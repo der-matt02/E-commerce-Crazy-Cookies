@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+.next
+out
+
+# Logs
+*.log
+
+# Environment files
+.env*
+!.env.example
+!.env*.example
+
+# Prisma
+backend/prisma/migrations
+
+# Coverage
+coverage
+
+# Other
+.git
+.husky

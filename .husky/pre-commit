@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Format check
+echo "📝 Checking code formatting..."
+pnpm format:check || {
+  echo "❌ Formatting issues found. Run 'pnpm format' to fix them."
+  exit 1
+}
+
+# Lint
+echo "🔎 Linting code..."
+pnpm lint || {
+  echo "❌ Linting errors found. Please fix them before committing."
+  exit 1
+}
+
+# Type check
+echo "🔍 Type checking..."
+cd backend && pnpm type-check || {
+  echo "❌ TypeScript errors found in backend."
+  exit 1
+}
+cd ../frontend && pnpm type-check || {
+  echo "❌ TypeScript errors found in frontend."
+  exit 1
+}
+
+echo "✅ All pre-commit checks passed!"
