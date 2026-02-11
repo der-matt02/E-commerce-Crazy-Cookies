@@ -9,10 +9,10 @@ import { PrismaService } from './database/prisma.service';
 import { ProductsModule } from '@modules/products/products.module';
 import { CategoriesModule } from '@modules/categories/categories.module';
 import { AdminModule } from '@modules/admin/admin.module';
+import { InventoryModule } from '@modules/inventory/inventory.module';
 
 // Import modules (will be added in future phases)
 // import { AuthModule } from '@modules/auth/auth.module';
-// import { InventoryModule } from '@modules/inventory/inventory.module';
 // import { CartModule } from '@modules/cart/cart.module';
 // import { OrdersModule } from '@modules/orders/orders.module';
 // import { ReviewsModule } from '@modules/reviews/reviews.module';
@@ -34,10 +34,10 @@ import { AdminModule } from '@modules/admin/admin.module';
     ProductsModule,
     CategoriesModule,
     AdminModule,
+    InventoryModule,
 
     // Modules to be added in future phases
     // AuthModule,
-    // InventoryModule,
     // CartModule,
     // OrdersModule,
     // ReviewsModule,
