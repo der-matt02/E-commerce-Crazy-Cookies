@@ -183,4 +183,130 @@ export class ProductsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async search(params: {
+    query?: string;
+    categoryId?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    inStock?: boolean;
+    sortBy?: 'price_asc' | 'price_desc' | 'name' | 'newest';
+    page?: number;
+    limit?: number;
+  }) {
+    const {
+      query,
+      categoryId,
+      minPrice,
+      maxPrice,
+      inStock,
+      sortBy = 'newest',
+      page = 1,
+      limit = 12,
+    } = params;
+
+    const where: any = {
+      isActive: true,
+    };
+
+    // Text search on name and description
+    if (query) {
+      where.OR = [
+        { name: { contains: query } },
+        { description: { contains: query } },
+      ];
+    }
+
+    // Filter by category
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
+    // Price range filter
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
+
+    // In stock filter
+    if (inStock) {
+      where.inventory = {
+        stockAvailable: { gt: 0 },
+      };
+    }
+
+    // Sorting options
+    let orderBy: any;
+    switch (sortBy) {
+      case 'price_asc':
+        orderBy = { price: 'asc' };
+        break;
+      case 'price_desc':
+        orderBy = { price: 'desc' };
+        break;
+      case 'name':
+        orderBy = { name: 'asc' };
+        break;
+      case 'newest':
+      default:
+        orderBy = { createdAt: 'desc' };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        include: {
+          category: true,
+          inventory: true,
+          images: {
+            orderBy: { order: 'asc' },
+            take: 1,
+          },
+          _count: {
+            select: { reviews: true },
+          },
+        },
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    return {
+      products,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
+  async getFeatured(limit = 8) {
+    return this.prisma.product.findMany({
+      where: {
+        isActive: true,
+        inventory: {
+          stockAvailable: { gt: 0 },
+        },
+      },
+      include: {
+        category: true,
+        inventory: true,
+        images: {
+          orderBy: { order: 'asc' },
+          take: 1,
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
 }

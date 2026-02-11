@@ -40,6 +40,47 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
+  @Get('search')
+  @ApiOperation({ summary: 'Search products with filters' })
+  @ApiResponse({ status: 200, description: 'Search results with pagination' })
+  @ApiQuery({ name: 'q', required: false, description: 'Search query' })
+  @ApiQuery({ name: 'categoryId', required: false, description: 'Filter by category' })
+  @ApiQuery({ name: 'minPrice', required: false, description: 'Minimum price' })
+  @ApiQuery({ name: 'maxPrice', required: false, description: 'Maximum price' })
+  @ApiQuery({ name: 'inStock', required: false, description: 'Only show in-stock products' })
+  @ApiQuery({ name: 'sortBy', required: false, enum: ['price_asc', 'price_desc', 'name', 'newest'] })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
+  search(
+    @Query('q') query?: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('inStock') inStock?: string,
+    @Query('sortBy') sortBy?: 'price_asc' | 'price_desc' | 'name' | 'newest',
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.productsService.search({
+      query,
+      categoryId,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      inStock: inStock === 'true',
+      sortBy,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+  }
+
+  @Get('featured')
+  @ApiOperation({ summary: 'Get featured products' })
+  @ApiResponse({ status: 200, description: 'Featured products list' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Number of products' })
+  getFeatured(@Query('limit') limit?: string) {
+    return this.productsService.getFeatured(limit ? parseInt(limit, 10) : undefined);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a product by ID' })
   @ApiResponse({ status: 200, description: 'Product found' })

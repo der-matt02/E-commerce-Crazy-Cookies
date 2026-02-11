@@ -13,11 +13,8 @@ import { InventoryModule } from '@modules/inventory/inventory.module';
 import { CartModule } from '@modules/cart/cart.module';
 import { OrdersModule } from '@modules/orders/orders.module';
 import { ReviewsModule } from '@modules/reviews/reviews.module';
-
-// Import modules (will be added in future phases)
-// import { AuthModule } from '@modules/auth/auth.module';
-// import { NotificationsModule } from '@modules/notifications/notifications.module';
-// import { AuditModule } from '@modules/audit/audit.module';
+import { NotificationsModule } from '@modules/notifications/notifications.module';
+import { AuditModule } from '@modules/audit/audit.module';
 
 @Module({
   imports: [
@@ -38,11 +35,8 @@ import { ReviewsModule } from '@modules/reviews/reviews.module';
     CartModule,
     OrdersModule,
     ReviewsModule,
-
-    // Modules to be added in future phases
-    // AuthModule,
-    // NotificationsModule,
-    // AuditModule,
+    NotificationsModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
