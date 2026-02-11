@@ -180,7 +180,7 @@ export default function CheckoutPage() {
                   <span>
                     {item.product.name} x{item.quantity}
                   </span>
-                  <span>${(item.priceAtAdd * item.quantity).toLocaleString('es-CO')}</span>
+                  <span>${(item.price * item.quantity).toLocaleString('es-CO')}</span>
                 </div>
               ))}
             </div>

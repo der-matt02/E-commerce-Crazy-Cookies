@@ -196,11 +196,11 @@ export default function CartPage() {
                             {/* Precio */}
                             <div className="text-right">
                               <div className="text-sm text-gray-600">
-                                ${item.priceAtAdd.toLocaleString('es-CO')} c/u
+                                ${item.price.toLocaleString('es-CO')} c/u
                               </div>
                               <div className="text-lg font-bold text-gray-900">
                                 $
-                                {(item.priceAtAdd * item.quantity).toLocaleString(
+                                {(item.price * item.quantity).toLocaleString(
                                   'es-CO'
                                 )}
                               </div>

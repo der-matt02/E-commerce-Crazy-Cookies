@@ -14,7 +14,7 @@ export interface CartItem {
   cartId: string;
   productId: string;
   quantity: number;
-  priceAtAdd: number;
+  price: number;
   product: Product;
   createdAt: string;
 }

@@ -133,7 +133,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const getSubtotal = () => {
     if (!cart || !cart.items) return 0;
-    return cart.items.reduce((total, item) => total + item.priceAtAdd * item.quantity, 0);
+    return cart.items.reduce((total, item) => total + Number(item.price) * item.quantity, 0);
   };
 
   return (
