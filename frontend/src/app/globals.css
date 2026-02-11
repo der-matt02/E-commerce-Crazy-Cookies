@@ -7,12 +7,8 @@
     --font-inter: 'Inter', system-ui, sans-serif;
   }
 
-  * {
-    @apply border-border;
-  }
-
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gray-50 text-gray-900;
   }
 }
 

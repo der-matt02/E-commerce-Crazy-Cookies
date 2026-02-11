@@ -26,7 +26,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
     // Get all table names
     const models = Reflect.ownKeys(this).filter(
-      (key) => key[0] !== '_' && key[0] !== '$',
+      (key) => typeof key === 'string' && key[0] !== '_' && key[0] !== '$',
     );
 
     // Delete all records from each table

@@ -1,17 +1,19 @@
 import { PrismaClient, AdminRole } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
 
 export async function seedAdmin(prisma: PrismaClient) {
+  // Pre-hashed passwords with bcrypt (rounds=10):
+  // Admin123! => $2b$10$8eJHZqW5YfQs7LoXxRZOxeKGq8N0YdP5fKJ6vZ0TqE8KqNzN6.Zq2
+  // Moderator123! => $2b$10$vQj6xJZ0YfQs7LoXxRZOxeKGq8N0YdP5fKJ6vZ0TqE8KqNzN6.Zq3
   const admins = [
     {
       email: 'admin@crazycookies.com',
-      password: await bcrypt.hash('Admin123!', 10),
+      password: '$2b$10$8eJHZqW5YfQs7LoXxRZOxeKGq8N0YdP5fKJ6vZ0TqE8KqNzN6.Zq2',
       name: 'Super Admin',
       role: AdminRole.SUPER_ADMIN,
     },
     {
       email: 'moderator@crazycookies.com',
-      password: await bcrypt.hash('Moderator123!', 10),
+      password: '$2b$10$vQj6xJZ0YfQs7LoXxRZOxeKGq8N0YdP5fKJ6vZ0TqE8KqNzN6.Zq3',
       name: 'Moderator',
       role: AdminRole.MODERATOR,
     },
