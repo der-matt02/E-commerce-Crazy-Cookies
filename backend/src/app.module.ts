@@ -10,10 +10,10 @@ import { ProductsModule } from '@modules/products/products.module';
 import { CategoriesModule } from '@modules/categories/categories.module';
 import { AdminModule } from '@modules/admin/admin.module';
 import { InventoryModule } from '@modules/inventory/inventory.module';
+import { CartModule } from '@modules/cart/cart.module';
 
 // Import modules (will be added in future phases)
 // import { AuthModule } from '@modules/auth/auth.module';
-// import { CartModule } from '@modules/cart/cart.module';
 // import { OrdersModule } from '@modules/orders/orders.module';
 // import { ReviewsModule } from '@modules/reviews/reviews.module';
 // import { NotificationsModule } from '@modules/notifications/notifications.module';
@@ -35,10 +35,10 @@ import { InventoryModule } from '@modules/inventory/inventory.module';
     CategoriesModule,
     AdminModule,
     InventoryModule,
+    CartModule,
 
     // Modules to be added in future phases
     // AuthModule,
-    // CartModule,
     // OrdersModule,
     // ReviewsModule,
     // NotificationsModule,
