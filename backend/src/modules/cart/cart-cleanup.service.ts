@@ -88,7 +88,7 @@ export class CartCleanupService {
           this.logger.log(`Carrito ${cart.sessionId} limpiado exitosamente`);
         } catch (error) {
           this.logger.error(
-            `Error limpiando carrito ${cart.sessionId}: ${error.message}`,
+            `Error limpiando carrito ${cart.sessionId}: ${(error as Error).message}`,
           );
         }
       }
@@ -97,7 +97,7 @@ export class CartCleanupService {
         `Limpieza completada. ${expiredCarts.length} carritos eliminados, ${totalItemsReleased} items liberados`,
       );
     } catch (error) {
-      this.logger.error(`Error en limpieza de carritos: ${error.message}`);
+      this.logger.error(`Error en limpieza de carritos: ${(error as Error).message}`);
     }
   }
 }

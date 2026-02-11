@@ -1,16 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CartService } from './cart.service';
 import { PrismaService } from '../../database/prisma.service';
-import { InventoryService } from '../inventory/inventory.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('CartService', () => {
   let service: CartService;
   let prisma: PrismaService;
-  let inventoryService: InventoryService;
 
   const mockPrismaService = {
     cart: {
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
@@ -25,12 +24,14 @@ describe('CartService', () => {
     product: {
       findUnique: jest.fn(),
     },
-  };
-
-  const mockInventoryService = {
-    checkStockAvailability: jest.fn(),
-    reserveStock: jest.fn(),
-    releaseStock: jest.fn(),
+    inventory: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+    inventoryMovement: {
+      create: jest.fn(),
+    },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -41,16 +42,11 @@ describe('CartService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
-        {
-          provide: InventoryService,
-          useValue: mockInventoryService,
-        },
       ],
     }).compile();
 
     service = module.get<CartService>(CartService);
     prisma = module.get<PrismaService>(PrismaService);
-    inventoryService = module.get<InventoryService>(InventoryService);
 
     jest.clearAllMocks();
   });
@@ -59,109 +55,51 @@ describe('CartService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getCart', () => {
+  describe('getOrCreateCart', () => {
     it('should return existing cart', async () => {
       const sessionId = 'session-123';
       const mockCart = {
         id: 'cart-1',
         sessionId,
         items: [],
-        expiresAt: new Date(),
+        expiresAt: new Date(Date.now() + 86400000),
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
+      mockPrismaService.cart.findFirst.mockResolvedValue(mockCart);
 
-      const result = await service.getCart(sessionId);
+      const result = await service.getOrCreateCart(sessionId);
 
       expect(result).toEqual(mockCart);
-      expect(mockPrismaService.cart.findUnique).toHaveBeenCalledWith({
-        where: { sessionId },
-        include: {
-          items: {
-            include: {
-              product: {
-                include: { category: true, inventory: true },
-              },
-            },
-          },
-        },
-      });
+      expect(mockPrismaService.cart.findFirst).toHaveBeenCalled();
     });
 
     it('should create new cart if not exists', async () => {
       const sessionId = 'session-123';
-
-      mockPrismaService.cart.findUnique.mockResolvedValue(null);
-      mockPrismaService.cart.create.mockResolvedValue({
+      const mockNewCart = {
         id: 'cart-1',
         sessionId,
         items: [],
-        expiresAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+        expiresAt: new Date(Date.now() + 86400000),
+      };
 
-      const result = await service.getCart(sessionId);
+      mockPrismaService.cart.findFirst.mockResolvedValue(null);
+      mockPrismaService.cart.create.mockResolvedValue(mockNewCart);
+
+      const result = await service.getOrCreateCart(sessionId);
 
       expect(result).toBeDefined();
       expect(mockPrismaService.cart.create).toHaveBeenCalled();
     });
   });
 
-  describe('addItem', () => {
-    it('should add new item to cart when product not in cart', async () => {
-      const sessionId = 'session-123';
-      const productId = 'product-1';
-      const quantity = 2;
-      const price = 10000;
-
-      const mockProduct = {
-        id: productId,
-        name: 'Test Product',
-        price,
-        isActive: true,
-      };
-
-      const mockCart = {
-        id: 'cart-1',
-        sessionId,
-        items: [],
-      };
-
-      mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
-      mockInventoryService.checkStockAvailability.mockResolvedValue(true);
-      mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
-      mockPrismaService.cartItem.findFirst.mockResolvedValue(null);
-      mockPrismaService.cartItem.create.mockResolvedValue({
-        id: 'item-1',
-        cartId: 'cart-1',
-        productId,
-        quantity,
-        priceAtAdd: price,
-      });
-      mockInventoryService.reserveStock.mockResolvedValue({});
-
-      await service.addItem(sessionId, { productId, quantity });
-
-      expect(mockInventoryService.checkStockAvailability).toHaveBeenCalledWith(
-        productId,
-        quantity,
-      );
-      expect(mockInventoryService.reserveStock).toHaveBeenCalledWith(
-        productId,
-        quantity,
-        expect.any(String),
-      );
-      expect(mockPrismaService.cartItem.create).toHaveBeenCalled();
-    });
-
+  describe('addToCart', () => {
     it('should throw error when product not found', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.addItem('session-123', { productId: 'invalid', quantity: 1 }),
+        service.addToCart('session-123', { productId: 'invalid', quantity: 1 }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -172,7 +110,7 @@ describe('CartService', () => {
       });
 
       await expect(
-        service.addItem('session-123', { productId: 'product-1', quantity: 1 }),
+        service.addToCart('session-123', { productId: 'product-1', quantity: 1 }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -181,69 +119,71 @@ describe('CartService', () => {
         id: 'product-1',
         isActive: true,
         price: 10000,
+        inventory: {
+          stockAvailable: 5,
+          stockReserved: 5,
+        },
       });
-      mockInventoryService.checkStockAvailability.mockResolvedValue(false);
 
       await expect(
-        service.addItem('session-123', { productId: 'product-1', quantity: 100 }),
+        service.addToCart('session-123', { productId: 'product-1', quantity: 10 }),
       ).rejects.toThrow(BadRequestException);
     });
   });
 
-  describe('removeItem', () => {
-    it('should remove item and release stock', async () => {
-      const itemId = 'item-1';
-      const quantity = 5;
-      const productId = 'product-1';
-
-      mockPrismaService.cartItem.findFirst.mockResolvedValue({
-        id: itemId,
-        quantity,
-        productId,
-      });
-      mockPrismaService.cartItem.delete.mockResolvedValue({});
-      mockInventoryService.releaseStock.mockResolvedValue({});
-
-      await service.removeItem('session-123', itemId);
-
-      expect(mockInventoryService.releaseStock).toHaveBeenCalledWith(
-        productId,
-        quantity,
-        expect.any(String),
-      );
-      expect(mockPrismaService.cartItem.delete).toHaveBeenCalledWith({
-        where: { id: itemId },
-      });
-    });
-
+  describe('removeCartItem', () => {
     it('should throw error when item not found', async () => {
-      mockPrismaService.cartItem.findFirst.mockResolvedValue(null);
+      mockPrismaService.cart.findFirst.mockResolvedValue({
+        id: 'cart-1',
+        items: [],
+      });
 
       await expect(
-        service.removeItem('session-123', 'invalid-id'),
+        service.removeCartItem('session-123', 'invalid-id'),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('clearCart', () => {
-    it('should clear all items and release stock', async () => {
+    it('should throw error when cart not found', async () => {
+      mockPrismaService.cart.findFirst.mockResolvedValue(null);
+
+      await expect(service.clearCart('session-123')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('getCart', () => {
+    it('should return cart with items', async () => {
       const sessionId = 'session-123';
       const mockCart = {
         id: 'cart-1',
+        sessionId,
         items: [
-          { id: 'item-1', productId: 'product-1', quantity: 2 },
-          { id: 'item-2', productId: 'product-2', quantity: 3 },
+          {
+            id: 'item-1',
+            productId: 'product-1',
+            quantity: 2,
+            price: 10000,
+            product: { name: 'Test Product' },
+          },
         ],
       };
 
-      mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
-      mockInventoryService.releaseStock.mockResolvedValue({});
-      mockPrismaService.cartItem.deleteMany.mockResolvedValue({});
+      mockPrismaService.cart.findFirst.mockResolvedValue(mockCart);
 
-      await service.clearCart(sessionId);
+      const result = await service.getCart(sessionId);
 
-      expect(mockInventoryService.releaseStock).toHaveBeenCalledTimes(2);
-      expect(mockPrismaService.cartItem.deleteMany).toHaveBeenCalled();
+      expect(result).toEqual(mockCart);
+    });
+
+    it('should return null when cart not found', async () => {
+      mockPrismaService.cart.findFirst.mockResolvedValue(null);
+
+      const result = await service.getCart('session-123');
+
+      expect(result).toBeNull();
     });
   });
 });

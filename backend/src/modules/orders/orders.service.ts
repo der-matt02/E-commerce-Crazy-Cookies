@@ -52,7 +52,7 @@ export class OrdersService {
 
     // Calcular totales
     const subtotal = cart.items.reduce(
-      (sum, item) => sum + item.priceAtAdd * item.quantity,
+      (sum, item) => sum + Number(item.price) * item.quantity,
       0,
     );
     const tax = subtotal * 0.19; // IVA 19%
@@ -60,14 +60,19 @@ export class OrdersService {
 
     // Crear orden en transacción
     const order = await this.prisma.$transaction(async (prisma) => {
+      // Generar orderNumber único
+      const orderNumber = `ORD-${Date.now()}`;
+
       // Crear orden
       const newOrder = await prisma.order.create({
         data: {
+          orderNumber,
           customerName: dto.customerName,
           customerPhone: dto.customerPhone,
-          customerEmail: dto.customerEmail,
-          deliveryAddress: dto.deliveryAddress,
-          notes: dto.notes,
+          customerEmail: dto.customerEmail || 'sin-email@default.com',
+          shippingAddress: dto.deliveryAddress,
+          shippingCity: 'Bogotá', // Default, se puede mejorar extrayendo de la dirección
+          shippingNotes: dto.notes,
           status: OrderStatus.PENDING,
           subtotal,
           tax,
@@ -82,8 +87,7 @@ export class OrdersService {
             orderId: newOrder.id,
             productId: cartItem.productId,
             quantity: cartItem.quantity,
-            priceAtPurchase: cartItem.priceAtAdd,
-            subtotal: cartItem.priceAtAdd * cartItem.quantity,
+            price: cartItem.price,
           },
         });
 
@@ -116,8 +120,8 @@ export class OrdersService {
       await prisma.orderStatusHistory.create({
         data: {
           orderId: newOrder.id,
-          status: OrderStatus.PENDING,
-          note: 'Orden creada',
+          toStatus: OrderStatus.PENDING,
+          notes: 'Orden creada',
         },
       });
 
@@ -202,8 +206,8 @@ export class OrdersService {
     // Validar transición de estado
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
       [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
-      [OrderStatus.CONFIRMED]: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
-      [OrderStatus.PREPARING]: [OrderStatus.READY, OrderStatus.CANCELLED],
+      [OrderStatus.CONFIRMED]: [OrderStatus.IN_PROCESS, OrderStatus.CANCELLED],
+      [OrderStatus.IN_PROCESS]: [OrderStatus.READY, OrderStatus.CANCELLED],
       [OrderStatus.READY]: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
       [OrderStatus.DELIVERED]: [],
       [OrderStatus.CANCELLED]: [],
@@ -243,8 +247,9 @@ export class OrdersService {
       await prisma.orderStatusHistory.create({
         data: {
           orderId: id,
-          status: dto.status,
-          note: dto.note,
+          fromStatus: order.status,
+          toStatus: dto.status,
+          notes: dto.note,
         },
       });
 

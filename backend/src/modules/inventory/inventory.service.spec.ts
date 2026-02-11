@@ -1,31 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InventoryService } from './inventory.service';
 import { PrismaService } from '../../database/prisma.service';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
+import { AdjustmentType } from './dto/adjust-inventory.dto';
 
 describe('InventoryService', () => {
   let service: InventoryService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     inventory: {
+      findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
-      create: jest.fn(),
     },
     inventoryMovement: {
+      findMany: jest.fn(),
       create: jest.fn(),
     },
-    product: {
-      findUnique: jest.fn(),
-    },
-    cart: {
-      findMany: jest.fn(),
-      delete: jest.fn(),
-    },
-    cartItem: {
-      deleteMany: jest.fn(),
-    },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -40,7 +32,6 @@ describe('InventoryService', () => {
     }).compile();
 
     service = module.get<InventoryService>(InventoryService);
-    prisma = module.get<PrismaService>(PrismaService);
 
     jest.clearAllMocks();
   });
@@ -49,151 +40,145 @@ describe('InventoryService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('reserveStock', () => {
-    it('should reserve stock successfully when available', async () => {
-      const productId = 'product-1';
-      const quantity = 5;
+  describe('getAll', () => {
+    it('should return all inventories', async () => {
+      const mockInventories = [
+        {
+          id: 'inv-1',
+          productId: 'prod-1',
+          stockAvailable: 100,
+          stockReserved: 5,
+          stockMinimum: 10,
+          product: { name: 'Product 1' },
+        },
+        {
+          id: 'inv-2',
+          productId: 'prod-2',
+          stockAvailable: 50,
+          stockReserved: 0,
+          stockMinimum: 5,
+          product: { name: 'Product 2' },
+        },
+      ];
 
-      mockPrismaService.inventory.findUnique.mockResolvedValue({
+      mockPrismaService.inventory.findMany.mockResolvedValue(mockInventories);
+
+      const result = await service.getAll();
+
+      expect(result).toEqual(mockInventories);
+      expect(mockPrismaService.inventory.findMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('getOne', () => {
+    it('should return inventory by productId', async () => {
+      const productId = 'prod-1';
+      const mockInventory = {
         id: 'inv-1',
         productId,
-        stockAvailable: 10,
-        stockReserved: 0,
-        stockMinimum: 2,
-      });
-
-      mockPrismaService.inventory.update.mockResolvedValue({
-        id: 'inv-1',
-        productId,
-        stockAvailable: 10,
+        stockAvailable: 100,
         stockReserved: 5,
-        stockMinimum: 2,
-      });
+        stockMinimum: 10,
+        product: { name: 'Product 1', category: { name: 'Category 1' } },
+      };
 
-      mockPrismaService.inventoryMovement.create.mockResolvedValue({
-        id: 'mov-1',
-        productId,
-        type: 'RESERVED',
-        quantity,
-        reason: 'Reserva de stock',
-      });
+      mockPrismaService.inventory.findUnique.mockResolvedValue(mockInventory);
 
-      const result = await service.reserveStock(productId, quantity, 'Reserva de stock');
+      const result = await service.getOne(productId);
 
-      expect(result).toBeDefined();
-      expect(mockPrismaService.inventory.update).toHaveBeenCalledWith({
+      expect(result).toEqual(mockInventory);
+      expect(mockPrismaService.inventory.findUnique).toHaveBeenCalledWith({
         where: { productId },
-        data: { stockReserved: { increment: quantity } },
+        include: {
+          product: {
+            include: { category: true },
+          },
+        },
       });
-      expect(mockPrismaService.inventoryMovement.create).toHaveBeenCalled();
     });
 
-    it('should throw error when insufficient stock', async () => {
-      const productId = 'product-1';
-      const quantity = 15;
+    it('should throw NotFoundException when inventory not found', async () => {
+      mockPrismaService.inventory.findUnique.mockResolvedValue(null);
 
-      mockPrismaService.inventory.findUnique.mockResolvedValue({
-        id: 'inv-1',
-        productId,
-        stockAvailable: 10,
-        stockReserved: 0,
-        stockMinimum: 2,
-      });
+      await expect(service.getOne('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
 
-      await expect(
-        service.reserveStock(productId, quantity, 'Test'),
-      ).rejects.toThrow(BadRequestException);
+  describe('getMovements', () => {
+    it('should return movements for a product', async () => {
+      const productId = 'prod-1';
+      const mockInventory = { id: 'inv-1', productId };
+      const mockMovements = [
+        { id: 'mov-1', type: 'IN', quantity: 50, reason: 'Restock' },
+        { id: 'mov-2', type: 'OUT', quantity: 10, reason: 'Sale' },
+      ];
+
+      mockPrismaService.inventory.findUnique.mockResolvedValue(mockInventory);
+      mockPrismaService.inventoryMovement.findMany.mockResolvedValue(mockMovements);
+
+      const result = await service.getMovements(productId);
+
+      expect(result).toEqual(mockMovements);
     });
 
-    it('should throw error when inventory not found', async () => {
+    it('should throw NotFoundException when product inventory not found', async () => {
+      mockPrismaService.inventory.findUnique.mockResolvedValue(null);
+
+      await expect(service.getMovements('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('adjustStock', () => {
+    it('should throw NotFoundException when inventory not found', async () => {
       mockPrismaService.inventory.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.reserveStock('invalid-id', 5, 'Test'),
+        service.adjustStock('invalid-id', { type: AdjustmentType.IN, quantity: 10 }),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('releaseStock', () => {
-    it('should release reserved stock successfully', async () => {
-      const productId = 'product-1';
-      const quantity = 5;
+  describe('getLowStockProducts', () => {
+    it('should return products with low stock', async () => {
+      const mockLowStockItems = [
+        {
+          id: 'inv-1',
+          productId: 'prod-1',
+          stockAvailable: 3,
+          stockMinimum: 10,
+          product: { name: 'Product 1' },
+        },
+      ];
 
-      mockPrismaService.inventory.findUnique.mockResolvedValue({
-        id: 'inv-1',
-        productId,
-        stockAvailable: 10,
-        stockReserved: 5,
-        stockMinimum: 2,
-      });
+      mockPrismaService.inventory.findMany.mockResolvedValue(mockLowStockItems);
 
-      mockPrismaService.inventory.update.mockResolvedValue({
-        id: 'inv-1',
-        productId,
-        stockAvailable: 10,
-        stockReserved: 0,
-        stockMinimum: 2,
-      });
+      const result = await service.getLowStockProducts();
 
-      mockPrismaService.inventoryMovement.create.mockResolvedValue({
-        id: 'mov-1',
-        productId,
-        type: 'RELEASED',
-        quantity,
-        reason: 'Liberación de stock',
-      });
-
-      const result = await service.releaseStock(productId, quantity, 'Liberación de stock');
-
-      expect(result).toBeDefined();
-      expect(mockPrismaService.inventory.update).toHaveBeenCalledWith({
-        where: { productId },
-        data: { stockReserved: { decrement: quantity } },
-      });
+      expect(result).toEqual(mockLowStockItems);
     });
   });
 
-  describe('checkStockAvailability', () => {
-    it('should return true when stock is available', async () => {
-      const productId = 'product-1';
-      const quantity = 5;
+  describe('getStockAlerts', () => {
+    it('should return stock alerts', async () => {
+      const mockAlerts = [
+        {
+          id: 'inv-1',
+          productId: 'prod-1',
+          stockAvailable: 2,
+          stockMinimum: 10,
+          product: { name: 'Product 1' },
+        },
+      ];
 
-      mockPrismaService.inventory.findUnique.mockResolvedValue({
-        id: 'inv-1',
-        productId,
-        stockAvailable: 10,
-        stockReserved: 0,
-        stockMinimum: 2,
-      });
+      mockPrismaService.inventory.findMany.mockResolvedValue(mockAlerts);
 
-      const result = await service.checkStockAvailability(productId, quantity);
+      const result = await service.getStockAlerts();
 
-      expect(result).toBe(true);
-    });
-
-    it('should return false when stock is insufficient', async () => {
-      const productId = 'product-1';
-      const quantity = 15;
-
-      mockPrismaService.inventory.findUnique.mockResolvedValue({
-        id: 'inv-1',
-        productId,
-        stockAvailable: 10,
-        stockReserved: 0,
-        stockMinimum: 2,
-      });
-
-      const result = await service.checkStockAvailability(productId, quantity);
-
-      expect(result).toBe(false);
-    });
-
-    it('should throw error when inventory not found', async () => {
-      mockPrismaService.inventory.findUnique.mockResolvedValue(null);
-
-      await expect(
-        service.checkStockAvailability('invalid-id', 5),
-      ).rejects.toThrow(NotFoundException);
+      expect(result).toEqual(mockAlerts);
     });
   });
 });

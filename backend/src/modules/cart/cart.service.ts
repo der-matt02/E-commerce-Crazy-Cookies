@@ -147,7 +147,7 @@ export class CartService {
             cartId: cart.id,
             productId: dto.productId,
             quantity: dto.quantity,
-            priceAtAdd: product.price,
+            price: product.price,
           },
           include: {
             product: {
