@@ -5,17 +5,19 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './database/prisma.service';
 
+// Feature modules
+import { ProductsModule } from '@modules/products/products.module';
+import { CategoriesModule } from '@modules/categories/categories.module';
+import { AdminModule } from '@modules/admin/admin.module';
+
 // Import modules (will be added in future phases)
 // import { AuthModule } from '@modules/auth/auth.module';
-// import { ProductsModule } from '@modules/products/products.module';
-// import { CategoriesModule } from '@modules/categories/categories.module';
 // import { InventoryModule } from '@modules/inventory/inventory.module';
 // import { CartModule } from '@modules/cart/cart.module';
 // import { OrdersModule } from '@modules/orders/orders.module';
 // import { ReviewsModule } from '@modules/reviews/reviews.module';
 // import { NotificationsModule } from '@modules/notifications/notifications.module';
 // import { AuditModule } from '@modules/audit/audit.module';
-// import { AdminModule } from '@modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -28,17 +30,19 @@ import { PrismaService } from './database/prisma.service';
     // Cron jobs
     ScheduleModule.forRoot(),
 
-    // Feature modules (will be uncommented as we build them)
+    // Feature modules
+    ProductsModule,
+    CategoriesModule,
+    AdminModule,
+
+    // Modules to be added in future phases
     // AuthModule,
-    // ProductsModule,
-    // CategoriesModule,
     // InventoryModule,
     // CartModule,
     // OrdersModule,
     // ReviewsModule,
     // NotificationsModule,
     // AuditModule,
-    // AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
