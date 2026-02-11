@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCart } from '@/features/cart/context/CartContext';
 import { productsApi } from '@/features/products/api/products-api';
+import { reviewsApi } from '@/features/reviews/api/reviews-api';
+import { ReviewList } from '@/features/reviews/components/ReviewList';
+import { ReviewForm } from '@/features/reviews/components/ReviewForm';
 import type { Product } from '@/types/product.types';
+import type { Review, RatingStats, CreateReviewDto } from '@/types/review.types';
 import Link from 'next/link';
 
 export default function ProductDetailPage() {
@@ -15,10 +19,14 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [ratingStats, setRatingStats] = useState<RatingStats | null>(null);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   useEffect(() => {
     if (params.id) {
       loadProduct(params.id as string);
+      loadReviews(params.id as string);
     }
   }, [params.id]);
 
@@ -34,6 +42,27 @@ export default function ProductDetailPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadReviews = async (productId: string) => {
+    try {
+      setLoadingReviews(true);
+      const [reviewsData, statsData] = await Promise.all([
+        reviewsApi.getByProduct(productId),
+        reviewsApi.getProductRatingStats(productId),
+      ]);
+      setReviews(reviewsData);
+      setRatingStats(statsData);
+    } catch (err) {
+      console.error('Error loading reviews:', err);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
+  const handleSubmitReview = async (dto: CreateReviewDto) => {
+    if (!product) return;
+    await reviewsApi.createForProduct(product.id, dto);
   };
 
   const handleAddToCart = async () => {
@@ -202,6 +231,85 @@ export default function ProductDetailPage() {
           >
             ← Volver al catálogo
           </Link>
+        </div>
+      </div>
+
+      {/* Sección de Reviews */}
+      <div className="mt-16">
+        <h2 className="mb-8 text-3xl font-bold">Opiniones de Clientes</h2>
+
+        {/* Rating Stats */}
+        {ratingStats && ratingStats.count > 0 && (
+          <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6">
+            <div className="flex items-center gap-8">
+              <div className="text-center">
+                <div className="text-5xl font-bold text-gray-900">
+                  {ratingStats.average.toFixed(1)}
+                </div>
+                <div className="mt-2 flex justify-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className={`h-5 w-5 ${
+                        star <= Math.round(ratingStats.average)
+                          ? 'text-yellow-400'
+                          : 'text-gray-300'
+                      }`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <div className="mt-1 text-sm text-gray-600">
+                  {ratingStats.count} {ratingStats.count === 1 ? 'opinión' : 'opiniones'}
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-2">
+                {[5, 4, 3, 2, 1].map((star) => {
+                  const count = ratingStats.distribution[star as keyof typeof ratingStats.distribution];
+                  const percentage = ratingStats.count > 0 ? (count / ratingStats.count) * 100 : 0;
+
+                  return (
+                    <div key={star} className="flex items-center gap-3">
+                      <span className="w-3 text-sm text-gray-600">{star}</span>
+                      <svg className="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
+                        <div
+                          className="h-full bg-yellow-400"
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                      <span className="w-8 text-sm text-gray-600">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          {/* Lista de reviews */}
+          <div>
+            <h3 className="mb-4 text-xl font-semibold">Reviews</h3>
+            {loadingReviews ? (
+              <div className="flex h-32 items-center justify-center">
+                <div className="text-gray-500">Cargando reviews...</div>
+              </div>
+            ) : (
+              <ReviewList reviews={reviews} />
+            )}
+          </div>
+
+          {/* Formulario de review */}
+          <div>
+            <ReviewForm productId={product.id} onSubmit={handleSubmitReview} />
+          </div>
         </div>
       </div>
     </div>
