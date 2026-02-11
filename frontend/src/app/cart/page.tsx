@@ -2,9 +2,11 @@
 
 import { useCart } from '@/features/cart/context/CartContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function CartPage() {
+  const router = useRouter();
   const { cart, loading, removeItem, updateQuantity, clearCart, getSubtotal } =
     useCart();
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
@@ -235,6 +237,7 @@ export default function CartPage() {
               </div>
 
               <button
+                onClick={() => router.push('/checkout')}
                 disabled={loading}
                 className="mt-6 w-full rounded-lg bg-green-600 py-3 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
               >

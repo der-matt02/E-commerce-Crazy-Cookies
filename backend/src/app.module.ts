@@ -11,10 +11,10 @@ import { CategoriesModule } from '@modules/categories/categories.module';
 import { AdminModule } from '@modules/admin/admin.module';
 import { InventoryModule } from '@modules/inventory/inventory.module';
 import { CartModule } from '@modules/cart/cart.module';
+import { OrdersModule } from '@modules/orders/orders.module';
 
 // Import modules (will be added in future phases)
 // import { AuthModule } from '@modules/auth/auth.module';
-// import { OrdersModule } from '@modules/orders/orders.module';
 // import { ReviewsModule } from '@modules/reviews/reviews.module';
 // import { NotificationsModule } from '@modules/notifications/notifications.module';
 // import { AuditModule } from '@modules/audit/audit.module';
@@ -36,10 +36,10 @@ import { CartModule } from '@modules/cart/cart.module';
     AdminModule,
     InventoryModule,
     CartModule,
+    OrdersModule,
 
     // Modules to be added in future phases
     // AuthModule,
-    // OrdersModule,
     // ReviewsModule,
     // NotificationsModule,
     // AuditModule,
