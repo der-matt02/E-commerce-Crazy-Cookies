@@ -43,7 +43,7 @@ export class OrdersService {
       const availableStock =
         item.product.inventory!.stockAvailable - item.product.inventory!.stockReserved;
 
-      if (availableStock < 0) {
+      if (availableStock < item.quantity) {
         throw new BadRequestException(
           `Stock insuficiente para ${item.product.name}`,
         );

@@ -7,10 +7,13 @@ import {
   Body,
   Param,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ApproveReviewDto } from './dto/approve-review.dto';
+import { JwtAuthGuard } from '@modules/admin/guards/jwt-auth.guard';
 
 @Controller('reviews')
 export class ReviewsController {
@@ -39,6 +42,8 @@ export class ReviewsController {
   }
 
   @Get('pending')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getPendingReviews() {
     return this.reviewsService.getPending();
   }
@@ -51,6 +56,8 @@ export class ReviewsController {
   }
 
   @Patch(':id/approve')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async approveReview(
     @Param('id') id: string,
     @Body() dto: ApproveReviewDto,
@@ -59,6 +66,8 @@ export class ReviewsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async deleteReview(@Param('id') id: string) {
     return this.reviewsService.delete(id);
   }

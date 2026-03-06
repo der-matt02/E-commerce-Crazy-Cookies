@@ -14,7 +14,7 @@ export class AdminService {
       pendingOrders,
       totalReviews,
       pendingReviews,
-      lowStockProducts,
+      lowStockResult,
     ] = await Promise.all([
       // Total products
       this.prisma.product.count(),
@@ -37,15 +37,13 @@ export class AdminService {
       // Pending reviews
       this.prisma.review.count({ where: { isApproved: false } }),
 
-      // Low stock products
-      this.prisma.inventory.count({
-        where: {
-          stockAvailable: {
-            lte: this.prisma.inventory.fields.stockMinimum,
-          },
-        },
-      }),
+      // Low stock products (cross-column comparison requires raw query)
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) as count FROM inventory WHERE stock_available <= stock_minimum
+      `,
     ]);
+
+    const lowStockProducts = Number((lowStockResult as [{ count: bigint }])[0].count);
 
     // Get revenue (sum of all delivered orders)
     const revenue = await this.prisma.order.aggregate({

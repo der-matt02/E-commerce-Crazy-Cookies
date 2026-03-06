@@ -1,35 +1,30 @@
 import { PrismaClient, AdminRole } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 export async function seedAdmin(prisma: PrismaClient) {
-  // Pre-hashed passwords with bcrypt (rounds=10):
-  // Admin123! => $2b$10$8eJHZqW5YfQs7LoXxRZOxeKGq8N0YdP5fKJ6vZ0TqE8KqNzN6.Zq2
-  // Moderator123! => $2b$10$vQj6xJZ0YfQs7LoXxRZOxeKGq8N0YdP5fKJ6vZ0TqE8KqNzN6.Zq3
   const admins = [
     {
       email: 'admin@crazycookies.com',
-      password: '$2b$10$8eJHZqW5YfQs7LoXxRZOxeKGq8N0YdP5fKJ6vZ0TqE8KqNzN6.Zq2',
+      plainPassword: 'Admin123!',
       name: 'Super Admin',
       role: AdminRole.SUPER_ADMIN,
     },
     {
       email: 'moderator@crazycookies.com',
-      password: '$2b$10$vQj6xJZ0YfQs7LoXxRZOxeKGq8N0YdP5fKJ6vZ0TqE8KqNzN6.Zq3',
+      plainPassword: 'Moderator123!',
       name: 'Moderator',
       role: AdminRole.MODERATOR,
     },
   ];
 
   for (const admin of admins) {
-    const existing = await prisma.admin.findUnique({
+    const password = await bcrypt.hash(admin.plainPassword, 10);
+    await prisma.admin.upsert({
       where: { email: admin.email },
+      update: { password, name: admin.name, role: admin.role, isActive: true },
+      create: { email: admin.email, password, name: admin.name, role: admin.role },
     });
-
-    if (!existing) {
-      await prisma.admin.create({ data: admin });
-      console.log(`  ✓ Created admin: ${admin.email}`);
-    } else {
-      console.log(`  ⚠ Admin already exists: ${admin.email}`);
-    }
+    console.log(`  ✓ Upserted admin: ${admin.email}`);
   }
 
   console.log('\n🔑 Admin credentials:');

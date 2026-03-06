@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import { AdjustInventoryDto } from './dto/adjust-inventory.dto';
+import { JwtAuthGuard } from '@modules/admin/guards/jwt-auth.guard';
 
 @ApiTags('inventory')
+@ApiBearerAuth()
 @Controller('inventory')
+@UseGuards(JwtAuthGuard)
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 

@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderStatus } from '@prisma/client';
+import { JwtAuthGuard } from '@modules/admin/guards/jwt-auth.guard';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -20,6 +21,8 @@ export class OrdersController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar todas las órdenes' })
   @ApiResponse({ status: 200, description: 'Lista de órdenes' })
   findAll() {
@@ -27,6 +30,8 @@ export class OrdersController {
   }
 
   @Get('status/:status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar órdenes por estado' })
   @ApiResponse({ status: 200, description: 'Órdenes filtradas' })
   getByStatus(@Param('status') status: OrderStatus) {
@@ -42,6 +47,8 @@ export class OrdersController {
   }
 
   @Patch(':id/status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar estado de una orden' })
   @ApiResponse({ status: 200, description: 'Estado actualizado' })
   @ApiResponse({ status: 400, description: 'Transición de estado inválida' })
