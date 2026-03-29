@@ -27,13 +27,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { token, admin: adminData } = await adminApi.login(email, password);
-    localStorage.setItem('token', token);
-    localStorage.setItem('admin_user', JSON.stringify(adminData));
-    setAdmin(adminData);
-    router.replace('/admin/dashboard');
-  }, [router]);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const { token, admin: adminData } = await adminApi.login(email, password);
+      localStorage.setItem('token', token);
+      localStorage.setItem('admin_user', JSON.stringify(adminData));
+      setAdmin(adminData);
+      router.replace('/admin/dashboard');
+    },
+    [router]
+  );
 
   const logout = useCallback(() => {
     adminApi.logout();

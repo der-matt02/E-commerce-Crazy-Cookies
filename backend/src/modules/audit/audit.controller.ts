@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../admin/guards/jwt-auth.guard';
 
 @ApiTags('Audit')
 @ApiBearerAuth()
-@Controller('api/audit')
+@Controller('audit')
 @UseGuards(JwtAuthGuard)
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}

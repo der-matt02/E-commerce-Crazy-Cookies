@@ -49,9 +49,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
           </div>
 
           {/* Comment */}
-          {review.comment && (
-            <p className="text-gray-700">{review.comment}</p>
-          )}
+          {review.comment && <p className="text-gray-700">{review.comment}</p>}
         </div>
       ))}
     </div>

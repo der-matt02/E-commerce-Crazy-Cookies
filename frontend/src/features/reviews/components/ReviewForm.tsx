@@ -8,7 +8,7 @@ interface ReviewFormProps {
   onSubmit: (dto: CreateReviewDto) => Promise<void>;
 }
 
-export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
+export function ReviewForm({ productId: _productId, onSubmit }: ReviewFormProps) {
   const [formData, setFormData] = useState<CreateReviewDto>({
     customerName: '',
     customerEmail: '',
@@ -52,9 +52,7 @@ export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
       <div className="space-y-4">
         {/* Rating */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Calificación *
-          </label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">Calificación *</label>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -81,9 +79,7 @@ export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
 
         {/* Name */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Nombre *
-          </label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Nombre *</label>
           <input
             type="text"
             value={formData.customerName}
@@ -97,9 +93,7 @@ export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
 
         {/* Email */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Email *
-          </label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Email *</label>
           <input
             type="email"
             value={formData.customerEmail}
@@ -107,9 +101,7 @@ export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
             required
             className="w-full rounded-lg border border-gray-300 px-3 py-2"
           />
-          <p className="mt-1 text-xs text-gray-500">
-            Tu email no será publicado
-          </p>
+          <p className="mt-1 text-xs text-gray-500">Tu email no será publicado</p>
         </div>
 
         {/* Comment */}
@@ -138,9 +130,7 @@ export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
           {submitting ? 'Enviando...' : 'Enviar Review'}
         </button>
 
-        <p className="text-xs text-gray-500">
-          * Tu review será revisada antes de ser publicada
-        </p>
+        <p className="text-xs text-gray-500">* Tu review será revisada antes de ser publicada</p>
       </div>
     </form>
   );

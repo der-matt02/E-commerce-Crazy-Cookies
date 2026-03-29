@@ -8,6 +8,26 @@ import { InventoryMovementType } from '@prisma/client';
 export class CartService {
   constructor(private prisma: PrismaService) {}
 
+  private readonly cartInclude = {
+    items: {
+      include: {
+        product: {
+          include: {
+            category: true,
+            inventory: true,
+          },
+        },
+      },
+    },
+  } as const;
+
+  private async fetchCartById(cartId: string) {
+    return this.prisma.cart.findUnique({
+      where: { id: cartId },
+      include: this.cartInclude,
+    });
+  }
+
   async getOrCreateCart(sessionId: string) {
     // Buscar carrito activo (no expirado)
     let cart = await this.prisma.cart.findFirst({
@@ -103,30 +123,18 @@ export class CartService {
     }
 
     // Transacción para agregar al carrito y reservar stock
-    const result = await this.prisma.$transaction(async (prisma) => {
+    await this.prisma.$transaction(async (prisma) => {
       // Si ya existe, actualizar cantidad
       if (existingItem) {
-        const updatedItem = await prisma.cartItem.update({
+        await prisma.cartItem.update({
           where: { id: existingItem.id },
           data: { quantity: totalQuantityNeeded },
-          include: {
-            product: {
-              include: {
-                category: true,
-                inventory: true,
-              },
-            },
-          },
         });
 
         // Reservar stock adicional
         await prisma.inventory.update({
           where: { productId: dto.productId },
-          data: {
-            stockReserved: {
-              increment: dto.quantity,
-            },
-          },
+          data: { stockReserved: { increment: dto.quantity } },
         });
 
         // Crear movimiento de inventario
@@ -138,35 +146,21 @@ export class CartService {
             reason: `Reservado por carrito: ${cart.sessionId}`,
           },
         });
-
-        return updatedItem;
       } else {
         // Crear nuevo item
-        const newItem = await prisma.cartItem.create({
+        await prisma.cartItem.create({
           data: {
             cartId: cart.id,
             productId: dto.productId,
             quantity: dto.quantity,
             price: product.price,
           },
-          include: {
-            product: {
-              include: {
-                category: true,
-                inventory: true,
-              },
-            },
-          },
         });
 
         // Reservar stock
         await prisma.inventory.update({
           where: { productId: dto.productId },
-          data: {
-            stockReserved: {
-              increment: dto.quantity,
-            },
-          },
+          data: { stockReserved: { increment: dto.quantity } },
         });
 
         // Crear movimiento de inventario
@@ -178,13 +172,11 @@ export class CartService {
             reason: `Reservado por carrito: ${cart.sessionId}`,
           },
         });
-
-        return newItem;
       }
     });
 
     // Retornar carrito actualizado
-    return this.getOrCreateCart(sessionId);
+    return this.fetchCartById(cart.id);
   }
 
   async updateCartItem(sessionId: string, itemId: string, dto: UpdateCartItemDto) {
@@ -223,35 +215,22 @@ export class CartService {
     }
 
     // Transacción para actualizar cantidad y ajustar stock reservado
-    const result = await this.prisma.$transaction(async (prisma) => {
+    await this.prisma.$transaction(async (prisma) => {
       // Actualizar item
-      const updatedItem = await prisma.cartItem.update({
+      await prisma.cartItem.update({
         where: { id: itemId },
         data: { quantity: dto.quantity },
-        include: {
-          product: {
-            include: {
-              category: true,
-              inventory: true,
-            },
-          },
-        },
       });
 
       // Ajustar stock reservado
       await prisma.inventory.update({
         where: { productId: item.productId },
-        data: {
-          stockReserved: {
-            increment: quantityDiff,
-          },
-        },
+        data: { stockReserved: { increment: quantityDiff } },
       });
 
       // Crear movimiento de inventario
-      const movementType = quantityDiff > 0
-        ? InventoryMovementType.RESERVED
-        : InventoryMovementType.RELEASED;
+      const movementType =
+        quantityDiff > 0 ? InventoryMovementType.RESERVED : InventoryMovementType.RELEASED;
 
       await prisma.inventoryMovement.create({
         data: {
@@ -261,11 +240,9 @@ export class CartService {
           reason: `Ajuste de carrito: ${cart.sessionId}`,
         },
       });
-
-      return updatedItem;
     });
 
-    return this.getOrCreateCart(sessionId);
+    return this.fetchCartById(cart.id);
   }
 
   async removeCartItem(sessionId: string, itemId: string) {
@@ -317,7 +294,7 @@ export class CartService {
       });
     });
 
-    return this.getOrCreateCart(sessionId);
+    return this.fetchCartById(cart.id);
   }
 
   async clearCart(sessionId: string) {
@@ -365,7 +342,7 @@ export class CartService {
       });
     });
 
-    return this.getOrCreateCart(sessionId);
+    return this.fetchCartById(cart.id);
   }
 
   async getCart(sessionId: string) {

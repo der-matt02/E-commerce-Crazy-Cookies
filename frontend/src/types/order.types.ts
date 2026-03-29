@@ -3,7 +3,7 @@ import { Product } from './product.types';
 export enum OrderStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
-  PREPARING = 'PREPARING',
+  IN_PROCESS = 'IN_PROCESS',
   READY = 'READY',
   DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
@@ -11,11 +11,13 @@ export enum OrderStatus {
 
 export interface Order {
   id: string;
+  orderNumber: string;
   customerName: string;
   customerPhone: string;
-  customerEmail: string | null;
-  deliveryAddress: string;
-  notes: string | null;
+  customerEmail: string;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingNotes: string | null;
   status: OrderStatus;
   subtotal: number;
   tax: number;
@@ -31,16 +33,17 @@ export interface OrderItem {
   orderId: string;
   productId: string;
   quantity: number;
-  priceAtPurchase: number;
-  subtotal: number;
+  price: number;
   product: Product;
 }
 
 export interface OrderStatusHistory {
   id: string;
   orderId: string;
-  status: OrderStatus;
-  note: string | null;
+  fromStatus: OrderStatus | null;
+  toStatus: OrderStatus;
+  notes: string | null;
+  changedBy: string | null;
   createdAt: string;
 }
 

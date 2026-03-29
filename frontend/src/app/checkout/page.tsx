@@ -53,9 +53,7 @@ export default function CheckoutPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="rounded-lg bg-yellow-50 p-8 text-center">
           <h2 className="text-2xl font-semibold">El carrito está vacío</h2>
-          <p className="mt-2 text-gray-600">
-            Agrega productos antes de proceder al checkout
-          </p>
+          <p className="mt-2 text-gray-600">Agrega productos antes de proceder al checkout</p>
           <button
             onClick={() => router.push('/')}
             className="mt-4 rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
@@ -85,9 +83,7 @@ export default function CheckoutPage() {
                 <input
                   type="text"
                   value={formData.customerName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, customerName: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
                   required
                   minLength={3}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2"
@@ -95,15 +91,11 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Teléfono *
-                </label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Teléfono *</label>
                 <input
                   type="tel"
                   value={formData.customerPhone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, customerPhone: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
                   required
                   pattern="[0-9]{10}"
                   placeholder="3001234567"
@@ -119,9 +111,7 @@ export default function CheckoutPage() {
                 <input
                   type="email"
                   value={formData.customerEmail}
-                  onChange={(e) =>
-                    setFormData({ ...formData, customerEmail: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, customerEmail: e.target.value })}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2"
                 />
               </div>
@@ -132,9 +122,7 @@ export default function CheckoutPage() {
                 </label>
                 <textarea
                   value={formData.deliveryAddress}
-                  onChange={(e) =>
-                    setFormData({ ...formData, deliveryAddress: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
                   required
                   minLength={10}
                   rows={3}
@@ -149,9 +137,7 @@ export default function CheckoutPage() {
                 </label>
                 <textarea
                   value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   rows={3}
                   placeholder="Instrucciones especiales, horario preferido, etc."
                   className="w-full rounded-lg border border-gray-300 px-3 py-2"

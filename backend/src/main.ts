@@ -5,6 +5,9 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { AppModule } from './app.module';
+import { join } from 'path';
+import { mkdirSync } from 'fs';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +15,11 @@ async function bootstrap() {
 
   // Global prefix
   app.setGlobalPrefix('api');
+
+  // Ensure uploads directory exists and serve static files
+  const uploadsDir = join(process.cwd(), 'uploads', 'products');
+  mkdirSync(uploadsDir, { recursive: true });
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   // Security
   app.use(helmet());

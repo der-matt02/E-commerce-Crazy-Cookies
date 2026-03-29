@@ -14,6 +14,7 @@ describe('ReviewsService', () => {
     review: {
       create: jest.fn(),
       findMany: jest.fn(),
+      groupBy: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -224,15 +225,13 @@ describe('ReviewsService', () => {
   describe('getProductRatingStats', () => {
     it('should calculate rating stats correctly', async () => {
       const productId = 'product-1';
-      const mockReviews = [
-        { rating: 5 },
-        { rating: 5 },
-        { rating: 4 },
-        { rating: 3 },
-        { rating: 5 },
+      const mockGroups = [
+        { rating: 5, _count: { rating: 3 } },
+        { rating: 4, _count: { rating: 1 } },
+        { rating: 3, _count: { rating: 1 } },
       ];
 
-      mockPrismaService.review.findMany.mockResolvedValue(mockReviews);
+      mockPrismaService.review.groupBy.mockResolvedValue(mockGroups);
 
       const result = await service.getProductRatingStats(productId);
 
@@ -250,7 +249,7 @@ describe('ReviewsService', () => {
     });
 
     it('should return zero stats when no reviews', async () => {
-      mockPrismaService.review.findMany.mockResolvedValue([]);
+      mockPrismaService.review.groupBy.mockResolvedValue([]);
 
       const result = await service.getProductRatingStats('product-1');
 

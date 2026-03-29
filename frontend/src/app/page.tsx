@@ -1,57 +1,20 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useCart } from '@/features/cart/context/CartContext';
-import { productsApi } from '@/features/products/api/products-api';
+import { serverFetch } from '@/lib/server-api';
 import type { Product } from '@/types/product.types';
 import Link from 'next/link';
+import { AddToCartButton } from '@/features/products/components/AddToCartButton';
 
-export default function HomePage() {
-  const { addToCart } = useCart();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-  useEffect(() => {
-    loadFeaturedProducts();
-  }, []);
-
-  const loadFeaturedProducts = async () => {
-    try {
-      setLoading(true);
-      const data = await productsApi.getAll();
-      setProducts(data.filter((p) => p.isActive).slice(0, 8));
-    } catch (err) {
-      console.error('Error loading products:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddToCart = async (productId: string) => {
-    setAddingToCart((prev) => new Set(prev).add(productId));
-    try {
-      await addToCart({ productId, quantity: 1 });
-      alert('Producto agregado al carrito');
-    } catch (err: any) {
-      alert(err.message || 'Error al agregar al carrito');
-    } finally {
-      setAddingToCart((prev) => {
-        const next = new Set(prev);
-        next.delete(productId);
-        return next;
-      });
-    }
-  };
+export default async function HomePage() {
+  const products = await serverFetch<Product[]>('/products', { revalidate: 60 }).catch(() => []);
+  const featured = products.filter((p) => p.isActive).slice(0, 8);
 
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 py-20 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="mb-4 text-6xl font-bold">
-            🍪 Crazy Cookies
-          </h1>
+          <h1 className="mb-4 text-6xl font-bold">🍪 Crazy Cookies</h1>
           <p className="mb-8 text-2xl">
             Las mejores galletas y postres artesanales, hechos con amor
           </p>
@@ -76,66 +39,47 @@ export default function HomePage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold text-gray-900">
-              Productos Destacados
-            </h2>
-            <p className="text-gray-600">
-              Descubre nuestros productos más populares
-            </p>
+            <h2 className="mb-4 text-4xl font-bold text-gray-900">Productos Destacados</h2>
+            <p className="text-gray-600">Descubre nuestros productos más populares</p>
           </div>
 
-          {loading ? (
-            <div className="flex h-64 items-center justify-center">
-              <div className="text-gray-500">Cargando productos...</div>
-            </div>
-          ) : products.length === 0 ? (
+          {featured.length === 0 ? (
             <div className="rounded-lg bg-white p-12 text-center shadow">
               <p className="text-gray-600">No hay productos disponibles</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {products.map((product) => {
-                const isAdding = addingToCart.has(product.id);
+              {featured.map((product) => {
                 const stockAvailable = product.inventory?.stockAvailable ?? 0;
                 const isOutOfStock = stockAvailable <= 0;
+                const firstImage = product.images?.[0];
 
                 return (
                   <div
                     key={product.id}
                     className="overflow-hidden rounded-lg bg-white shadow transition-shadow hover:shadow-lg"
                   >
-                    <div className="h-48 w-full bg-gradient-to-br from-blue-100 to-blue-200"></div>
-
+                    {firstImage ? (
+                      <img
+                        src={`${API_URL}${firstImage.url}`}
+                        alt={firstImage.alt ?? product.name}
+                        className="h-48 w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-48 w-full bg-gradient-to-br from-blue-100 to-blue-200" />
+                    )}
                     <div className="p-4">
-                      <Link
-                        href={`/products/${product.id}`}
-                        className="hover:text-blue-600"
-                      >
-                        <h3 className="mb-2 text-lg font-semibold">
-                          {product.name}
-                        </h3>
+                      <Link href={`/products/${product.id}`} className="hover:text-blue-600">
+                        <h3 className="mb-2 text-lg font-semibold">{product.name}</h3>
                       </Link>
-
                       <p className="mb-4 line-clamp-2 text-sm text-gray-700">
                         {product.description}
                       </p>
-
                       <div className="flex items-center justify-between">
                         <p className="text-xl font-bold text-gray-900">
                           ${product.price.toLocaleString('es-CO')}
                         </p>
-
-                        <button
-                          onClick={() => handleAddToCart(product.id)}
-                          disabled={isAdding || isOutOfStock}
-                          className={`rounded-lg px-3 py-2 text-sm font-semibold text-white ${
-                            isOutOfStock
-                              ? 'cursor-not-allowed bg-gray-400'
-                              : 'bg-blue-600 hover:bg-blue-700'
-                          } disabled:opacity-50`}
-                        >
-                          {isOutOfStock ? 'Agotado' : isAdding ? '...' : '+ Carrito'}
-                        </button>
+                        <AddToCartButton productId={product.id} outOfStock={isOutOfStock} />
                       </div>
                     </div>
                   </div>
@@ -169,16 +113,12 @@ export default function HomePage() {
             <div className="text-center">
               <div className="mb-4 text-4xl">🚚</div>
               <h3 className="mb-2 text-xl font-semibold">Entrega Rápida</h3>
-              <p className="text-gray-600">
-                Recibe tus productos frescos en la puerta de tu casa
-              </p>
+              <p className="text-gray-600">Recibe tus productos frescos en la puerta de tu casa</p>
             </div>
             <div className="text-center">
               <div className="mb-4 text-4xl">💝</div>
               <h3 className="mb-2 text-xl font-semibold">Hecho con Amor</h3>
-              <p className="text-gray-600">
-                Ponemos todo nuestro cariño en cada galleta y postre
-              </p>
+              <p className="text-gray-600">Ponemos todo nuestro cariño en cada galleta y postre</p>
             </div>
           </div>
         </div>

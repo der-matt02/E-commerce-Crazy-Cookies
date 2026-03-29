@@ -39,7 +39,7 @@ export class AdminService {
 
       // Low stock products (cross-column comparison requires raw query)
       this.prisma.$queryRaw<[{ count: bigint }]>`
-        SELECT COUNT(*) as count FROM inventory WHERE stock_available <= stock_minimum
+        SELECT COUNT(*) as count FROM inventory WHERE stockAvailable <= stockMinimum
       `,
     ]);
 
@@ -73,18 +73,16 @@ export class AdminService {
       take: 5,
     });
 
-    const topProductsWithDetails = await Promise.all(
-      topProducts.map(async (item) => {
-        const product = await this.prisma.product.findUnique({
-          where: { id: item.productId },
-          select: { id: true, name: true, price: true },
-        });
-        return {
-          ...product,
-          totalSold: item._sum.quantity || 0,
-        };
-      }),
-    );
+    const productIds = topProducts.map((item) => item.productId);
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, name: true, price: true },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+    const topProductsWithDetails = topProducts.map((item) => ({
+      ...productMap.get(item.productId),
+      totalSold: item._sum.quantity || 0,
+    }));
 
     return {
       products: {

@@ -20,7 +20,7 @@ export const ordersApi = {
   },
 
   async updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<Order> {
-    const { data} = await apiClient.patch<Order>(`/orders/${id}/status`, dto);
+    const { data } = await apiClient.patch<Order>(`/orders/${id}/status`, dto);
     return data;
   },
 

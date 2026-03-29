@@ -18,17 +18,12 @@ export const inventoryApi = {
   },
 
   async getMovements(productId: string): Promise<InventoryMovement[]> {
-    const { data } = await apiClient.get<InventoryMovement[]>(
-      `/inventory/${productId}/movements`
-    );
+    const { data } = await apiClient.get<InventoryMovement[]>(`/inventory/${productId}/movements`);
     return data;
   },
 
   async adjustStock(productId: string, dto: AdjustInventoryDto): Promise<Inventory> {
-    const { data } = await apiClient.post<Inventory>(
-      `/inventory/${productId}/adjust`,
-      dto
-    );
+    const { data } = await apiClient.post<Inventory>(`/inventory/${productId}/adjust`, dto);
     return data;
   },
 

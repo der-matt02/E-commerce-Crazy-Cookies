@@ -95,9 +95,7 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
@@ -128,11 +126,7 @@ export default function AdminCategoriesPage() {
   }
 
   if (error) {
-    return (
-      <div className="rounded-lg bg-red-50 p-4 text-red-600">
-        {error}
-      </div>
-    );
+    return <div className="rounded-lg bg-red-50 p-4 text-red-600">{error}</div>;
   }
 
   return (
@@ -152,24 +146,12 @@ export default function AdminCategoriesPage() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Nombre
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Slug
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Productos
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Estado
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Orden
-              </th>
-              <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">
-                Acciones
-              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Nombre</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Slug</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Productos</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Estado</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Orden</th>
+              <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
@@ -185,14 +167,10 @@ export default function AdminCategoriesPage() {
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900">{category.name}</div>
                     {category.description && (
-                      <div className="mt-1 text-sm text-gray-500">
-                        {category.description}
-                      </div>
+                      <div className="mt-1 text-sm text-gray-500">{category.description}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {category.slug}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{category.slug}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {category._count?.products || 0}
                   </td>
@@ -207,9 +185,7 @@ export default function AdminCategoriesPage() {
                       {category.isActive ? 'Activa' : 'Inactiva'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {category.order}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{category.order}</td>
                   <td className="px-6 py-4 text-right text-sm">
                     <button
                       onClick={() => handleEdit(category)}
@@ -243,9 +219,7 @@ export default function AdminCategoriesPage() {
               <div className="space-y-4">
                 {/* Name */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Nombre *
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Nombre *</label>
                   <input
                     type="text"
                     name="name"
@@ -258,9 +232,7 @@ export default function AdminCategoriesPage() {
 
                 {/* Slug */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Slug *
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Slug *</label>
                   <input
                     type="text"
                     name="slug"
@@ -307,9 +279,7 @@ export default function AdminCategoriesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Order */}
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Orden
-                    </label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Orden</label>
                     <input
                       type="number"
                       name="order"
@@ -322,9 +292,7 @@ export default function AdminCategoriesPage() {
 
                   {/* Active Status */}
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Estado
-                    </label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Estado</label>
                     <div className="flex h-10 items-center">
                       <input
                         type="checkbox"

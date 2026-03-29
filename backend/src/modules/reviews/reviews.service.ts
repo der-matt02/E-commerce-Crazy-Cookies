@@ -131,12 +131,13 @@ export class ReviewsService {
   }
 
   async getProductRatingStats(productId: string) {
-    const reviews = await this.prisma.review.findMany({
+    const groups = await this.prisma.review.groupBy({
+      by: ['rating'],
       where: { productId, isApproved: true },
-      select: { rating: true },
+      _count: { rating: true },
     });
 
-    if (reviews.length === 0) {
+    if (groups.length === 0) {
       return {
         average: 0,
         count: 0,
@@ -144,24 +145,21 @@ export class ReviewsService {
       };
     }
 
-    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-    const average = sum / reviews.length;
+    const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let totalCount = 0;
+    let weightedSum = 0;
 
-    const distribution = reviews.reduce((acc, r) => {
-      acc[r.rating] = (acc[r.rating] || 0) + 1;
-      return acc;
-    }, {} as Record<number, number>);
+    for (const group of groups) {
+      const count = group._count.rating;
+      distribution[group.rating] = count;
+      totalCount += count;
+      weightedSum += group.rating * count;
+    }
 
     return {
-      average: Math.round(average * 10) / 10,
-      count: reviews.length,
-      distribution: {
-        1: distribution[1] || 0,
-        2: distribution[2] || 0,
-        3: distribution[3] || 0,
-        4: distribution[4] || 0,
-        5: distribution[5] || 0,
-      },
+      average: Math.round((weightedSum / totalCount) * 10) / 10,
+      count: totalCount,
+      distribution,
     };
   }
 }

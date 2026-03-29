@@ -16,6 +16,7 @@ describe('CartService', () => {
     },
     cartItem: {
       findFirst: jest.fn(),
+      findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -145,12 +146,26 @@ describe('CartService', () => {
   });
 
   describe('clearCart', () => {
-    it('should throw error when cart not found', async () => {
-      mockPrismaService.cart.findFirst.mockResolvedValue(null);
+    it('should create and return empty cart when none exists', async () => {
+      const newCart = {
+        id: 'cart-1',
+        sessionId: 'session-123',
+        items: [],
+        expiresAt: new Date(Date.now() + 86400000),
+      };
 
-      await expect(service.clearCart('session-123')).rejects.toThrow(
-        NotFoundException,
+      mockPrismaService.cart.findFirst.mockResolvedValue(null);
+      mockPrismaService.cart.create.mockResolvedValue(newCart);
+      mockPrismaService.cart.findUnique.mockResolvedValue(newCart);
+      mockPrismaService.cartItem.findMany.mockResolvedValue([]);
+      mockPrismaService.$transaction.mockImplementation((fn: (p: typeof mockPrismaService) => Promise<unknown>) =>
+        fn(mockPrismaService),
       );
+
+      const result = await service.clearCart('session-123');
+
+      expect(result).toBeDefined();
+      expect(mockPrismaService.cart.create).toHaveBeenCalled();
     });
   });
 
@@ -178,12 +193,22 @@ describe('CartService', () => {
       expect(result).toEqual(mockCart);
     });
 
-    it('should return null when cart not found', async () => {
+    it('should create and return new cart when none exists', async () => {
+      const newCart = {
+        id: 'cart-new',
+        sessionId: 'session-123',
+        items: [],
+        expiresAt: new Date(Date.now() + 86400000),
+      };
+
       mockPrismaService.cart.findFirst.mockResolvedValue(null);
+      mockPrismaService.cart.create.mockResolvedValue(newCart);
 
       const result = await service.getCart('session-123');
 
-      expect(result).toBeNull();
+      expect(result).toBeDefined();
+      expect(result).toEqual(newCart);
+      expect(mockPrismaService.cart.create).toHaveBeenCalled();
     });
   });
 });

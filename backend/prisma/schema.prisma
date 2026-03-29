@@ -196,6 +196,8 @@ model Order {
   @@index([orderNumber])
   @@index([status])
   @@index([createdAt])
+  @@index([customerEmail])
+  @@index([status, createdAt])
 }
 
 enum OrderStatus {
@@ -301,6 +303,7 @@ model Admin {
   updatedAt DateTime @updatedAt
 
   @@map("admins")
+  @@index([isActive])
 }
 
 enum AdminRole {

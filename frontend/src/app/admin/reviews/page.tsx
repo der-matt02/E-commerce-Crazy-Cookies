@@ -142,9 +142,7 @@ export default function AdminReviewsPage() {
                   <div className="flex-1">
                     <div className="mb-3 flex items-start justify-between">
                       <div>
-                        <p className="font-semibold text-gray-900">
-                          {review.customerName}
-                        </p>
+                        <p className="font-semibold text-gray-900">{review.customerName}</p>
                         <p className="text-sm text-gray-600">{review.customerEmail}</p>
                         {review.product && (
                           <p className="mt-1 text-sm text-gray-500">
@@ -171,15 +169,11 @@ export default function AdminReviewsPage() {
                     </div>
 
                     {/* Comentario */}
-                    {review.comment && (
-                      <p className="mb-3 text-gray-700">{review.comment}</p>
-                    )}
+                    {review.comment && <p className="mb-3 text-gray-700">{review.comment}</p>}
 
                     {/* Metadata */}
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>
-                        {new Date(review.createdAt).toLocaleDateString('es-CO')}
-                      </span>
+                      <span>{new Date(review.createdAt).toLocaleDateString('es-CO')}</span>
                       {review.isApproved ? (
                         <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-800">
                           Aprobada
@@ -213,9 +207,7 @@ export default function AdminReviewsPage() {
                     )}
 
                     <button
-                      onClick={() =>
-                        handleDelete(review.id, review.product?.name || 'producto')
-                      }
+                      onClick={() => handleDelete(review.id, review.product?.name || 'producto')}
                       disabled={isProcessing}
                       className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                     >

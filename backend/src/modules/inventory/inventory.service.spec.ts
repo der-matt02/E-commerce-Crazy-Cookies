@@ -12,6 +12,10 @@ describe('InventoryService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      fields: {
+        stockMinimum: 'stockMinimum',
+        stockAvailable: 'stockAvailable',
+      },
     },
     inventoryMovement: {
       findMany: jest.fn(),
@@ -163,22 +167,49 @@ describe('InventoryService', () => {
   });
 
   describe('getStockAlerts', () => {
-    it('should return stock alerts', async () => {
-      const mockAlerts = [
+    it('should return structured stock alerts with lowStock and highReserved', async () => {
+      const mockLowStock = [
         {
           id: 'inv-1',
           productId: 'prod-1',
           stockAvailable: 2,
+          stockReserved: 0,
           stockMinimum: 10,
           product: { name: 'Product 1' },
         },
       ];
+      const mockHighReserved = [
+        {
+          id: 'inv-2',
+          productId: 'prod-2',
+          stockAvailable: 4,
+          stockReserved: 6,
+          stockMinimum: 5,
+          product: { name: 'Product 2' },
+        },
+      ];
 
-      mockPrismaService.inventory.findMany.mockResolvedValue(mockAlerts);
+      mockPrismaService.inventory.findMany
+        .mockResolvedValueOnce(mockLowStock)
+        .mockResolvedValueOnce(mockHighReserved);
 
       const result = await service.getStockAlerts();
 
-      expect(result).toEqual(mockAlerts);
+      expect(result).toHaveProperty('lowStock');
+      expect(result).toHaveProperty('highReserved');
+      expect(result.lowStock).toHaveLength(1);
+      expect(result.lowStock[0]).toMatchObject({
+        productId: 'prod-1',
+        productName: 'Product 1',
+        stockAvailable: 2,
+        stockMinimum: 10,
+        deficit: 8,
+      });
+      expect(result.highReserved).toHaveLength(1);
+      expect(result.highReserved[0]).toMatchObject({
+        productId: 'prod-2',
+        productName: 'Product 2',
+      });
     });
   });
 });

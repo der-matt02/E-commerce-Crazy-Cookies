@@ -11,11 +11,7 @@ export const metadata: Metadata = {
   keywords: ['galletas', 'postres', 'brownies', 'pasteles', 'artesanal', 'bogotá'],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={inter.variable}>
       <body className="min-h-screen bg-gray-50 antialiased">

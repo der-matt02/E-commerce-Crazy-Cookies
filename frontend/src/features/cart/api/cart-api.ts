@@ -16,11 +16,7 @@ export const cartApi = {
     return data;
   },
 
-  async updateCartItem(
-    sessionId: string,
-    itemId: string,
-    dto: UpdateCartItemDto
-  ): Promise<Cart> {
+  async updateCartItem(sessionId: string, itemId: string, dto: UpdateCartItemDto): Promise<Cart> {
     const { data } = await apiClient.patch<Cart>(`/cart/items/${itemId}`, dto, {
       params: { sessionId },
     });

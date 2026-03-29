@@ -7,8 +7,7 @@ import { useState } from 'react';
 
 export default function CartPage() {
   const router = useRouter();
-  const { cart, loading, removeItem, updateQuantity, clearCart, getSubtotal } =
-    useCart();
+  const { cart, loading, removeItem, updateQuantity, clearCart, getSubtotal } = useCart();
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
 
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
@@ -66,10 +65,7 @@ export default function CartPage() {
     <div className="container mx-auto px-4 py-12">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-4xl font-bold">Carrito de Compras</h1>
-        <Link
-          href="/"
-          className="text-blue-600 hover:text-blue-800 hover:underline"
-        >
+        <Link href="/" className="text-blue-600 hover:text-blue-800 hover:underline">
           ← Seguir comprando
         </Link>
       </div>
@@ -89,12 +85,8 @@ export default function CartPage() {
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          <h2 className="mt-4 text-2xl font-semibold text-gray-900">
-            Tu carrito está vacío
-          </h2>
-          <p className="mt-2 text-gray-600">
-            Agrega productos para comenzar tu pedido
-          </p>
+          <h2 className="mt-4 text-2xl font-semibold text-gray-900">Tu carrito está vacío</h2>
+          <p className="mt-2 text-gray-600">Agrega productos para comenzar tu pedido</p>
           <Link
             href="/"
             className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
@@ -137,17 +129,11 @@ export default function CartPage() {
                         <div className="flex flex-1 flex-col">
                           <div className="flex justify-between">
                             <div>
-                              <h3 className="font-semibold text-gray-900">
-                                {item.product.name}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                {item.product.category?.name}
-                              </p>
+                              <h3 className="font-semibold text-gray-900">{item.product.name}</h3>
+                              <p className="text-sm text-gray-600">{item.product.category?.name}</p>
                             </div>
                             <button
-                              onClick={() =>
-                                handleRemoveItem(item.id, item.product.name)
-                              }
+                              onClick={() => handleRemoveItem(item.id, item.product.name)}
                               className="text-gray-400 hover:text-red-600"
                               disabled={isUpdating}
                             >
@@ -171,21 +157,15 @@ export default function CartPage() {
                             {/* Controles de cantidad */}
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() =>
-                                  handleUpdateQuantity(item.id, item.quantity - 1)
-                                }
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                                 disabled={item.quantity <= 1 || isUpdating}
                                 className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
                               >
                                 -
                               </button>
-                              <span className="w-12 text-center font-medium">
-                                {item.quantity}
-                              </span>
+                              <span className="w-12 text-center font-medium">{item.quantity}</span>
                               <button
-                                onClick={() =>
-                                  handleUpdateQuantity(item.id, item.quantity + 1)
-                                }
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                                 disabled={item.quantity >= 99 || isUpdating}
                                 className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
                               >
@@ -199,10 +179,7 @@ export default function CartPage() {
                                 ${item.price.toLocaleString('es-CO')} c/u
                               </div>
                               <div className="text-lg font-bold text-gray-900">
-                                $
-                                {(item.price * item.quantity).toLocaleString(
-                                  'es-CO'
-                                )}
+                                ${(item.price * item.quantity).toLocaleString('es-CO')}
                               </div>
                             </div>
                           </div>

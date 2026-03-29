@@ -26,8 +26,7 @@ export default function AdminLoginPage() {
     try {
       await login(email, password);
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setError(msg || 'Credenciales incorrectas');
     } finally {
       setSubmitting(false);
@@ -83,9 +82,7 @@ export default function AdminLoginPage() {
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
-            </div>
+            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
           )}
 
           <button

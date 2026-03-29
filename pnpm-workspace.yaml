@@ -1,7 +1,6 @@
 packages:
   - backend
   - frontend
-  - shared
 
 ignoredBuiltDependencies:
   - '@nestjs/core'

@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { productsApi, categoriesApi } from '@/features/products/api/products-api';
-import type { Product, Category } from '@/types/product.types';
+import type { Product, ProductImage, Category } from '@/types/product.types';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -11,6 +13,9 @@ export default function AdminProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [imageProduct, setImageProduct] = useState<Product | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -75,34 +80,27 @@ export default function AdminProductsPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`¿Estás seguro de eliminar el producto "${name}"?`)) {
-      return;
-    }
-
+    if (!confirm(`¿Estás seguro de eliminar el producto "${name}"?`)) return;
     try {
       await productsApi.delete(id);
       await loadData();
     } catch (err: any) {
       alert(err?.response?.data?.message || 'Error al eliminar producto');
-      console.error(err);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       if (editingProduct) {
         await productsApi.update(editingProduct.id, formData);
       } else {
         await productsApi.create(formData);
       }
-
       setShowModal(false);
       await loadData();
     } catch (err: any) {
       alert(err?.response?.data?.message || 'Error al guardar producto');
-      console.error(err);
     }
   };
 
@@ -110,7 +108,6 @@ export default function AdminProductsPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
@@ -118,8 +115,6 @@ export default function AdminProductsPage() {
       setFormData((prev) => ({ ...prev, [name]: parseFloat(value) || 0 }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
-
-      // Auto-generate slug from name
       if (name === 'name' && !editingProduct) {
         const slug = value
           .toLowerCase()
@@ -127,6 +122,38 @@ export default function AdminProductsPage() {
           .replace(/^-|-$/g, '');
         setFormData((prev) => ({ ...prev, slug }));
       }
+    }
+  };
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!imageProduct || !e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    try {
+      setUploadingImage(true);
+      const newImage = await productsApi.uploadImage(imageProduct.id, file);
+      setImageProduct((prev) =>
+        prev ? { ...prev, images: [...(prev.images ?? []), newImage] } : prev
+      );
+      await loadData();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Error al subir imagen');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteImage = async (image: ProductImage) => {
+    if (!imageProduct) return;
+    if (!confirm('¿Eliminar esta imagen?')) return;
+    try {
+      await productsApi.deleteImage(imageProduct.id, image.id);
+      setImageProduct((prev) =>
+        prev ? { ...prev, images: prev.images?.filter((img) => img.id !== image.id) } : prev
+      );
+      await loadData();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Error al eliminar imagen');
     }
   };
 
@@ -139,11 +166,7 @@ export default function AdminProductsPage() {
   }
 
   if (error) {
-    return (
-      <div className="rounded-lg bg-red-50 p-4 text-red-600">
-        {error}
-      </div>
-    );
+    return <div className="rounded-lg bg-red-50 p-4 text-red-600">{error}</div>;
   }
 
   return (
@@ -158,35 +181,23 @@ export default function AdminProductsPage() {
         </button>
       </div>
 
-      {/* Products Table */}
       <div className="rounded-lg bg-white shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Producto
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Categoría
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Precio
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Stock
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Estado
-              </th>
-              <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">
-                Acciones
-              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Producto</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Categoría</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Precio</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Stock</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Imágenes</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Estado</th>
+              <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
             {products.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                   No hay productos registrados
                 </td>
               </tr>
@@ -194,8 +205,21 @@ export default function AdminProductsPage() {
               products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{product.name}</div>
-                    <div className="mt-1 text-sm text-gray-500">{product.slug}</div>
+                    <div className="flex items-center gap-3">
+                      {product.images && product.images.length > 0 ? (
+                        <img
+                          src={`${API_URL}${product.images[0].url}`}
+                          alt={product.images[0].alt ?? product.name}
+                          className="h-10 w-10 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded bg-gray-200" />
+                      )}
+                      <div>
+                        <div className="font-medium text-gray-900">{product.name}</div>
+                        <div className="text-sm text-gray-500">{product.slug}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {product.category?.name || '-'}
@@ -204,15 +228,14 @@ export default function AdminProductsPage() {
                     ${product.price.toLocaleString('es-CO')}
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <div className="text-gray-900">
-                      {product.inventory?.stockAvailable || 0} disponibles
-                    </div>
+                    <div>{product.inventory?.stockAvailable || 0} disponibles</div>
                     {product.inventory &&
-                     product.inventory.stockAvailable < product.inventory.stockMinimum && (
-                      <div className="text-red-600">
-                        ⚠️ Stock bajo
-                      </div>
-                    )}
+                      product.inventory.stockAvailable < product.inventory.stockMinimum && (
+                        <div className="text-red-600">⚠️ Stock bajo</div>
+                      )}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {product.images?.length ?? 0} foto(s)
                   </td>
                   <td className="px-6 py-4">
                     <span
@@ -225,10 +248,16 @@ export default function AdminProductsPage() {
                       {product.isActive ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right text-sm">
+                  <td className="space-x-3 px-6 py-4 text-right text-sm">
+                    <button
+                      onClick={() => setImageProduct(product)}
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      Imágenes
+                    </button>
                     <button
                       onClick={() => handleEdit(product)}
-                      className="mr-3 text-blue-600 hover:text-blue-800"
+                      className="text-blue-600 hover:text-blue-800"
                     >
                       Editar
                     </button>
@@ -246,6 +275,63 @@ export default function AdminProductsPage() {
         </table>
       </div>
 
+      {/* Image Management Modal */}
+      {imageProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="w-full max-w-2xl rounded-lg bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <h2 className="text-xl font-bold">Imágenes — {imageProduct.name}</h2>
+              <button
+                onClick={() => setImageProduct(null)}
+                className="text-2xl leading-none text-gray-400 hover:text-gray-600"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-6">
+                {!imageProduct.images || imageProduct.images.length === 0 ? (
+                  <p className="text-sm text-gray-500">Este producto no tiene imágenes aún.</p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4">
+                    {imageProduct.images.map((img) => (
+                      <div key={img.id} className="group relative">
+                        <img
+                          src={`${API_URL}${img.url}`}
+                          alt={img.alt ?? ''}
+                          className="h-32 w-full rounded-lg object-cover"
+                        />
+                        <button
+                          onClick={() => handleDeleteImage(img)}
+                          className="absolute right-2 top-2 hidden rounded-full bg-red-600 px-2 py-0.5 text-xs text-white group-hover:block"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="mb-3 text-sm font-medium text-gray-700">Subir nueva imagen</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUploadImage}
+                  disabled={uploadingImage}
+                  className="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                />
+                {uploadingImage && <p className="mt-2 text-sm text-gray-500">Subiendo imagen...</p>}
+                <p className="mt-1 text-xs text-gray-400">Máximo 5 MB. JPG, PNG, WEBP.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -256,11 +342,8 @@ export default function AdminProductsPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
-                {/* Name */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Nombre *
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Nombre *</label>
                   <input
                     type="text"
                     name="name"
@@ -271,11 +354,8 @@ export default function AdminProductsPage() {
                   />
                 </div>
 
-                {/* Slug */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Slug *
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Slug *</label>
                   <input
                     type="text"
                     name="slug"
@@ -290,7 +370,6 @@ export default function AdminProductsPage() {
                   </p>
                 </div>
 
-                {/* Description */}
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700">
                     Descripción *
@@ -306,11 +385,8 @@ export default function AdminProductsPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Price */}
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Precio *
-                    </label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Precio *</label>
                     <input
                       type="number"
                       name="price"
@@ -322,8 +398,6 @@ export default function AdminProductsPage() {
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
-
-                  {/* Category */}
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">
                       Categoría *
@@ -346,7 +420,6 @@ export default function AdminProductsPage() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
-                  {/* Stock Available */}
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">
                       Stock Disponible
@@ -360,8 +433,6 @@ export default function AdminProductsPage() {
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
-
-                  {/* Stock Minimum */}
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">
                       Stock Mínimo
@@ -375,12 +446,8 @@ export default function AdminProductsPage() {
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
-
-                  {/* Active Status */}
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Estado
-                    </label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Estado</label>
                     <div className="flex h-10 items-center">
                       <input
                         type="checkbox"
@@ -395,7 +462,6 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"

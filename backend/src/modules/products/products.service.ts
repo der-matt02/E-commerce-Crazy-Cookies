@@ -2,6 +2,9 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '@/database/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { existsSync } from 'fs';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
 
 @Injectable()
 export class ProductsService {
@@ -308,5 +311,41 @@ export class ProductsService {
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
+  }
+
+  async addImage(productId: string, file: Express.Multer.File) {
+    await this.findOne(productId);
+
+    const lastImage = await this.prisma.productImage.findFirst({
+      where: { productId },
+      orderBy: { order: 'desc' },
+    });
+    const order = (lastImage?.order ?? -1) + 1;
+
+    return this.prisma.productImage.create({
+      data: {
+        productId,
+        url: `/uploads/products/${file.filename}`,
+        alt: file.originalname,
+        order,
+      },
+    });
+  }
+
+  async removeImage(productId: string, imageId: string) {
+    const image = await this.prisma.productImage.findFirst({
+      where: { id: imageId, productId },
+    });
+
+    if (!image) {
+      throw new NotFoundException('Image not found');
+    }
+
+    const filePath = join(process.cwd(), image.url);
+    if (existsSync(filePath)) {
+      await unlink(filePath);
+    }
+
+    await this.prisma.productImage.delete({ where: { id: imageId } });
   }
 }

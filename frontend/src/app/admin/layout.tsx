@@ -55,6 +55,9 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
           <Link href="/admin/reviews" className="block rounded-lg px-4 py-2 hover:bg-gray-800">
             Reviews
           </Link>
+          <Link href="/admin/audit" className="block rounded-lg px-4 py-2 hover:bg-gray-800">
+            Auditoría
+          </Link>
         </nav>
         <div className="absolute bottom-0 w-64 border-t border-gray-700 p-4">
           <button

@@ -2,12 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { inventoryApi } from '@/features/inventory/api/inventory-api';
-import type {
-  Inventory,
-  InventoryMovement,
-  AdjustmentType,
-  StockAlerts,
-} from '@/types/inventory.types';
+import type { Inventory, InventoryMovement, StockAlerts } from '@/types/inventory.types';
+import { AdjustmentType } from '@/types/inventory.types';
 
 export default function AdminInventoryPage() {
   const [inventories, setInventories] = useState<Inventory[]>([]);
@@ -51,7 +47,7 @@ export default function AdminInventoryPage() {
     setSelectedInventory(inventory);
     setAdjustForm({
       quantity: 0,
-      type: 'IN',
+      type: AdjustmentType.IN,
       reason: '',
     });
     setShowAdjustModal(true);
@@ -110,11 +106,7 @@ export default function AdminInventoryPage() {
   }
 
   if (error) {
-    return (
-      <div className="rounded-lg bg-red-50 p-4 text-red-600">
-        {error}
-      </div>
-    );
+    return <div className="rounded-lg bg-red-50 p-4 text-red-600">{error}</div>;
   }
 
   return (
@@ -163,27 +155,13 @@ export default function AdminInventoryPage() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Producto
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Categoría
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Disponible
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Reservado
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Mínimo
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                Estado
-              </th>
-              <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">
-                Acciones
-              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Producto</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Categoría</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Disponible</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Reservado</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Mínimo</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Estado</th>
+              <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
@@ -211,12 +189,8 @@ export default function AdminInventoryPage() {
                         {inventory.stockAvailable}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {inventory.stockReserved}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {inventory.stockMinimum}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{inventory.stockReserved}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{inventory.stockMinimum}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-medium ${status.bg} ${status.color}`}
@@ -287,9 +261,7 @@ export default function AdminInventoryPage() {
 
                 {/* Cantidad */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Cantidad *
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Cantidad *</label>
                   <input
                     type="number"
                     value={adjustForm.quantity}
@@ -307,14 +279,10 @@ export default function AdminInventoryPage() {
 
                 {/* Razón */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Razón
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Razón</label>
                   <textarea
                     value={adjustForm.reason}
-                    onChange={(e) =>
-                      setAdjustForm((prev) => ({ ...prev, reason: e.target.value }))
-                    }
+                    onChange={(e) => setAdjustForm((prev) => ({ ...prev, reason: e.target.value }))}
                     rows={3}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                   />
@@ -351,13 +319,9 @@ export default function AdminInventoryPage() {
             </h2>
 
             {loadingMovements ? (
-              <div className="py-12 text-center text-gray-500">
-                Cargando movimientos...
-              </div>
+              <div className="py-12 text-center text-gray-500">Cargando movimientos...</div>
             ) : movements.length === 0 ? (
-              <div className="py-12 text-center text-gray-500">
-                No hay movimientos registrados
-              </div>
+              <div className="py-12 text-center text-gray-500">No hay movimientos registrados</div>
             ) : (
               <div className="max-h-96 overflow-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -389,8 +353,8 @@ export default function AdminInventoryPage() {
                               movement.type === 'IN'
                                 ? 'bg-green-100 text-green-800'
                                 : movement.type === 'OUT'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-blue-100 text-blue-800'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-blue-100 text-blue-800'
                             }`}
                           >
                             {movement.type}
