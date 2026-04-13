@@ -1,5 +1,15 @@
 version: '3.8'
 
+# ─── Desarrollo ───────────────────────────────────────────────────────────────
+# Modo rápido (base de datos en Docker, app localmente):
+#   docker compose up mysql
+#   pnpm dev:backend   (otra terminal)
+#   pnpm dev:frontend  (otra terminal)
+#
+# Modo full-stack en Docker:
+#   docker compose up --build
+# ─────────────────────────────────────────────────────────────────────────────
+
 services:
   mysql:
     image: mysql:8.0
@@ -24,50 +34,45 @@ services:
       retries: 5
       start_period: 30s
 
-  # Backend service (uncomment when ready)
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: ../docker/backend/Dockerfile
-  #   container_name: crazy-cookies-backend
-  #   restart: unless-stopped
-  #   environment:
-  #     DATABASE_URL: mysql://${DB_USER:-crazy_cookies_user}:${DB_PASSWORD:-secure_password}@mysql:3306/${DB_DATABASE:-crazy_cookies}
-  #     NODE_ENV: development
-  #     PORT: 3000
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #     - ./backend:/app
-  #     - /app/node_modules
-  #   depends_on:
-  #     mysql:
-  #       condition: service_healthy
-  #   networks:
-  #     - crazy-cookies-network
-  #   command: pnpm run start:dev
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: crazy-cookies-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mysql://${DB_USER:-crazy_cookies_user}:${DB_PASSWORD:-secure_password}@mysql:3306/${DB_DATABASE:-crazy_cookies}
+      BACKEND_PORT: 3000
+      CORS_ORIGIN: http://localhost:3001
+    ports:
+      - '3000:3000'
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - crazy-cookies-network
+    volumes:
+      - uploads_data:/app/backend/uploads
 
-  # Frontend service (uncomment when ready)
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: ../docker/frontend/Dockerfile
-  #   container_name: crazy-cookies-frontend
-  #   restart: unless-stopped
-  #   environment:
-  #     NEXT_PUBLIC_API_URL: http://localhost:3000
-  #     NODE_ENV: development
-  #   ports:
-  #     - '3001:3000'
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #     - /app/.next
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - crazy-cookies-network
-  #   command: pnpm run dev
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3000
+    container_name: crazy-cookies-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - '3001:3000'
+    depends_on:
+      - backend
+    networks:
+      - crazy-cookies-network
 
 networks:
   crazy-cookies-network:
@@ -75,4 +80,6 @@ networks:
 
 volumes:
   mysql_data:
+    driver: local
+  uploads_data:
     driver: local

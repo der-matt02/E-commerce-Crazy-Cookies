@@ -1,52 +1,52 @@
-# Stage 1: Build
+# ─── Stage 1: Build ───────────────────────────────────────────────────────────
 FROM node:18-alpine AS builder
 
-# Install pnpm
 RUN npm install -g pnpm@8
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Copy workspace manifests first (layer cache)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
 
-# Install dependencies
+# Install all deps (including dev, needed to compile)
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
+# Copy source and build
 COPY backend ./backend
-
-# Build the application
 WORKDIR /app/backend
 RUN pnpm run build
 
-# Stage 2: Production
+# ─── Stage 2: Production ──────────────────────────────────────────────────────
 FROM node:18-alpine AS runner
 
-# Install pnpm
-RUN npm install -g pnpm@8
+RUN npm install -g pnpm@8 && \
+    apk add --no-cache curl
 
 WORKDIR /app
 
-# Copy package files
-COPY --from=builder /app/package.json /app/pnpm-lock.yaml ./
-COPY --from=builder /app/backend/package.json ./backend/
+# Copy workspace manifests
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY backend/package.json ./backend/
 
-# Install production dependencies only
+# Copy Prisma schema BEFORE installing so @prisma/client postinstall can generate
+COPY --from=builder /app/backend/prisma ./backend/prisma
+
+# Install production deps only (postinstall generates Prisma client from schema)
 RUN pnpm install --prod --frozen-lockfile
 
-# Copy built application
+# Copy compiled application
 COPY --from=builder /app/backend/dist ./backend/dist
-COPY --from=builder /app/backend/prisma ./backend/prisma
+
+# Copy entrypoint script
+COPY docker/backend/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 WORKDIR /app/backend
 
-# Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start the application
-CMD ["pnpm", "run", "start:prod"]
+ENTRYPOINT ["/entrypoint.sh"]

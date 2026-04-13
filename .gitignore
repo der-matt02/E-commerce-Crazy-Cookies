@@ -64,7 +64,6 @@ backend/prisma/migrations/**/*.sql
 
 # Docker
 docker-compose.override.yml
-.dockerignore
 
 # Misc
 .cache/
