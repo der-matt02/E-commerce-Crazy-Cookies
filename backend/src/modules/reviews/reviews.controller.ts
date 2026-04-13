@@ -8,6 +8,8 @@ import {
   Param,
   Query,
   UseGuards,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewsService } from './reviews.service';
@@ -31,9 +33,11 @@ export class ReviewsController {
   async getProductReviews(
     @Param('productId') productId: string,
     @Query('includeUnapproved') includeUnapproved?: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
   ) {
     const include = includeUnapproved === 'true';
-    return this.reviewsService.getByProduct(productId, include);
+    return this.reviewsService.getByProduct(productId, include, page, limit);
   }
 
   @Get('products/:productId/stats')
@@ -49,10 +53,14 @@ export class ReviewsController {
   }
 
   @Get()
-  async getAllReviews(@Query('approved') approved?: string) {
+  async getAllReviews(
+    @Query('approved') approved?: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+  ) {
     const isApproved =
       approved === 'true' ? true : approved === 'false' ? false : undefined;
-    return this.reviewsService.getAll(isApproved);
+    return this.reviewsService.getAll(isApproved, page, limit);
   }
 
   @Patch(':id/approve')

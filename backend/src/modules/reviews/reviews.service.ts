@@ -40,20 +40,34 @@ export class ReviewsService {
     return review;
   }
 
-  async getByProduct(productId: string, includeUnapproved = false) {
+  async getByProduct(productId: string, includeUnapproved = false, page = 1, limit = 10) {
     const where = includeUnapproved
       ? { productId }
       : { productId, isApproved: true };
 
-    const reviews = await this.prisma.review.findMany({
-      where,
-      include: {
-        images: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const skip = (page - 1) * limit;
+    const [reviews, total] = await Promise.all([
+      this.prisma.review.findMany({
+        where,
+        include: { images: true },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.review.count({ where }),
+    ]);
 
-    return reviews;
+    return {
+      reviews,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
+      },
+    };
   }
 
   async getPending() {
@@ -71,21 +85,35 @@ export class ReviewsService {
     return reviews;
   }
 
-  async getAll(approved?: boolean) {
+  async getAll(approved?: boolean, page = 1, limit = 20) {
     const where = approved !== undefined ? { isApproved: approved } : {};
+    const skip = (page - 1) * limit;
 
-    const reviews = await this.prisma.review.findMany({
-      where,
-      include: {
-        product: {
-          select: { id: true, name: true },
+    const [reviews, total] = await Promise.all([
+      this.prisma.review.findMany({
+        where,
+        include: {
+          product: { select: { id: true, name: true } },
+          images: true,
         },
-        images: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.review.count({ where }),
+    ]);
 
-    return reviews;
+    return {
+      reviews,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
+      },
+    };
   }
 
   async approve(id: string, dto: ApproveReviewDto, adminId?: string) {

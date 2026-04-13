@@ -142,28 +142,43 @@ export class OrdersService {
     return this.findOne(order.id);
   }
 
-  async findAll() {
-    return this.prisma.order.findMany({
-      include: {
-        items: {
-          include: {
-            product: {
-              include: {
-                category: true,
+  async findAll(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const [orders, total] = await Promise.all([
+      this.prisma.order.findMany({
+        include: {
+          items: {
+            include: {
+              product: {
+                include: {
+                  category: true,
+                },
               },
             },
           },
-        },
-        statusHistory: {
-          orderBy: {
-            createdAt: 'desc',
+          statusHistory: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
           },
         },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.order.count(),
+    ]);
+
+    return {
+      orders,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    };
   }
 
   async findOne(id: string) {
@@ -256,31 +271,22 @@ export class OrdersService {
       // Si se cancela, devolver stock
       if (dto.status === OrderStatus.CANCELLED) {
         for (const item of updatedOrder.items) {
-          await prisma.inventory.update({
+          // update devuelve el id — evita un findUnique extra por item
+          const inventory = await prisma.inventory.update({
             where: { productId: item.productId },
+            data: { stockAvailable: { increment: item.quantity } },
+            select: { id: true },
+          });
+
+          await prisma.inventoryMovement.create({
             data: {
-              stockAvailable: {
-                increment: item.quantity,
-              },
+              inventoryId: inventory.id,
+              type: InventoryMovementType.IN,
+              quantity: item.quantity,
+              reason: `Devolución por cancelación - Orden #${id}`,
+              orderId: id,
             },
           });
-
-          // Crear movimiento de inventario
-          const inventory = await prisma.inventory.findUnique({
-            where: { productId: item.productId },
-          });
-
-          if (inventory) {
-            await prisma.inventoryMovement.create({
-              data: {
-                inventoryId: inventory.id,
-                type: InventoryMovementType.IN,
-                quantity: item.quantity,
-                reason: `Devolución por cancelación - Orden #${id}`,
-                orderId: id,
-              },
-            });
-          }
         }
       }
 

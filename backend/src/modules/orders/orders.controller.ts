@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -24,9 +24,14 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar todas las órdenes' })
-  @ApiResponse({ status: 200, description: 'Lista de órdenes' })
-  findAll() {
-    return this.ordersService.findAll();
+  @ApiResponse({ status: 200, description: 'Lista de órdenes paginada' })
+  @ApiQuery({ name: 'page', required: false, description: 'Página (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items por página (default: 20)' })
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
+  ) {
+    return this.ordersService.findAll(page, limit);
   }
 
   @Get('status/:status')

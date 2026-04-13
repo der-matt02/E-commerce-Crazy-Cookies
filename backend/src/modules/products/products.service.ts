@@ -51,20 +51,39 @@ export class ProductsService {
     });
   }
 
-  async findAll() {
-    return this.prisma.product.findMany({
-      include: {
-        category: true,
-        inventory: true,
-        images: {
-          orderBy: { order: 'asc' },
+  async findAll(page = 1, limit = 50) {
+    const skip = (page - 1) * limit;
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        include: {
+          category: true,
+          inventory: true,
+          images: {
+            orderBy: { order: 'asc' },
+            take: 1,
+          },
+          _count: {
+            select: { reviews: true },
+          },
         },
-        _count: {
-          select: { reviews: true },
-        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.product.count(),
+    ]);
+
+    return {
+      products,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
       },
-      orderBy: { createdAt: 'desc' },
-    });
+    };
   }
 
   async findOne(id: string) {
