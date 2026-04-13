@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (installed inside container)
+node_modules
+**/node_modules
+
+# Build outputs
+backend/dist
+frontend/.next
+frontend/out
+
+# Environment files (injected at runtime)
+.env
+.env.local
+.env.*.local
+
+# Development tools
+.husky
+.vscode
+.idea
+
+# Test coverage
+coverage
+**/coverage
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker compose overrides
+docker-compose.override.yml
