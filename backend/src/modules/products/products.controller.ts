@@ -13,6 +13,8 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -51,11 +53,17 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get all products' })
   @ApiResponse({ status: 200, description: 'List of products' })
   @ApiQuery({ name: 'categoryId', required: false, description: 'Filter by category ID' })
-  findAll(@Query('categoryId') categoryId?: string) {
+  @ApiQuery({ name: 'page', required: false, description: 'Página (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items por página (default: 50)' })
+  findAll(
+    @Query('categoryId') categoryId?: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit?: number,
+  ) {
     if (categoryId) {
       return this.productsService.findByCategory(categoryId);
     }
-    return this.productsService.findAll();
+    return this.productsService.findAll(page, limit);
   }
 
   @Get('search')
