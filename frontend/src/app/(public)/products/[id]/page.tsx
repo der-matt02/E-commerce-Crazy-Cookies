@@ -32,7 +32,7 @@ export default async function ProductDetailPage({ params }: Props) {
     <div className="container mx-auto px-4 py-12">
       {/* Breadcrumb */}
       <nav className="mb-8 text-sm text-gray-600">
-        <Link href="/products" className="hover:text-blue-600">
+        <Link href="/products" className="hover:text-primary-600">
           Productos
         </Link>
         {product.category && (
@@ -48,7 +48,7 @@ export default async function ProductDetailPage({ params }: Props) {
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
         {/* Imagen */}
         <div>
-          <div className="overflow-hidden rounded-lg bg-gradient-to-br from-blue-100 to-blue-200">
+          <div className="overflow-hidden rounded-xl product-placeholder">
             {firstImage ? (
               <img
                 src={`${API_URL}${firstImage.url}`}
@@ -65,7 +65,7 @@ export default async function ProductDetailPage({ params }: Props) {
         <div>
           <div className="mb-6">
             {product.category && (
-              <p className="mb-2 text-sm font-medium text-blue-600">{product.category.name}</p>
+              <p className="mb-2 text-sm font-medium text-primary-600">{product.category.name}</p>
             )}
             <h1 className="mb-4 text-4xl font-bold text-gray-900">{product.name}</h1>
             <p className="text-gray-700">{product.description}</p>
@@ -113,7 +113,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
           <Link
             href="/products"
-            className="inline-block text-blue-600 hover:text-blue-800 hover:underline"
+            className="inline-block text-primary-600 hover:text-primary-800 hover:underline"
           >
             ← Volver al catálogo
           </Link>

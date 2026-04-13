@@ -1,27 +1,83 @@
+import { CartWidget } from '@/features/cart/components/CartWidget';
+import Link from 'next/link';
+
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b bg-white shadow-sm">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
         <div className="container-custom py-4">
           <nav className="flex items-center justify-between">
-            <a href="/" className="text-2xl font-bold text-primary-600">
-              🍪 Crazy Cookies
-            </a>
-            <div className="flex items-center space-x-6">
-              <a href="/products" className="hover:text-primary-600">
-                Productos
-              </a>
-              <a href="/cart" className="hover:text-primary-600">
-                Carrito
-              </a>
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-2xl font-bold text-primary-600 transition-opacity hover:opacity-80"
+            >
+              <span>🍪</span>
+              <span>Crazy Cookies</span>
+            </Link>
+
+            <div className="flex items-center gap-6">
+              <Link
+                href="/products"
+                className="text-sm font-medium text-gray-600 transition-colors hover:text-primary-600"
+              >
+                Catálogo
+              </Link>
+              <CartWidget />
             </div>
           </nav>
         </div>
       </header>
+
       <main className="flex-1">{children}</main>
-      <footer className="border-t bg-gray-100 py-8">
-        <div className="container-custom text-center text-sm text-gray-600">
-          <p>© 2026 Crazy Cookies. Todos los derechos reservados.</p>
+
+      <footer className="border-t border-gray-200 bg-gray-900 text-white">
+        <div className="container-custom py-12">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+            <div>
+              <p className="mb-3 text-xl font-bold text-primary-400">🍪 Crazy Cookies</p>
+              <p className="text-sm leading-relaxed text-gray-400">
+                Galletas y postres artesanales hechos con amor, usando los mejores ingredientes.
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+                Navegación
+              </p>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li>
+                  <Link href="/" className="transition-colors hover:text-white">
+                    Inicio
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products" className="transition-colors hover:text-white">
+                    Productos
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/cart" className="transition-colors hover:text-white">
+                    Carrito
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+                Contacto
+              </p>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li>📍 Bogotá, Colombia</li>
+                <li>📞 +57 300 000 0000</li>
+                <li>✉️ hola@crazycookies.co</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
+            © 2026 Crazy Cookies. Todos los derechos reservados.
+          </div>
         </div>
       </footer>
     </div>

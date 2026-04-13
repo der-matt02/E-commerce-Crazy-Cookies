@@ -6,46 +6,83 @@ import { AddToCartButton } from '@/features/products/components/AddToCartButton'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export default async function HomePage() {
-  const products = await serverFetch<Product[]>('/products', { revalidate: 60 }).catch(() => []);
-  const featured = products.filter((p) => p.isActive).slice(0, 8);
+  const featured = await serverFetch<Product[]>('/products/featured?limit=8', {
+    revalidate: 60,
+  }).catch(() => [] as Product[]);
 
   return (
     <main className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 py-20 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="mb-4 text-6xl font-bold">🍪 Crazy Cookies</h1>
-          <p className="mb-8 text-2xl">
-            Las mejores galletas y postres artesanales, hechos con amor
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-700 via-primary-600 to-orange-500 py-24 text-white">
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+        />
+        <div className="container-custom relative text-center">
+          <p className="mb-4 text-5xl">🍪</p>
+          <h1 className="mb-4 text-5xl font-bold leading-tight tracking-tight sm:text-6xl">
+            Crazy Cookies
+          </h1>
+          <p className="mx-auto mb-10 max-w-xl text-lg text-white/85">
+            Galletas y postres artesanales hechos con amor y los mejores ingredientes.
+            ¡Envío a domicilio en Bogotá!
           </p>
-          <div className="space-x-4">
+          <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/products"
-              className="inline-block rounded-lg bg-white px-8 py-3 font-semibold text-blue-600 hover:bg-gray-100"
+              className="rounded-lg bg-white px-8 py-3 font-semibold text-primary-700 shadow-sm transition-all hover:bg-primary-50 hover:shadow-md"
             >
               Ver Catálogo
             </Link>
             <Link
               href="/cart"
-              className="inline-block rounded-lg border-2 border-white px-8 py-3 font-semibold hover:bg-white hover:text-blue-600"
+              className="rounded-lg border-2 border-white/80 px-8 py-3 font-semibold text-white backdrop-blur-sm transition-all hover:border-white hover:bg-white/10"
             >
-              Ir al Carrito
+              Mi Carrito
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Productos Destacados */}
+      {/* Features strip */}
+      <section className="border-b border-gray-200 bg-white">
+        <div className="container-custom py-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {[
+              { icon: '🎂', title: 'Artesanal', desc: 'Hecho a mano con ingredientes premium' },
+              { icon: '🚚', title: 'Entrega rápida', desc: 'Fresco en la puerta de tu casa' },
+              { icon: '💝', title: 'Hecho con amor', desc: 'Cariño en cada galleta y postre' },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className="flex items-start gap-4">
+                <span className="text-3xl">{icon}</span>
+                <div>
+                  <p className="font-semibold text-gray-900">{title}</p>
+                  <p className="text-sm text-gray-500">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured products */}
       <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold text-gray-900">Productos Destacados</h2>
-            <p className="text-gray-600">Descubre nuestros productos más populares</p>
+        <div className="container-custom">
+          <div className="mb-10 text-center">
+            <h2 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl">
+              Productos Destacados
+            </h2>
+            <p className="text-gray-500">Los favoritos de nuestros clientes</p>
           </div>
 
           {featured.length === 0 ? (
-            <div className="rounded-lg bg-white p-12 text-center shadow">
-              <p className="text-gray-600">No hay productos disponibles</p>
+            <div className="rounded-xl bg-white p-16 text-center shadow-sm ring-1 ring-gray-200">
+              <p className="text-gray-500">No hay productos disponibles en este momento</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -55,24 +92,33 @@ export default async function HomePage() {
                 const firstImage = product.images?.[0];
 
                 return (
-                  <div
-                    key={product.id}
-                    className="overflow-hidden rounded-lg bg-white shadow transition-shadow hover:shadow-lg"
-                  >
-                    {firstImage ? (
-                      <img
-                        src={`${API_URL}${firstImage.url}`}
-                        alt={firstImage.alt ?? product.name}
-                        className="h-48 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-48 w-full bg-gradient-to-br from-blue-100 to-blue-200" />
-                    )}
+                  <div key={product.id} className="card group">
+                    <div className="relative h-52 overflow-hidden">
+                      {firstImage ? (
+                        <img
+                          src={`${API_URL}${firstImage.url}`}
+                          alt={firstImage.alt ?? product.name}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="product-placeholder h-full w-full" />
+                      )}
+                      {isOutOfStock && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                          <span className="rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-gray-700">
+                            Agotado
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="p-4">
-                      <Link href={`/products/${product.id}`} className="hover:text-blue-600">
-                        <h3 className="mb-2 text-lg font-semibold">{product.name}</h3>
+                      <Link href={`/products/${product.id}`}>
+                        <h3 className="mb-1 font-semibold text-gray-900 transition-colors hover:text-primary-600 line-clamp-1">
+                          {product.name}
+                        </h3>
                       </Link>
-                      <p className="mb-4 line-clamp-2 text-sm text-gray-700">
+                      <p className="mb-3 line-clamp-2 text-sm text-gray-500">
                         {product.description}
                       </p>
                       <div className="flex items-center justify-between">
@@ -89,37 +135,9 @@ export default async function HomePage() {
           )}
 
           <div className="mt-12 text-center">
-            <Link
-              href="/products"
-              className="inline-block rounded-lg border-2 border-blue-600 px-8 py-3 font-semibold text-blue-600 hover:bg-blue-600 hover:text-white"
-            >
-              Ver Todos los Productos
+            <Link href="/products" className="btn-outline">
+              Ver todos los productos
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="bg-gray-50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="text-center">
-              <div className="mb-4 text-4xl">🎂</div>
-              <h3 className="mb-2 text-xl font-semibold">Productos Artesanales</h3>
-              <p className="text-gray-600">
-                Cada producto es hecho a mano con ingredientes de la mejor calidad
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mb-4 text-4xl">🚚</div>
-              <h3 className="mb-2 text-xl font-semibold">Entrega Rápida</h3>
-              <p className="text-gray-600">Recibe tus productos frescos en la puerta de tu casa</p>
-            </div>
-            <div className="text-center">
-              <div className="mb-4 text-4xl">💝</div>
-              <h3 className="mb-2 text-xl font-semibold">Hecho con Amor</h3>
-              <p className="text-gray-600">Ponemos todo nuestro cariño en cada galleta y postre</p>
-            </div>
           </div>
         </div>
       </section>
