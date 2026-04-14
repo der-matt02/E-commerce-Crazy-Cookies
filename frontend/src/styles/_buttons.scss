@@ -1,0 +1,151 @@
+@use 'tokens' as *;
+
+// ── Botón primario ─────────────────────────────────────────────────────────
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background-color: $ink;
+  color: $white;
+  font-family: $font-sans;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: background-color $t-normal, transform $t-fast;
+  border: none;
+  text-decoration: none;
+
+  &:hover {
+    background-color: #2d2926;
+    transform: translateY(-1px);
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// ── Botón secundario (outline) ─────────────────────────────────────────────
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  border: 1px solid $border-md;
+  background-color: transparent;
+  color: $ink;
+  font-family: $font-sans;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: background-color $t-normal;
+  text-decoration: none;
+
+  &:hover {
+    background-color: $cream-dark;
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ── Botón full-width ───────────────────────────────────────────────────────
+.btn-full {
+  display: block;
+  width: 100%;
+  border-radius: 2px;
+  border: none;
+  background-color: $ink;
+  color: $white;
+  font-family: $font-sans;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  padding: 14px;
+  cursor: pointer;
+  transition: background-color $t-normal;
+  text-align: center;
+
+  &:hover {
+    background-color: #2d2926;
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ── Botón redondo "+" (card de producto) ──────────────────────────────────
+.btn-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid $border-md;
+  background-color: transparent;
+  color: $ink-light;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color $t-fast, border-color $t-fast, color $t-fast;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: $ink;
+    border-color: $ink;
+    color: $white;
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &--added {
+    background-color: $ink;
+    border-color: $ink;
+    color: $white;
+  }
+
+  &--error {
+    border-color: #dc2626;
+    color: #dc2626;
+  }
+}
+
+// ── Botón icon (nav / ghost) ───────────────────────────────────────────────
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 2px;
+  border: 1px solid $border-md;
+  background-color: transparent;
+  color: $ink-light;
+  cursor: pointer;
+  transition: background-color $t-fast;
+  text-decoration: none;
+  position: relative;
+
+  &:hover {
+    background-color: $cream-dark;
+  }
+}

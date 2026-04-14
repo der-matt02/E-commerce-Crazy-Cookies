@@ -1,0 +1,371 @@
+@use 'tokens' as *;
+
+.cart-page {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: 64px $page-px;
+
+  @media (max-width: $bp-sm) {
+    padding: 48px $page-px-sm;
+  }
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  &__title {
+    font-family: $font-serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: $ink;
+  }
+
+  &__back-link {
+    font-family: $font-sans;
+    font-size: 13px;
+    color: $ink-light;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color $t-normal;
+
+    &:hover { color: $ink; }
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+
+    @media (min-width: $bp-lg) {
+      grid-template-columns: 1fr 380px;
+    }
+  }
+
+  &__empty {
+    border: 1px solid $border;
+    padding: 96px 24px;
+    text-align: center;
+  }
+
+  &__empty-icon {
+    width: 56px;
+    height: 56px;
+    color: $ink-lighter;
+    margin: 0 auto 24px;
+  }
+
+  &__empty-title {
+    font-family: $font-serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: $ink;
+    margin-bottom: 8px;
+  }
+
+  &__empty-text {
+    font-family: $font-sans;
+    font-size: 14px;
+    color: $ink-light;
+    margin-bottom: 32px;
+  }
+}
+
+// ── Lista de items ─────────────────────────────────────────────────────────
+.cart-list {
+  border: 1px solid $border;
+  background-color: $white;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid $border;
+  }
+
+  &__count {
+    font-family: $font-sans;
+    font-size: 13px;
+    color: $ink-light;
+  }
+
+  &__clear-btn {
+    font-family: $font-sans;
+    font-size: 12px;
+    color: $ink-lighter;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color $t-fast;
+
+    &:hover { color: #dc2626; }
+  }
+
+  &__confirm {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: $font-sans;
+    font-size: 13px;
+  }
+
+  &__confirm-text {
+    color: $ink-light;
+  }
+
+  &__confirm-yes {
+    color: #dc2626;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: $font-sans;
+    font-size: 13px;
+  }
+
+  &__confirm-no {
+    color: $ink-lighter;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: $font-sans;
+    font-size: 13px;
+  }
+
+  &__items {
+    > * + * {
+      border-top: 1px solid $border;
+    }
+  }
+}
+
+// ── Item individual ────────────────────────────────────────────────────────
+.cart-item {
+  padding: 20px 24px;
+
+  &__inner {
+    display: flex;
+    gap: 20px;
+  }
+
+  &__image {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    background-color: $cream-dark;
+  }
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  &__name {
+    font-family: $font-serif;
+    font-size: 15px;
+    color: $ink;
+    margin-bottom: 2px;
+  }
+
+  &__category {
+    font-family: $font-sans;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $ink-lighter;
+  }
+
+  &__remove-btn {
+    color: $ink-lighter;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color $t-fast;
+    padding: 2px;
+
+    &:hover { color: #dc2626; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  &__error {
+    font-family: $font-sans;
+    font-size: 11px;
+    color: #dc2626;
+  }
+
+  &__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+// ── Stepper de cantidad ────────────────────────────────────────────────────
+.qty-stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid $border-md;
+  border-radius: 2px;
+  overflow: hidden;
+
+  &__btn {
+    padding: 6px 12px;
+    font-family: $font-sans;
+    font-size: 15px;
+    color: $ink-light;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color $t-fast;
+    line-height: 1;
+
+    &:hover:not(:disabled) { background-color: $cream-dark; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  &__value {
+    width: 40px;
+    text-align: center;
+    font-family: $font-sans;
+    font-size: 13px;
+    font-weight: 500;
+    color: $ink;
+    border-left: 1px solid $border-md;
+    border-right: 1px solid $border-md;
+    padding: 6px 0;
+  }
+}
+
+// ── Precios ────────────────────────────────────────────────────────────────
+.cart-item-price {
+  text-align: right;
+
+  &__unit {
+    font-family: $font-sans;
+    font-size: 11px;
+    color: $ink-lighter;
+  }
+
+  &__total {
+    font-family: $font-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: $ink;
+  }
+}
+
+// ── Resumen del pedido ────────────────────────────────────────────────────
+.order-summary {
+  border: 1px solid $border;
+  background-color: $white;
+  padding: 24px;
+  position: sticky;
+  top: calc(#{$nav-height} + 16px);
+
+  &__title {
+    font-family: $font-serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: $ink;
+    margin-bottom: 24px;
+  }
+
+  &__lines {
+    border-bottom: 1px solid $border;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__line {
+    display: flex;
+    justify-content: space-between;
+    font-family: $font-sans;
+    font-size: 13px;
+    color: $ink-light;
+  }
+
+  &__total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
+  }
+
+  &__total-label {
+    font-family: $font-sans;
+    font-size: 13px;
+    font-weight: 500;
+    color: $ink;
+  }
+
+  &__total-value {
+    font-family: $font-serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: $ink;
+  }
+
+  &__note {
+    text-align: center;
+    font-family: $font-sans;
+    font-size: 11px;
+    color: $ink-lighter;
+    margin-top: 16px;
+  }
+}
+
+// ── Cart Widget (nav) ──────────────────────────────────────────────────────
+.cart-widget {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 2px;
+  border: 1px solid $border-md;
+  background-color: transparent;
+  color: $ink-light;
+  text-decoration: none;
+  transition: background-color $t-fast;
+
+  &:hover {
+    background-color: $cream-dark;
+  }
+
+  &__badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: $accent;
+    color: $white;
+    font-family: $font-sans;
+    font-size: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
+}

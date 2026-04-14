@@ -33,24 +33,21 @@ export function AddToCartSection({ productId, stockAvailable }: AddToCartSection
 
   const btnLabel =
     state === 'loading' ? 'Agregando...' :
-    state === 'added' ? `✓ ${quantity > 1 ? `${quantity} productos` : 'Producto'} agregado` :
-    state === 'error' ? 'Error — Reintentar' :
+    state === 'added'   ? `✓ ${quantity > 1 ? `${quantity} productos` : 'Producto'} agregado` :
+    state === 'error'   ? 'Error — Reintentar' :
     'Agregar al carrito';
 
   return (
-    <div className="mb-8">
+    <div className="add-to-cart">
       <label className="form-label">Cantidad</label>
-      <div className="flex gap-3">
-        {/* Stepper */}
-        <div className="flex items-center overflow-hidden rounded-[2px] border border-ink/20 bg-white">
+      <div className="add-to-cart__row">
+        <div className="add-to-cart__stepper">
           <button
+            className="add-to-cart__step-btn"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
             disabled={quantity <= 1}
-            className="px-4 py-3 font-sans text-[15px] text-ink-light transition-colors hover:bg-cream-dark disabled:opacity-40"
-            aria-label="Disminuir cantidad"
-          >
-            −
-          </button>
+            aria-label="Disminuir"
+          >−</button>
           <input
             type="number"
             value={quantity}
@@ -60,29 +57,26 @@ export function AddToCartSection({ productId, stockAvailable }: AddToCartSection
             }}
             min={1}
             max={maxQuantity}
-            className="w-14 border-x border-ink/20 py-3 text-center font-sans text-[14px] font-medium text-ink focus:outline-none"
+            className="add-to-cart__input"
           />
           <button
+            className="add-to-cart__step-btn"
             onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
             disabled={quantity >= maxQuantity}
-            className="px-4 py-3 font-sans text-[15px] text-ink-light transition-colors hover:bg-cream-dark disabled:opacity-40"
-            aria-label="Aumentar cantidad"
-          >
-            +
-          </button>
+            aria-label="Aumentar"
+          >+</button>
         </div>
-
         <button
           onClick={handleAddToCart}
           disabled={state === 'loading'}
-          className="btn-full flex-1 disabled:cursor-wait"
+          className="btn-full"
+          style={{ flex: 1 }}
         >
           {btnLabel}
         </button>
       </div>
-
       {state === 'error' && errorMsg && (
-        <p className="mt-2 font-sans text-[12px] text-red-600">{errorMsg}</p>
+        <p className="add-to-cart__error">{errorMsg}</p>
       )}
     </div>
   );

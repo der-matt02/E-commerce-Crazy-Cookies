@@ -11,131 +11,96 @@ export default async function HomePage() {
   }).catch(() => [] as Product[]);
 
   return (
-    <main className="min-h-screen">
-      {/* Hero — cream-dark, sin gradiente */}
-      <section className="bg-cream-dark px-6 py-28 text-center lg:px-12">
-        <p className="microlabel mb-6">Repostería artesanal · Quito</p>
-        <h1
-          className="mx-auto mb-6 font-serif font-light text-ink"
-          style={{ fontSize: 'clamp(38px, 4vw, 58px)', lineHeight: 1.15, maxWidth: '640px' }}
-        >
-          Hecho con amor,
-          <br />
-          pensado para ti
+    <main>
+      {/* Hero */}
+      <section className="hero">
+        <span className="hero__label">Repostería artesanal · Quito</span>
+        <h1 className="hero__title">
+          Hecho con amor,<br />pensado para ti
         </h1>
-        <p className="mx-auto mb-10 max-w-md font-sans text-[14px] leading-relaxed text-ink-light">
+        <p className="hero__subtitle">
           Galletas y postres artesanales elaborados con los mejores ingredientes.
           Envío a domicilio en Quito.
         </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link href="/products" className="btn-primary">
-            Ver Catálogo
-          </Link>
-          <Link href="/cart" className="btn-secondary">
-            Mi Carrito
-          </Link>
+        <div className="hero__actions">
+          <Link href="/products" className="btn-primary">Ver Catálogo</Link>
+          <Link href="/cart" className="btn-secondary">Mi Carrito</Link>
         </div>
       </section>
 
       {/* Strip de atributos */}
-      <section className="border-y border-ink/10 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:divide-x sm:divide-ink/10">
-            {[
-              { title: 'Artesanal', desc: 'Hecho a mano con ingredientes premium' },
-              { title: 'Entrega rápida', desc: 'Fresco en la puerta de tu casa' },
-              { title: 'Hecho con amor', desc: 'Cariño en cada galleta y postre' },
-            ].map(({ title, desc }) => (
-              <div key={title} className="text-center sm:px-6">
-                <p className="font-sans text-[13px] font-medium text-ink">{title}</p>
-                <p className="mt-1 font-sans text-[13px] text-ink-light">{desc}</p>
-              </div>
-            ))}
-          </div>
+      <section className="features-strip">
+        <div className="features-strip__inner">
+          {[
+            { title: 'Artesanal', desc: 'Hecho a mano con ingredientes premium' },
+            { title: 'Entrega rápida', desc: 'Fresco en la puerta de tu casa' },
+            { title: 'Hecho con amor', desc: 'Cariño en cada galleta y postre' },
+          ].map(({ title, desc }) => (
+            <div key={title} className="features-strip__item">
+              <p className="features-strip__title">{title}</p>
+              <p className="features-strip__desc">{desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Productos destacados */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-6 lg:px-12">
-          <div className="mb-12 text-center">
-            <p className="microlabel mb-3">Selección</p>
-            <h2 className="font-serif text-[28px] font-light text-ink">
-              Productos Destacados
-            </h2>
+      <section className="featured-section">
+        <div className="featured-section__inner">
+          <div className="featured-section__header">
+            <span className="featured-section__label">Selección</span>
+            <h2 className="featured-section__title">Productos Destacados</h2>
           </div>
 
           {featured.length === 0 ? (
-            <p className="py-16 text-center font-sans text-[14px] text-ink-lighter">
+            <p className="featured-section__empty">
               No hay productos disponibles en este momento
             </p>
           ) : (
-            /* Grid 1px-border trick */
-            <div
-              className="grid grid-cols-2 lg:grid-cols-4"
-              style={{
-                gap: '1px',
-                background: 'rgba(26,23,20,0.10)',
-                border: '1px solid rgba(26,23,20,0.10)',
-              }}
-            >
+            <div className="product-grid product-grid--4col">
               {featured.map((product) => {
                 const stockAvailable = product.inventory?.stockAvailable ?? 0;
                 const isOutOfStock = stockAvailable <= 0;
                 const firstImage = product.images?.[0];
 
                 return (
-                  <div key={product.id} className="group bg-cream transition-colors hover:bg-white">
-                    {/* Imagen */}
-                    <div
-                      className="relative overflow-hidden"
-                      style={{ aspectRatio: '1', background: '#F0EBE3' }}
-                    >
+                  <article key={product.id} className="product-card">
+                    <div className="product-card__image-wrap">
                       {firstImage ? (
                         <img
                           src={`${API_URL}${firstImage.url}`}
                           alt={firstImage.alt ?? product.name}
-                          className="h-full w-full object-cover transition-transform duration-[400ms] ease-[cubic-bezier(.25,.46,.45,.94)] group-hover:scale-[1.04]"
+                          className="product-card__image"
                         />
-                      ) : (
-                        <div className="h-full w-full" />
-                      )}
+                      ) : null}
                       {isOutOfStock && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-ink/30">
-                          <span className="font-sans text-[11px] uppercase tracking-wider text-white">
-                            Agotado
-                          </span>
+                        <div className="product-card__sold-out-overlay">
+                          <span className="product-card__sold-out-label">Agotado</span>
                         </div>
                       )}
                     </div>
-
-                    {/* Cuerpo */}
-                    <div className="px-[18px] py-4 pb-5">
+                    <div className="product-card__body">
                       {product.category && (
-                        <p className="microlabel mb-1">{product.category.name}</p>
+                        <span className="product-card__category">{product.category.name}</span>
                       )}
-                      <Link href={`/products/${product.id}`}>
-                        <h3 className="mb-2 line-clamp-1 font-serif text-[17px] text-ink transition-opacity hover:opacity-70">
-                          {product.name}
-                        </h3>
+                      <Link href={`/products/${product.id}`} className="product-card__name">
+                        {product.name}
                       </Link>
-                      <div className="flex items-center justify-between">
-                        <p className="font-serif text-[15px] font-medium text-ink">
+                      <div className="product-card__footer">
+                        <span className="product-card__price">
                           ${product.price.toLocaleString('es-CO')}
-                        </p>
+                        </span>
                         <AddToCartButton productId={product.id} outOfStock={isOutOfStock} />
                       </div>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>
           )}
 
-          <div className="mt-12 text-center">
-            <Link href="/products" className="btn-secondary">
-              Ver todos los productos
-            </Link>
+          <div className="featured-section__cta">
+            <Link href="/products" className="btn-secondary">Ver todos los productos</Link>
           </div>
         </div>
       </section>

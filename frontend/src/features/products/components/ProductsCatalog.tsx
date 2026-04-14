@@ -32,9 +32,7 @@ export function ProductsCatalog({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
   const [totalProducts, setTotalProducts] = useState(initialPagination.total);
-  const [cartState, setCartState] = useState<
-    Record<string, 'idle' | 'loading' | 'added' | 'error'>
-  >({});
+  const [cartState, setCartState] = useState<Record<string, 'idle' | 'loading' | 'added' | 'error'>>({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
 
@@ -62,17 +60,12 @@ export function ProductsCatalog({
   );
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       fetchProducts(searchQuery, selectedCategory, sortBy, page);
     }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [searchQuery, selectedCategory, sortBy, page, fetchProducts]);
 
   const handleCategoryChange = (id: string) => { setSelectedCategory(id); setPage(1); };
@@ -92,37 +85,29 @@ export function ProductsCatalog({
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12">
-      <h1 className="mb-10 font-serif text-[28px] font-light text-ink">Catálogo</h1>
+    <div className="catalog">
+      <h1 className="catalog__title">Catálogo</h1>
 
       {/* Filtros */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <svg
-            className="absolute left-3.5 top-[11px] h-4 w-4 text-ink-lighter"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
+      <div className="catalog__filters">
+        <div className="catalog__search-wrap">
+          <svg className="catalog__search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Buscar productos..."
-            className="form-input pl-10"
+            className="form-input form-input--search catalog__search"
           />
         </div>
         <select
           value={sortBy}
           onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-          className="form-input sm:w-52"
+          className="form-input"
+          style={{ width: '200px' }}
         >
           <option value="newest">Más recientes</option>
           <option value="price_asc">Precio: menor a mayor</option>
@@ -133,65 +118,46 @@ export function ProductsCatalog({
 
       {/* Chips de categoría */}
       {categories.length > 0 && (
-        <div className="mb-10 flex flex-wrap gap-2">
+        <div className="catalog__chips">
           <button
             onClick={() => handleCategoryChange('')}
-            className={`chip ${selectedCategory === '' ? 'chip-active' : ''}`}
+            className={`chip ${selectedCategory === '' ? 'chip--active' : ''}`}
           >
             Todos
           </button>
-          {categories.map((category) => (
+          {categories.map((cat) => (
             <button
-              key={category.id}
-              onClick={() => handleCategoryChange(category.id)}
-              className={`chip ${selectedCategory === category.id ? 'chip-active' : ''}`}
+              key={cat.id}
+              onClick={() => handleCategoryChange(cat.id)}
+              className={`chip ${selectedCategory === cat.id ? 'chip--active' : ''}`}
             >
-              {category.name}
+              {cat.name}
             </button>
           ))}
         </div>
       )}
 
-      {/* Grid de productos */}
+      {/* Grid */}
       {loading ? (
-        <div
-          className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          style={{
-            gap: '1px',
-            background: 'rgba(26,23,20,0.10)',
-            border: '1px solid rgba(26,23,20,0.10)',
-          }}
-        >
+        <div className="product-grid product-grid--4col">
           {Array.from({ length: PAGE_SIZE }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="border border-ink/10 py-16 text-center">
-          <p className="font-serif text-[22px] font-light text-ink-light">
-            {searchQuery
-              ? `Sin resultados para "${searchQuery}"`
-              : 'Sin productos disponibles'}
+        <div className="catalog__empty">
+          <p className="catalog__empty-text">
+            {searchQuery ? `Sin resultados para "${searchQuery}"` : 'Sin productos disponibles'}
           </p>
           {searchQuery && (
-            <button
-              onClick={() => handleSearchChange('')}
-              className="mt-4 font-sans text-[13px] text-ink underline underline-offset-2"
-            >
+            <button className="catalog__empty-reset" onClick={() => handleSearchChange('')}>
               Limpiar búsqueda
             </button>
           )}
         </div>
       ) : (
         <>
-          <div
-            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            style={{
-              gap: '1px',
-              background: 'rgba(26,23,20,0.10)',
-              border: '1px solid rgba(26,23,20,0.10)',
-            }}
-          >
+          <div className="product-grid product-grid--4col">
             {products.map((product) => {
               const state = cartState[product.id] ?? 'idle';
               const stockAvailable = product.inventory?.stockAvailable ?? 0;
@@ -200,86 +166,73 @@ export function ProductsCatalog({
 
               const btnLabel =
                 state === 'loading' ? '···' :
-                state === 'added' ? '✓' :
-                state === 'error' ? '!' :
-                '+';
+                state === 'added'   ? '✓'   :
+                state === 'error'   ? '!'   : '+';
+
+              const btnClass =
+                state === 'added' ? 'btn-add btn-add--added' :
+                state === 'error' ? 'btn-add btn-add--error' :
+                'btn-add';
 
               return (
-                <div key={product.id} className="group bg-cream transition-colors hover:bg-white">
-                  {/* Imagen */}
-                  <div
-                    className="relative overflow-hidden"
-                    style={{ aspectRatio: '1', background: '#F0EBE3' }}
-                  >
+                <article key={product.id} className="product-card">
+                  <div className="product-card__image-wrap">
                     {firstImage ? (
                       <img
                         src={`${API_URL}${firstImage.url}`}
                         alt={firstImage.alt ?? product.name}
-                        className="h-full w-full object-cover transition-transform duration-[400ms] ease-[cubic-bezier(.25,.46,.45,.94)] group-hover:scale-[1.04]"
+                        className="product-card__image"
                       />
-                    ) : (
-                      <div className="h-full w-full" />
-                    )}
+                    ) : null}
                     {isOutOfStock && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-ink/30">
-                        <span className="font-sans text-[11px] uppercase tracking-wider text-white">
-                          Agotado
-                        </span>
+                      <div className="product-card__sold-out-overlay">
+                        <span className="product-card__sold-out-label">Agotado</span>
                       </div>
                     )}
                   </div>
-
-                  {/* Cuerpo */}
-                  <div className="px-[18px] py-4 pb-5">
+                  <div className="product-card__body">
                     {product.category && (
-                      <p className="microlabel mb-1">{product.category.name}</p>
+                      <span className="product-card__category">{product.category.name}</span>
                     )}
-                    <Link href={`/products/${product.id}`}>
-                      <h3 className="mb-2 line-clamp-1 font-serif text-[17px] text-ink transition-opacity hover:opacity-70">
-                        {product.name}
-                      </h3>
+                    <Link href={`/products/${product.id}`} className="product-card__name">
+                      {product.name}
                     </Link>
                     {stockAvailable > 0 && stockAvailable <= 5 && (
-                      <p className="mb-1 font-sans text-[11px] text-accent">
-                        Solo {stockAvailable} disp.
-                      </p>
+                      <p className="product-card__low-stock">Solo {stockAvailable} disp.</p>
                     )}
-                    <div className="flex items-center justify-between">
-                      <p className="font-serif text-[15px] font-medium text-ink">
+                    <div className="product-card__footer">
+                      <span className="product-card__price">
                         ${product.price.toLocaleString('es-CO')}
-                      </p>
+                      </span>
                       {isOutOfStock ? (
-                        <span className="font-sans text-[11px] uppercase tracking-wider text-ink-lighter">
-                          Agotado
-                        </span>
+                        <span className="product-card__out-label">Agotado</span>
                       ) : (
                         <button
                           onClick={() => handleAddToCart(product.id)}
                           disabled={state === 'loading'}
                           aria-label="Agregar al carrito"
-                          className={`btn-add ${state === 'added' ? 'border-ink bg-ink text-white' : ''} ${state === 'error' ? 'border-red-500 text-red-500' : ''}`}
+                          className={btnClass}
                         >
                           {btnLabel}
                         </button>
                       )}
                     </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-12 flex flex-col items-center gap-4">
-              <p className="font-sans text-[12px] text-ink-lighter">
-                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalProducts)} de{' '}
-                {totalProducts} productos
+            <div className="catalog__pagination">
+              <p className="catalog__pagination-info">
+                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalProducts)} de {totalProducts} productos
               </p>
-              <div className="flex gap-2">
+              <div className="catalog__pagination-controls">
                 <button
                   onClick={() => setPage((p) => p - 1)}
                   disabled={page === 1}
-                  className="btn-secondary px-4 py-2 disabled:opacity-40"
+                  className="catalog__page-btn"
                 >
                   ← Anterior
                 </button>
@@ -287,7 +240,7 @@ export function ProductsCatalog({
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={p === page ? 'btn-primary px-4 py-2' : 'btn-secondary px-4 py-2'}
+                    className={`catalog__page-btn ${p === page ? 'catalog__page-btn--active' : ''}`}
                   >
                     {p}
                   </button>
@@ -295,7 +248,7 @@ export function ProductsCatalog({
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page === totalPages}
-                  className="btn-secondary px-4 py-2 disabled:opacity-40"
+                  className="catalog__page-btn"
                 >
                   Siguiente →
                 </button>

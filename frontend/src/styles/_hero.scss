@@ -1,0 +1,104 @@
+@use 'tokens' as *;
+
+.hero {
+  background-color: $cream-dark;
+  padding: 112px $page-px;
+  text-align: center;
+
+  @media (max-width: $bp-sm) {
+    padding: 80px $page-px-sm;
+  }
+
+  &__label {
+    font-family: $font-sans;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $ink-lighter;
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  &__title {
+    font-family: $font-serif;
+    font-size: clamp(38px, 4vw, 58px);
+    font-weight: 300;
+    line-height: 1.15;
+    color: $ink;
+    max-width: 640px;
+    margin: 0 auto 24px;
+  }
+
+  &__subtitle {
+    font-family: $font-sans;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.7;
+    color: $ink-light;
+    max-width: 420px;
+    margin: 0 auto 40px;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+}
+
+// ── Strip de atributos ──────────────────────────────────────────────────────
+.features-strip {
+  border-top: 1px solid $border;
+  border-bottom: 1px solid $border;
+  background-color: $white;
+
+  &__inner {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 32px $page-px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+
+    @media (max-width: $bp-sm) {
+      grid-template-columns: 1fr;
+      padding: 32px $page-px-sm;
+    }
+  }
+
+  &__item {
+    text-align: center;
+    padding: 0 24px;
+    border-right: 1px solid $border;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    @media (max-width: $bp-sm) {
+      border-right: none;
+      border-bottom: 1px solid $border;
+      padding: 16px 0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  &__title {
+    font-family: $font-sans;
+    font-size: 13px;
+    font-weight: 500;
+    color: $ink;
+    margin-bottom: 4px;
+  }
+
+  &__desc {
+    font-family: $font-sans;
+    font-size: 13px;
+    color: $ink-light;
+  }
+}

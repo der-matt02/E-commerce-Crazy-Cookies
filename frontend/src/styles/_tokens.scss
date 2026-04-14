@@ -1,0 +1,35 @@
+// ─── Design tokens — Crazy Cookies / Dulcerie ──────────────────────────────
+
+// Colores
+$cream:        #F9F6F1;
+$cream-dark:   #F0EBE3;
+$white:        #ffffff;
+$ink:          #1A1714;
+$ink-light:    #6B6560;
+$ink-lighter:  #A8A29C;
+$accent:       #C4956A;
+$accent-light: #EDD9C5;
+
+$border:       rgba(26, 23, 20, 0.10);
+$border-md:    rgba(26, 23, 20, 0.18);
+
+// Tipografía
+$font-serif: var(--font-cormorant, 'Cormorant Garamond', Georgia, serif);
+$font-sans:  var(--font-dm-sans, 'DM Sans', system-ui, sans-serif);
+
+// Spacing
+$nav-height:  64px;
+$page-px:     48px;
+$page-px-sm:  24px;
+$max-width:   1280px;
+
+// Transiciones
+$t-fast:   0.15s;
+$t-normal: 0.20s;
+$t-img:    0.40s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+// Breakpoints
+$bp-sm:  640px;
+$bp-md:  768px;
+$bp-lg:  1024px;
+$bp-xl:  1280px;

@@ -1,0 +1,86 @@
+@use 'tokens' as *;
+
+.footer {
+  background-color: $ink;
+  border-top: 1px solid $border;
+
+  &__grid {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 56px $page-px 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+
+    @media (max-width: $bp-md) {
+      grid-template-columns: 1fr;
+      padding: 48px $page-px-sm 0;
+    }
+  }
+
+  &__brand-name {
+    font-family: $font-serif;
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 12px;
+  }
+
+  &__brand-desc {
+    font-family: $font-sans;
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.40);
+  }
+
+  &__section-title {
+    font-family: $font-sans;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.30);
+    margin-bottom: 16px;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__list-item {
+    font-family: $font-sans;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.50);
+  }
+
+  &__link {
+    font-family: $font-sans;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.50);
+    text-decoration: none;
+    transition: color $t-normal;
+
+    &:hover {
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+
+  &__bottom {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 24px $page-px 32px;
+    margin-top: 48px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+    font-family: $font-sans;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.25);
+
+    @media (max-width: $bp-md) {
+      padding: 24px $page-px-sm 32px;
+    }
+  }
+}

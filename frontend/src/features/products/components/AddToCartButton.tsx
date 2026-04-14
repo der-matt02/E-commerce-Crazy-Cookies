@@ -30,25 +30,25 @@ export function AddToCartButton({
   };
 
   if (outOfStock) {
-    return (
-      <span className="font-sans text-[11px] uppercase tracking-wider text-ink-lighter">
-        Agotado
-      </span>
-    );
+    return <span className="product-card__out-label">Agotado</span>;
   }
 
   const label =
     state === 'loading' ? '···' :
-    state === 'added' ? '✓' :
-    state === 'error' ? '!' :
-    '+';
+    state === 'added'   ? '✓'   :
+    state === 'error'   ? '!'   : '+';
+
+  const modifier =
+    state === 'added' ? 'btn-add btn-add--added' :
+    state === 'error' ? 'btn-add btn-add--error' :
+    'btn-add';
 
   return (
     <button
       onClick={handleClick}
       disabled={state === 'loading'}
       aria-label="Agregar al carrito"
-      className={`btn-add ${state === 'added' ? 'border-ink bg-ink text-white' : ''} ${state === 'error' ? 'border-red-500 text-red-500' : ''} ${className}`}
+      className={`${modifier} ${className}`}
     >
       {label}
     </button>

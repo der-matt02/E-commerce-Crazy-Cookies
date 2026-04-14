@@ -1,0 +1,162 @@
+@use 'tokens' as *;
+
+.catalog {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: 64px $page-px;
+
+  @media (max-width: $bp-sm) {
+    padding: 48px $page-px-sm;
+  }
+
+  &__title {
+    font-family: $font-serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: $ink;
+    margin-bottom: 40px;
+  }
+
+  &__filters {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    @media (min-width: $bp-sm) {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  &__search-wrap {
+    position: relative;
+    flex: 1;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: $ink-lighter;
+    pointer-events: none;
+  }
+
+  &__search {
+    padding-left: 42px;
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+
+  &__empty {
+    border: 1px solid $border;
+    padding: 64px 24px;
+    text-align: center;
+  }
+
+  &__empty-text {
+    font-family: $font-serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: $ink-light;
+    margin-bottom: 16px;
+  }
+
+  &__empty-reset {
+    font-family: $font-sans;
+    font-size: 13px;
+    color: $ink;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  &__pagination {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 48px;
+  }
+
+  &__pagination-info {
+    font-family: $font-sans;
+    font-size: 12px;
+    color: $ink-lighter;
+  }
+
+  &__pagination-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__page-btn {
+    font-family: $font-sans;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color $t-normal, color $t-normal;
+    border: 1px solid $border-md;
+    background-color: transparent;
+    color: $ink;
+
+    &:hover:not(:disabled) {
+      background-color: $cream-dark;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &--active {
+      background-color: $ink;
+      border-color: $ink;
+      color: $white;
+
+      &:hover {
+        background-color: #2d2926;
+      }
+    }
+  }
+}
+
+// ── Chip filtro ────────────────────────────────────────────────────────────
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid $border-md;
+  border-radius: 40px;
+  background-color: transparent;
+  color: $ink-light;
+  font-family: $font-sans;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  padding: 7px 18px;
+  cursor: pointer;
+  transition: border-color $t-fast, color $t-fast, background-color $t-fast;
+
+  &:hover {
+    border-color: $ink;
+    color: $ink;
+  }
+
+  &--active {
+    border-color: $ink !important;
+    background-color: $ink !important;
+    color: $white !important;
+  }
+}
