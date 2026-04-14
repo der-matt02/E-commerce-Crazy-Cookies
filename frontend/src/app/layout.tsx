@@ -21,7 +21,7 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: 'Crazy Cookies — Galletas y Postres Artesanales',
   description: 'Las mejores galletas y postres artesanales, hechos con amor',
-  keywords: ['galletas', 'postres', 'brownies', 'pasteles', 'artesanal', 'bogotá'],
+  keywords: ['galletas', 'postres', 'brownies', 'pasteles', 'artesanal', 'quito'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -66,7 +66,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                 Contacto
               </p>
               <ul className="space-y-2 font-sans text-[13px] text-white/50">
-                <li>Bogotá, Colombia</li>
+                <li>Quito, Ecuador</li>
                 <li>+57 300 000 0000</li>
                 <li>hola@crazycookies.co</li>
               </ul>

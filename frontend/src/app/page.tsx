@@ -14,7 +14,7 @@ export default async function HomePage() {
     <main className="min-h-screen">
       {/* Hero — cream-dark, sin gradiente */}
       <section className="bg-cream-dark px-6 py-28 text-center lg:px-12">
-        <p className="microlabel mb-6">Repostería artesanal · Bogotá</p>
+        <p className="microlabel mb-6">Repostería artesanal · Quito</p>
         <h1
           className="mx-auto mb-6 font-serif font-light text-ink"
           style={{ fontSize: 'clamp(38px, 4vw, 58px)', lineHeight: 1.15, maxWidth: '640px' }}
@@ -25,7 +25,7 @@ export default async function HomePage() {
         </h1>
         <p className="mx-auto mb-10 max-w-md font-sans text-[14px] leading-relaxed text-ink-light">
           Galletas y postres artesanales elaborados con los mejores ingredientes.
-          Envío a domicilio en Bogotá.
+          Envío a domicilio en Quito.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/products" className="btn-primary">
