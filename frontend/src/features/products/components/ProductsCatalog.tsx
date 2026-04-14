@@ -32,7 +32,9 @@ export function ProductsCatalog({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
   const [totalProducts, setTotalProducts] = useState(initialPagination.total);
-  const [cartState, setCartState] = useState<Record<string, 'idle' | 'loading' | 'added' | 'error'>>({});
+  const [cartState, setCartState] = useState<
+    Record<string, 'idle' | 'loading' | 'added' | 'error'>
+  >({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
 
@@ -90,14 +92,14 @@ export function ProductsCatalog({
   };
 
   return (
-    <div className="container-custom py-12">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900 sm:text-4xl">Catálogo</h1>
+    <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12">
+      <h1 className="mb-10 font-serif text-[28px] font-light text-ink">Catálogo</h1>
 
       {/* Filtros */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <svg
-            className="absolute left-3.5 top-3 h-4 w-4 text-gray-400"
+            className="absolute left-3.5 top-[11px] h-4 w-4 text-ink-lighter"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -105,7 +107,7 @@ export function ProductsCatalog({
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={1.5}
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
@@ -114,13 +116,13 @@ export function ProductsCatalog({
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Buscar productos..."
-            className="input pl-10"
+            className="form-input pl-10"
           />
         </div>
         <select
           value={sortBy}
           onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-          className="input sm:w-52"
+          className="form-input sm:w-52"
         >
           <option value="newest">Más recientes</option>
           <option value="price_asc">Precio: menor a mayor</option>
@@ -129,16 +131,12 @@ export function ProductsCatalog({
         </select>
       </div>
 
-      {/* Categorías */}
+      {/* Chips de categoría */}
       {categories.length > 0 && (
-        <div className="mb-8 flex flex-wrap gap-2">
+        <div className="mb-10 flex flex-wrap gap-2">
           <button
             onClick={() => handleCategoryChange('')}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-              selectedCategory === ''
-                ? 'border-primary-600 bg-primary-600 text-white'
-                : 'border-gray-300 bg-white text-gray-600 hover:border-primary-400 hover:text-primary-600'
-            }`}
+            className={`chip ${selectedCategory === '' ? 'chip-active' : ''}`}
           >
             Todos
           </button>
@@ -146,11 +144,7 @@ export function ProductsCatalog({
             <button
               key={category.id}
               onClick={() => handleCategoryChange(category.id)}
-              className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                selectedCategory === category.id
-                  ? 'border-primary-600 bg-primary-600 text-white'
-                  : 'border-gray-300 bg-white text-gray-600 hover:border-primary-400 hover:text-primary-600'
-              }`}
+              className={`chip ${selectedCategory === category.id ? 'chip-active' : ''}`}
             >
               {category.name}
             </button>
@@ -158,25 +152,31 @@ export function ProductsCatalog({
         </div>
       )}
 
-      {/* Grid */}
+      {/* Grid de productos */}
       {loading ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div
+          className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          style={{
+            gap: '1px',
+            background: 'rgba(26,23,20,0.10)',
+            border: '1px solid rgba(26,23,20,0.10)',
+          }}
+        >
           {Array.from({ length: PAGE_SIZE }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="rounded-xl bg-white py-16 text-center ring-1 ring-gray-200">
-          <p className="text-4xl">🔍</p>
-          <p className="mt-4 font-semibold text-gray-900">
+        <div className="border border-ink/10 py-16 text-center">
+          <p className="font-serif text-[22px] font-light text-ink-light">
             {searchQuery
-              ? `No hay resultados para "${searchQuery}"`
-              : 'No hay productos disponibles'}
+              ? `Sin resultados para "${searchQuery}"`
+              : 'Sin productos disponibles'}
           </p>
           {searchQuery && (
             <button
               onClick={() => handleSearchChange('')}
-              className="mt-3 text-sm text-primary-600 hover:underline"
+              className="mt-4 font-sans text-[13px] text-ink underline underline-offset-2"
             >
               Limpiar búsqueda
             </button>
@@ -184,82 +184,84 @@ export function ProductsCatalog({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div
+            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            style={{
+              gap: '1px',
+              background: 'rgba(26,23,20,0.10)',
+              border: '1px solid rgba(26,23,20,0.10)',
+            }}
+          >
             {products.map((product) => {
               const state = cartState[product.id] ?? 'idle';
               const stockAvailable = product.inventory?.stockAvailable ?? 0;
               const isOutOfStock = stockAvailable <= 0;
               const firstImage = product.images?.[0];
 
-              const btnVariant =
-                isOutOfStock
-                  ? 'cursor-not-allowed bg-gray-100 text-gray-500'
-                  : state === 'added'
-                    ? 'bg-green-600 text-white'
-                    : state === 'error'
-                      ? 'bg-red-600 text-white'
-                      : 'bg-primary-600 text-white hover:bg-primary-700';
-
               const btnLabel =
-                isOutOfStock
-                  ? 'Agotado'
-                  : state === 'loading'
-                    ? '...'
-                    : state === 'added'
-                      ? '✓ Listo'
-                      : state === 'error'
-                        ? 'Reintentar'
-                        : '+ Carrito';
+                state === 'loading' ? '···' :
+                state === 'added' ? '✓' :
+                state === 'error' ? '!' :
+                '+';
 
               return (
-                <div key={product.id} className="card group">
-                  <div className="relative h-52 overflow-hidden">
+                <div key={product.id} className="group bg-cream transition-colors hover:bg-white">
+                  {/* Imagen */}
+                  <div
+                    className="relative overflow-hidden"
+                    style={{ aspectRatio: '1', background: '#F0EBE3' }}
+                  >
                     {firstImage ? (
                       <img
                         src={`${API_URL}${firstImage.url}`}
                         alt={firstImage.alt ?? product.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-[400ms] ease-[cubic-bezier(.25,.46,.45,.94)] group-hover:scale-[1.04]"
                       />
                     ) : (
-                      <div className="product-placeholder h-full w-full" />
+                      <div className="h-full w-full" />
                     )}
                     {isOutOfStock && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                        <span className="rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-gray-700">
+                      <div className="absolute inset-0 flex items-center justify-center bg-ink/30">
+                        <span className="font-sans text-[11px] uppercase tracking-wider text-white">
                           Agotado
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="p-4">
+                  {/* Cuerpo */}
+                  <div className="px-[18px] py-4 pb-5">
+                    {product.category && (
+                      <p className="microlabel mb-1">{product.category.name}</p>
+                    )}
                     <Link href={`/products/${product.id}`}>
-                      <h3 className="mb-1 font-semibold text-gray-900 transition-colors hover:text-primary-600 line-clamp-1">
+                      <h3 className="mb-2 line-clamp-1 font-serif text-[17px] text-ink transition-opacity hover:opacity-70">
                         {product.name}
                       </h3>
                     </Link>
-                    {product.category && (
-                      <p className="mb-1 text-xs font-medium text-primary-600">
-                        {product.category.name}
+                    {stockAvailable > 0 && stockAvailable <= 5 && (
+                      <p className="mb-1 font-sans text-[11px] text-accent">
+                        Solo {stockAvailable} disp.
                       </p>
                     )}
-                    <p className="mb-4 line-clamp-2 text-sm text-gray-500">{product.description}</p>
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xl font-bold text-gray-900">
-                          ${product.price.toLocaleString('es-CO')}
-                        </p>
-                        {stockAvailable > 0 && stockAvailable <= 5 && (
-                          <p className="text-xs text-orange-600">Solo {stockAvailable} disp.</p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => !isOutOfStock && handleAddToCart(product.id)}
-                        disabled={isOutOfStock || state === 'loading'}
-                        className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed ${btnVariant}`}
-                      >
-                        {btnLabel}
-                      </button>
+                      <p className="font-serif text-[15px] font-medium text-ink">
+                        ${product.price.toLocaleString('es-CO')}
+                      </p>
+                      {isOutOfStock ? (
+                        <span className="font-sans text-[11px] uppercase tracking-wider text-ink-lighter">
+                          Agotado
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleAddToCart(product.id)}
+                          disabled={state === 'loading'}
+                          aria-label="Agregar al carrito"
+                          className={`btn-add ${state === 'added' ? 'border-ink bg-ink text-white' : ''} ${state === 'error' ? 'border-red-500 text-red-500' : ''}`}
+                        >
+                          {btnLabel}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -268,16 +270,16 @@ export function ProductsCatalog({
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-12 flex flex-col items-center gap-3">
-              <p className="text-sm text-gray-500">
-                Mostrando {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalProducts)}{' '}
-                de {totalProducts} productos
+            <div className="mt-12 flex flex-col items-center gap-4">
+              <p className="font-sans text-[12px] text-ink-lighter">
+                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalProducts)} de{' '}
+                {totalProducts} productos
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPage((p) => p - 1)}
                   disabled={page === 1}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm transition-colors hover:bg-gray-50 disabled:opacity-40"
+                  className="btn-secondary px-4 py-2 disabled:opacity-40"
                 >
                   ← Anterior
                 </button>
@@ -285,11 +287,7 @@ export function ProductsCatalog({
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`rounded-lg px-4 py-2 text-sm transition-colors ${
-                      p === page
-                        ? 'bg-primary-600 text-white'
-                        : 'border border-gray-300 hover:bg-gray-50'
-                    }`}
+                    className={p === page ? 'btn-primary px-4 py-2' : 'btn-secondary px-4 py-2'}
                   >
                     {p}
                   </button>
@@ -297,7 +295,7 @@ export function ProductsCatalog({
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page === totalPages}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm transition-colors hover:bg-gray-50 disabled:opacity-40"
+                  className="btn-secondary px-4 py-2 disabled:opacity-40"
                 >
                   Siguiente →
                 </button>

@@ -4,78 +4,76 @@ import Link from 'next/link';
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="container-custom py-4">
-          <nav className="flex items-center justify-between">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-2xl font-bold text-primary-600 transition-opacity hover:opacity-80"
-            >
-              <span>🍪</span>
-              <span>Crazy Cookies</span>
-            </Link>
+      {/* Nav — cream/0.92 backdrop */}
+      <header
+        className="sticky top-0 z-50 border-b border-ink/10"
+        style={{ background: 'rgba(249,246,241,0.92)', backdropFilter: 'blur(12px)' }}
+      >
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-12">
+          <Link
+            href="/"
+            className="font-serif text-[22px] tracking-wide2 text-ink transition-opacity hover:opacity-70"
+          >
+            Crazy Cookies
+          </Link>
 
-            <div className="flex items-center gap-6">
-              <Link
-                href="/products"
-                className="text-sm font-medium text-gray-600 transition-colors hover:text-primary-600"
-              >
-                Catálogo
-              </Link>
-              <CartWidget />
-            </div>
+          <nav className="flex items-center gap-8">
+            <Link
+              href="/products"
+              className="font-sans text-[13px] tracking-[0.04em] text-ink-light transition-colors hover:text-ink"
+            >
+              Catálogo
+            </Link>
+            <CartWidget />
           </nav>
         </div>
       </header>
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-gray-200 bg-gray-900 text-white">
-        <div className="container-custom py-12">
+      <footer className="border-t border-ink/10 bg-ink">
+        <div className="mx-auto max-w-7xl px-6 py-14 lg:px-12">
           <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
             <div>
-              <p className="mb-3 text-xl font-bold text-primary-400">🍪 Crazy Cookies</p>
-              <p className="text-sm leading-relaxed text-gray-400">
-                Galletas y postres artesanales hechos con amor, usando los mejores ingredientes.
+              <p className="mb-3 font-serif text-[18px] font-light tracking-wide2 text-white/80">
+                Crazy Cookies
+              </p>
+              <p className="font-sans text-[13px] leading-relaxed text-white/40">
+                Galletas y postres artesanales hechos con amor,
+                usando los mejores ingredientes.
               </p>
             </div>
 
             <div>
-              <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+              <p className="mb-4 font-sans text-[10px] uppercase tracking-[0.12em] text-white/30">
                 Navegación
               </p>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 font-sans text-[13px] text-white/50">
                 <li>
-                  <Link href="/" className="transition-colors hover:text-white">
-                    Inicio
-                  </Link>
+                  <Link href="/" className="transition-colors hover:text-white">Inicio</Link>
                 </li>
                 <li>
-                  <Link href="/products" className="transition-colors hover:text-white">
-                    Productos
-                  </Link>
+                  <Link href="/products" className="transition-colors hover:text-white">Productos</Link>
                 </li>
                 <li>
-                  <Link href="/cart" className="transition-colors hover:text-white">
-                    Carrito
-                  </Link>
+                  <Link href="/cart" className="transition-colors hover:text-white">Carrito</Link>
                 </li>
               </ul>
             </div>
 
             <div>
-              <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+              <p className="mb-4 font-sans text-[10px] uppercase tracking-[0.12em] text-white/30">
                 Contacto
               </p>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>📍 Bogotá, Colombia</li>
-                <li>📞 +57 300 000 0000</li>
-                <li>✉️ hola@crazycookies.co</li>
+              <ul className="space-y-2 font-sans text-[13px] text-white/50">
+                <li>Bogotá, Colombia</li>
+                <li>+57 300 000 0000</li>
+                <li>hola@crazycookies.co</li>
               </ul>
             </div>
           </div>
 
-          <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
+          <div className="mt-12 border-t border-white/10 pt-6 text-center font-sans text-[11px] text-white/25">
             © 2026 Crazy Cookies. Todos los derechos reservados.
           </div>
         </div>

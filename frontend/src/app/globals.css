@@ -1,74 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --font-inter: 'Inter', system-ui, sans-serif;
+    --cream:        #F9F6F1;
+    --cream-dark:   #F0EBE3;
+    --ink:          #1A1714;
+    --ink-light:    #6B6560;
+    --ink-lighter:  #A8A29C;
+    --border:       rgba(26, 23, 20, 0.10);
+    --border-md:    rgba(26, 23, 20, 0.18);
+    --accent:       #C4956A;
+    --accent-light: #EDD9C5;
+    --nav-h:        64px;
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-dm-sans, 'DM Sans', system-ui, sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   *:focus-visible {
-    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ink);
   }
 }
 
 @layer components {
-  .container-custom {
-    @apply container mx-auto px-4 sm:px-6 lg:px-8;
-  }
 
-  /* Buttons */
+  /* ── Botón primario ──────────────────────────────────────────── */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-[2px] bg-ink
+           px-7 py-3 font-sans text-[13px] font-normal tracking-wide2
+           text-white transition-all
+           hover:-translate-y-px hover:bg-[#2d2926]
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  .btn-outline {
-    @apply inline-flex items-center justify-center rounded-lg border-2 border-primary-600 px-6 py-3 font-semibold text-primary-600 transition-colors hover:bg-primary-600 hover:text-white disabled:opacity-50;
+  /* ── Botón secundario (outline) ─────────────────────────────── */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-[2px]
+           border border-ink/20 bg-transparent
+           px-7 py-3 font-sans text-[13px] font-normal tracking-wide2
+           text-ink transition-colors
+           hover:bg-cream-dark disabled:opacity-50;
   }
 
-  .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-100;
+  /* ── Botón full-width ────────────────────────────────────────── */
+  .btn-full {
+    @apply w-full rounded-[2px] bg-ink
+           py-3.5 font-sans text-[13px] font-normal tracking-wide2
+           text-white transition-colors
+           hover:bg-[#2d2926]
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* Cards */
-  .card {
-    @apply overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-shadow hover:shadow-md;
+  /* ── Botón "+" redondo (product card) ────────────────────────── */
+  .btn-add {
+    @apply flex h-[30px] w-[30px] items-center justify-center
+           rounded-full border border-ink/20 bg-transparent
+           text-lg leading-none text-ink-light
+           transition-all
+           hover:border-ink hover:bg-ink hover:text-white
+           disabled:cursor-not-allowed disabled:opacity-40;
   }
 
-  /* Form inputs */
-  .input {
-    @apply w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500;
+  /* ── Botón ghost icon ────────────────────────────────────────── */
+  .btn-icon {
+    @apply flex h-9 w-9 items-center justify-center
+           rounded-[2px] border border-ink/20 bg-transparent
+           transition-colors hover:bg-cream-dark;
   }
 
-  .label {
-    @apply mb-1.5 block text-sm font-medium text-gray-700;
+  /* ── Inputs ──────────────────────────────────────────────────── */
+  .form-input {
+    @apply w-full rounded-[2px] border border-ink/20 bg-white
+           px-3.5 py-[11px] font-sans text-[13px] text-ink
+           outline-none transition-colors
+           placeholder:text-ink-lighter focus:border-ink;
   }
 
-  /* Badges */
-  .badge-green {
-    @apply inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20;
+  .form-label {
+    @apply mb-[7px] block font-sans text-[11px]
+           uppercase tracking-wider2 text-ink-lighter;
   }
 
-  .badge-red {
-    @apply inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20;
+  /* ── Chips / filtros ─────────────────────────────────────────── */
+  .chip {
+    @apply cursor-pointer rounded-[40px] border border-ink/20
+           px-[18px] py-[7px] font-sans text-xs
+           tracking-[0.02em] text-ink-light
+           transition-all hover:border-ink hover:text-ink;
+  }
+  .chip-active {
+    @apply border-ink bg-ink text-white;
   }
 
-  .badge-yellow {
-    @apply inline-flex items-center rounded-full bg-yellow-50 px-2.5 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-yellow-600/20;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  /* ── Microlabel ──────────────────────────────────────────────── */
+  .microlabel {
+    @apply font-sans text-[10px] uppercase tracking-[0.12em] text-ink-lighter;
   }
 
-  .product-placeholder {
-    @apply bg-gradient-to-br from-primary-50 via-secondary-50 to-orange-50;
+  /* ── Divisor ─────────────────────────────────────────────────── */
+  .divider {
+    @apply h-px bg-ink/10;
+  }
+
+  /* ── Skeleton ────────────────────────────────────────────────── */
+  .skeleton {
+    @apply animate-pulse rounded-[2px] bg-cream-dark;
   }
 }

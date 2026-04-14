@@ -31,33 +31,26 @@ export function AddToCartButton({
 
   if (outOfStock) {
     return (
-      <span className={`rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-500 ${className}`}>
+      <span className="font-sans text-[11px] uppercase tracking-wider text-ink-lighter">
         Agotado
       </span>
     );
   }
 
-  const variants = {
-    idle: 'bg-primary-600 hover:bg-primary-700 text-white',
-    loading: 'bg-primary-400 text-white cursor-wait',
-    added: 'bg-green-600 text-white',
-    error: 'bg-red-600 text-white',
-  };
-
-  const labels = {
-    idle: '+ Carrito',
-    loading: '...',
-    added: '✓ Listo',
-    error: 'Reintentar',
-  };
+  const label =
+    state === 'loading' ? '···' :
+    state === 'added' ? '✓' :
+    state === 'error' ? '!' :
+    '+';
 
   return (
     <button
       onClick={handleClick}
       disabled={state === 'loading'}
-      className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-wait ${variants[state]} ${className}`}
+      aria-label="Agregar al carrito"
+      className={`btn-add ${state === 'added' ? 'border-ink bg-ink text-white' : ''} ${state === 'error' ? 'border-red-500 text-red-500' : ''} ${className}`}
     >
-      {labels[state]}
+      {label}
     </button>
   );
 }

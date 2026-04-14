@@ -3,21 +3,19 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className = '' }: SkeletonProps) {
-  return <div className={`animate-pulse rounded-lg bg-gray-200 ${className}`} />;
+  return <div className={`skeleton ${className}`} />;
 }
 
 export function ProductCardSkeleton() {
   return (
-    <div className="card">
-      <Skeleton className="h-52 rounded-none rounded-t-xl" />
-      <div className="space-y-3 p-4">
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-3 w-1/2" />
-        <Skeleton className="h-3 w-full" />
-        <Skeleton className="h-3 w-4/5" />
-        <div className="flex items-center justify-between pt-2">
-          <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-9 w-24 rounded-lg" />
+    <div className="bg-cream">
+      <div className="skeleton" style={{ aspectRatio: '1' }} />
+      <div className="space-y-2 px-[18px] py-4 pb-5">
+        <div className="skeleton h-2.5 w-1/3" />
+        <div className="skeleton h-[18px] w-3/4" />
+        <div className="flex items-center justify-between pt-1">
+          <div className="skeleton h-4 w-20" />
+          <div className="skeleton h-[30px] w-[30px] rounded-full" />
         </div>
       </div>
     </div>
