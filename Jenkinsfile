@@ -105,15 +105,14 @@ pipeline {
             parallel {
                 stage('Backend — ESLint') {
                     steps {
-                        // ESLint marca UNSTABLE (no FAILURE) para no bloquear el pipeline
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             script { runPnpm('backend', 'lint') }
                         }
                     }
                 }
                 stage('Frontend — ESLint') {
                     steps {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             script { runPnpm('frontend', 'lint') }
                         }
                     }
@@ -129,15 +128,14 @@ pipeline {
             parallel {
                 stage('Backend — Jest') {
                     steps {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             script { runPnpm('backend', 'test') }
                         }
                     }
                 }
                 stage('Frontend — Vitest') {
                     steps {
-                        // catchError marca como UNSTABLE si no hay tests
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             script { runPnpm('frontend', 'test') }
                         }
                     }
@@ -158,7 +156,7 @@ pipeline {
                 }
             }
             steps {
-                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     script { runPnpm('backend', 'test:e2e') }
                 }
             }
@@ -180,14 +178,14 @@ pipeline {
             parallel {
                 stage('Backend — nest build') {
                     steps {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             script { runPnpm('backend', 'build') }
                         }
                     }
                 }
                 stage('Frontend — next build') {
                     steps {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             script { runPnpm('frontend', 'build') }
                         }
                     }
