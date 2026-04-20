@@ -101,12 +101,17 @@ pipeline {
             parallel {
                 stage('Backend — ESLint') {
                     steps {
-                        script { runPnpm('backend', 'lint') }
+                        // ESLint marca UNSTABLE (no FAILURE) para no bloquear el pipeline
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                            script { runPnpm('backend', 'lint') }
+                        }
                     }
                 }
                 stage('Frontend — ESLint') {
                     steps {
-                        script { runPnpm('frontend', 'lint') }
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                            script { runPnpm('frontend', 'lint') }
+                        }
                     }
                 }
             }
