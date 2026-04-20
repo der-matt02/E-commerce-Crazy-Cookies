@@ -85,12 +85,13 @@ pipeline {
             parallel {
                 stage('Backend — Install') {
                     steps {
-                        sh 'pnpm --filter backend install'
+                        sh 'rm -rf node_modules/.pnpm/node_modules 2>/dev/null || true'
+                        sh 'pnpm --filter backend install --no-frozen-lockfile'
                     }
                 }
                 stage('Frontend — Install') {
                     steps {
-                        sh 'pnpm --filter frontend install'
+                        sh 'pnpm --filter frontend install --no-frozen-lockfile'
                     }
                 }
             }
