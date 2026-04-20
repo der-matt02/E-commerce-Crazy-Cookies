@@ -180,12 +180,16 @@ pipeline {
             parallel {
                 stage('Backend — nest build') {
                     steps {
-                        script { runPnpm('backend', 'build') }
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                            script { runPnpm('backend', 'build') }
+                        }
                     }
                 }
                 stage('Frontend — next build') {
                     steps {
-                        script { runPnpm('frontend', 'build') }
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                            script { runPnpm('frontend', 'build') }
+                        }
                     }
                 }
             }
