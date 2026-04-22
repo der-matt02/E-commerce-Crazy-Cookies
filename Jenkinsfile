@@ -2,38 +2,20 @@
 // Pipeline CI — E-commerce Crazy Cookies
 // Materia: Procesos de Software — UDLA
 // ───────────────────────────────────────────────────────────────────
-// ESTRATEGIA 2 ▸ Función reutilizable para ejecutar comandos pnpm
-// Recibe el workspace filter y el script a ejecutar.
-// Centraliza logging y manejo de errores en un solo lugar.
+// ESTRATEGIA 2 ▸ Modularidad — la lógica de cada stage vive en
+// archivos externos dentro de ci/. El Jenkinsfile solo orquesta.
 // ═══════════════════════════════════════════════════════════════════
-def runPnpm(String workspace_filter, String script) {
-    echo "▶ [${workspace_filter}] pnpm run ${script}"
-    sh "pnpm --filter ${workspace_filter} run ${script}"
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ESTRATEGIA 2 ▸ Función reutilizable para Health Check de archivos
-// ═══════════════════════════════════════════════════════════════════
-def checkFile(String filepath) {
-    def exists = sh(script: "test -f ${filepath} && echo 'OK' || echo 'MISSING'", returnStdout: true).trim()
-    echo "${exists == 'OK' ? '✓' : '✗'} ${filepath} — ${exists}"
-    return exists == 'OK'
-}
 
 pipeline {
     agent any
 
     environment {
         REPO_URL = 'https://github.com/der-matt02/E-commerce-Crazy-Cookies.git'
-        // ESTRATEGIA 3 ▸ Variable que define en qué ramas se hace Build y E2E
-        MAIN_BRANCHES = 'main develop'
     }
 
     // ─────────────────────────────────────────────────────────────
-    // ESTRATEGIA 3 ▸ IC por rama — dispara el pipeline
-    // automáticamente en CUALQUIER rama al hacer push
-    // (requiere configurar Multibranch Pipeline en Jenkins,
-    //  o activar "Poll SCM" en la configuración del job)
+    // ESTRATEGIA 3 ▸ CI por rama — revisa el repo cada 5 minutos
+    // y dispara el pipeline automáticamente al detectar un commit
     // ─────────────────────────────────────────────────────────────
     triggers {
         pollSCM('H/5 * * * *')
@@ -51,7 +33,6 @@ pipeline {
                     branch: env.BRANCH_NAME ?: 'main'
 
                 script {
-                    // Captura la rama activa para usarla en los when de abajo
                     env.CURRENT_BRANCH = sh(
                         script: 'git rev-parse --abbrev-ref HEAD',
                         returnStdout: true
@@ -63,43 +44,33 @@ pipeline {
 
         // ══════════════════════════════════════════════════════════
         // ESTRATEGIA 1 ▸ Etapa 2 — Setup del entorno
+        // ESTRATEGIA 2 ▸ Lógica en ci/setup.sh
         // ══════════════════════════════════════════════════════════
         stage('Setup') {
             steps {
-                sh '''
-                    which pnpm || npm install -g pnpm@8
-                    echo "Node: $(node --version)"
-                    echo "pnpm: $(pnpm --version)"
-                    rm -rf node_modules 2>/dev/null || true
-                    pnpm --filter backend install --frozen-lockfile=false
-                    pnpm --filter backend exec prisma generate
-                    echo "Prisma client generado correctamente"
-                '''
+                sh 'chmod +x ci/*.sh && ./ci/setup.sh'
             }
         }
 
         // ══════════════════════════════════════════════════════════
         // ESTRATEGIA 1 ▸ Etapa 3 — Instalación de dependencias
+        // ESTRATEGIA 2 ▸ Lógica en ci/install-backend.sh y ci/install-frontend.sh
         // ESTRATEGIA 4 ▸ Paralelismo — backend y frontend simultáneo
         // ══════════════════════════════════════════════════════════
         stage('Install Dependencies') {
             parallel {
                 stage('Backend — Install') {
-                    steps {
-                        sh 'rm -rf node_modules/.pnpm/node_modules 2>/dev/null || true'
-                        sh 'pnpm --filter backend install --no-frozen-lockfile'
-                    }
+                    steps { sh './ci/install-backend.sh' }
                 }
                 stage('Frontend — Install') {
-                    steps {
-                        sh 'pnpm --filter frontend install --no-frozen-lockfile'
-                    }
+                    steps { sh './ci/install-frontend.sh' }
                 }
             }
         }
 
         // ══════════════════════════════════════════════════════════
         // ESTRATEGIA 1 ▸ Etapa 4 — Calidad de código (ESLint)
+        // ESTRATEGIA 2 ▸ Lógica en ci/lint-backend.sh y ci/lint-frontend.sh
         // ESTRATEGIA 4 ▸ Paralelismo — lint backend y frontend
         // ══════════════════════════════════════════════════════════
         stage('Code Quality — ESLint') {
@@ -107,14 +78,14 @@ pipeline {
                 stage('Backend — ESLint') {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            script { runPnpm('backend', 'lint') }
+                            sh './ci/lint-backend.sh'
                         }
                     }
                 }
                 stage('Frontend — ESLint') {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            script { runPnpm('frontend', 'lint') }
+                            sh './ci/lint-frontend.sh'
                         }
                     }
                 }
@@ -123,6 +94,7 @@ pipeline {
 
         // ══════════════════════════════════════════════════════════
         // ESTRATEGIA 1 ▸ Etapa 5 — Tests unitarios
+        // ESTRATEGIA 2 ▸ Lógica en ci/test-backend.sh y ci/test-frontend.sh
         // ESTRATEGIA 4 ▸ Paralelismo — Jest y Vitest al mismo tiempo
         // ══════════════════════════════════════════════════════════
         stage('Unit Tests') {
@@ -130,14 +102,14 @@ pipeline {
                 stage('Backend — Jest') {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            script { runPnpm('backend', 'test') }
+                            sh './ci/test-backend.sh'
                         }
                     }
                 }
                 stage('Frontend — Vitest') {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            script { runPnpm('frontend', 'test') }
+                            sh './ci/test-frontend.sh'
                         }
                     }
                 }
@@ -146,8 +118,8 @@ pipeline {
 
         // ══════════════════════════════════════════════════════════
         // ESTRATEGIA 1 ▸ Etapa 6 — Tests E2E
-        // ESTRATEGIA 3 ▸ IC por rama — SOLO se ejecuta en main/develop
-        //   En feature/* se omite esta etapa (agiliza el ciclo de dev)
+        // ESTRATEGIA 2 ▸ Lógica en ci/test-e2e.sh
+        // ESTRATEGIA 3 ▸ CI por rama — SOLO se ejecuta en main/develop
         // ══════════════════════════════════════════════════════════
         stage('E2E Tests') {
             when {
@@ -158,15 +130,15 @@ pipeline {
             }
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    script { runPnpm('backend', 'test:e2e') }
+                    sh './ci/test-e2e.sh'
                 }
             }
         }
 
         // ══════════════════════════════════════════════════════════
         // ESTRATEGIA 1 ▸ Etapa 7 — Build
-        // ESTRATEGIA 3 ▸ IC por rama — SOLO en main/develop
-        //   En feature/* no se buildea (feedback más rápido)
+        // ESTRATEGIA 2 ▸ Lógica en ci/build-backend.sh y ci/build-frontend.sh
+        // ESTRATEGIA 3 ▸ CI por rama — SOLO en main/develop
         // ESTRATEGIA 4 ▸ Paralelismo — nest build y next build juntos
         // ══════════════════════════════════════════════════════════
         stage('Build') {
@@ -180,14 +152,14 @@ pipeline {
                 stage('Backend — nest build') {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            script { runPnpm('backend', 'build') }
+                            sh './ci/build-backend.sh'
                         }
                     }
                 }
                 stage('Frontend — next build') {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            script { runPnpm('frontend', 'build') }
+                            sh './ci/build-frontend.sh'
                         }
                     }
                 }
@@ -196,31 +168,11 @@ pipeline {
 
         // ══════════════════════════════════════════════════════════
         // ESTRATEGIA 1 ▸ Etapa 8 — Health Check
-        // ESTRATEGIA 2 ▸ Usa la función reutilizable checkFile()
+        // ESTRATEGIA 2 ▸ Lógica en ci/health-check.sh
         // ══════════════════════════════════════════════════════════
         stage('Health Check') {
             steps {
-                script {
-                    echo '=== Verificando archivos críticos del proyecto ==='
-                    checkFile('docker-compose.yml')
-                    checkFile('.env.example')
-                    checkFile('.gitignore')
-                    checkFile('pnpm-workspace.yaml')
-
-                    def tsCount = sh(
-                        script: "find . -name '*.ts' -not -path '*/node_modules/*' -not -path '*/.next/*' | wc -l",
-                        returnStdout: true
-                    ).trim()
-                    echo "Archivos TypeScript detectados: ${tsCount}"
-
-                    def todos = sh(
-                        script: "grep -r 'TODO' --include='*.ts' --exclude-dir=node_modules -l 2>/dev/null | wc -l || echo 0",
-                        returnStdout: true
-                    ).trim()
-                    echo "Archivos con TODOs pendientes: ${todos}"
-
-                    echo '=== Health Check completado ==='
-                }
+                sh './ci/health-check.sh'
             }
         }
 
