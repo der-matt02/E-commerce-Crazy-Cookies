@@ -1,0 +1,16 @@
+version: 2.1
+
+jobs:
+  placeholder:
+    docker:
+      - image: cimg/node:20.11
+    steps:
+      - checkout
+      - run:
+          name: Hello CircleCI
+          command: echo "Pipeline listo"
+
+workflows:
+  main:
+    jobs:
+      - placeholder
