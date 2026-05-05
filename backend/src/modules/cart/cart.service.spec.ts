@@ -5,7 +5,6 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('CartService', () => {
   let service: CartService;
-  let _prisma: PrismaService;
 
   const mockPrismaService = {
     cart: {
@@ -47,8 +46,6 @@ describe('CartService', () => {
     }).compile();
 
     service = module.get<CartService>(CartService);
-    prisma = module.get<PrismaService>(PrismaService);
-
     jest.clearAllMocks();
   });
 
@@ -139,9 +136,9 @@ describe('CartService', () => {
         items: [],
       });
 
-      await expect(
-        service.removeCartItem('session-123', 'invalid-id'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.removeCartItem('session-123', 'invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -158,8 +155,8 @@ describe('CartService', () => {
       mockPrismaService.cart.create.mockResolvedValue(newCart);
       mockPrismaService.cart.findUnique.mockResolvedValue(newCart);
       mockPrismaService.cartItem.findMany.mockResolvedValue([]);
-      mockPrismaService.$transaction.mockImplementation((fn: (p: typeof mockPrismaService) => Promise<unknown>) =>
-        fn(mockPrismaService),
+      mockPrismaService.$transaction.mockImplementation(
+        (fn: (p: typeof mockPrismaService) => Promise<unknown>) => fn(mockPrismaService),
       );
 
       const result = await service.clearCart('session-123');

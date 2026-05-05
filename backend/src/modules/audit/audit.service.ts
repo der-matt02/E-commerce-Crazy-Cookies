@@ -38,8 +38,10 @@ export interface AuditLogData {
   entity: string;
   entityId?: string;
   adminId?: string;
-  oldValue?: Record<string, unknown>;
-  newValue?: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  oldValue?: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  newValue?: Record<string, any>;
   ipAddress?: string;
   userAgent?: string;
 }

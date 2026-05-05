@@ -34,14 +34,14 @@ export function AddToCartButton({
   }
 
   const label =
-    state === 'loading' ? '···' :
-    state === 'added'   ? '✓'   :
-    state === 'error'   ? '!'   : '+';
+    state === 'loading' ? '···' : state === 'added' ? '✓' : state === 'error' ? '!' : '+';
 
   const modifier =
-    state === 'added' ? 'btn-add btn-add--added' :
-    state === 'error' ? 'btn-add btn-add--error' :
-    'btn-add';
+    state === 'added'
+      ? 'btn-add btn-add--added'
+      : state === 'error'
+        ? 'btn-add btn-add--error'
+        : 'btn-add';
 
   return (
     <button

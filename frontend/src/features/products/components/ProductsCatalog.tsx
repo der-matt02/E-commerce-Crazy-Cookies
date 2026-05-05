@@ -32,7 +32,9 @@ export function ProductsCatalog({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
   const [totalProducts, setTotalProducts] = useState(initialPagination.total);
-  const [cartState, setCartState] = useState<Record<string, 'idle' | 'loading' | 'added' | 'error'>>({});
+  const [cartState, setCartState] = useState<
+    Record<string, 'idle' | 'loading' | 'added' | 'error'>
+  >({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
 
@@ -60,17 +62,31 @@ export function ProductsCatalog({
   );
 
   useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       fetchProducts(searchQuery, selectedCategory, sortBy, page);
     }, 300);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [searchQuery, selectedCategory, sortBy, page, fetchProducts]);
 
-  const handleCategoryChange = (id: string) => { setSelectedCategory(id); setPage(1); };
-  const handleSearchChange = (q: string) => { setSearchQuery(q); setPage(1); };
-  const handleSortChange = (s: typeof sortBy) => { setSortBy(s); setPage(1); };
+  const handleCategoryChange = (id: string) => {
+    setSelectedCategory(id);
+    setPage(1);
+  };
+  const handleSearchChange = (q: string) => {
+    setSearchQuery(q);
+    setPage(1);
+  };
+  const handleSortChange = (s: typeof sortBy) => {
+    setSortBy(s);
+    setPage(1);
+  };
 
   const handleAddToCart = async (productId: string) => {
     setCartState((prev) => ({ ...prev, [productId]: 'loading' }));
@@ -91,9 +107,18 @@ export function ProductsCatalog({
       {/* Filtros */}
       <div className="catalog__filters">
         <div className="catalog__search-wrap">
-          <svg className="catalog__search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            className="catalog__search-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
           <input
             type="text"
@@ -165,14 +190,20 @@ export function ProductsCatalog({
               const firstImage = product.images?.[0];
 
               const btnLabel =
-                state === 'loading' ? '···' :
-                state === 'added'   ? '✓'   :
-                state === 'error'   ? '!'   : '+';
+                state === 'loading'
+                  ? '···'
+                  : state === 'added'
+                    ? '✓'
+                    : state === 'error'
+                      ? '!'
+                      : '+';
 
               const btnClass =
-                state === 'added' ? 'btn-add btn-add--added' :
-                state === 'error' ? 'btn-add btn-add--error' :
-                'btn-add';
+                state === 'added'
+                  ? 'btn-add btn-add--added'
+                  : state === 'error'
+                    ? 'btn-add btn-add--error'
+                    : 'btn-add';
 
               return (
                 <article key={product.id} className="product-card">
@@ -226,7 +257,8 @@ export function ProductsCatalog({
           {totalPages > 1 && (
             <div className="catalog__pagination">
               <p className="catalog__pagination-info">
-                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalProducts)} de {totalProducts} productos
+                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalProducts)} de{' '}
+                {totalProducts} productos
               </p>
               <div className="catalog__pagination-controls">
                 <button

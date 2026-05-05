@@ -16,24 +16,39 @@ export default function CartPage() {
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1 || newQty > 99) return;
     setUpdatingItems((prev) => new Set(prev).add(itemId));
-    setErrors((prev) => { const n = { ...prev }; delete n[itemId]; return n; });
+    setErrors((prev) => {
+      const n = { ...prev };
+      delete n[itemId];
+      return n;
+    });
     try {
       await updateQuantity(itemId, newQty);
     } catch (err: any) {
       setErrors((prev) => ({ ...prev, [itemId]: err.message || 'Error al actualizar' }));
     } finally {
-      setUpdatingItems((prev) => { const n = new Set(prev); n.delete(itemId); return n; });
+      setUpdatingItems((prev) => {
+        const n = new Set(prev);
+        n.delete(itemId);
+        return n;
+      });
     }
   };
 
   const handleRemoveItem = async (itemId: string) => {
-    try { await removeItem(itemId); }
-    catch { setErrors((prev) => ({ ...prev, [itemId]: 'No se pudo eliminar' })); }
+    try {
+      await removeItem(itemId);
+    } catch {
+      setErrors((prev) => ({ ...prev, [itemId]: 'No se pudo eliminar' }));
+    }
   };
 
   const handleClearCart = async () => {
-    try { await clearCart(); setClearConfirm(false); }
-    catch { setClearConfirm(false); }
+    try {
+      await clearCart();
+      setClearConfirm(false);
+    } catch {
+      setClearConfirm(false);
+    }
   };
 
   if (loading && !cart) {
@@ -42,7 +57,9 @@ export default function CartPage() {
         <Skeleton className="" style={{ height: 32, width: 200, marginBottom: 40 }} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 32 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {[1, 2, 3].map((i) => <Skeleton key={i} className="" style={{ height: 112 }} />)}
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="" style={{ height: 112 }} />
+            ))}
           </div>
           <Skeleton className="" style={{ height: 280 }} />
         </div>
@@ -58,18 +75,31 @@ export default function CartPage() {
     <div className="cart-page">
       <div className="cart-page__header">
         <h1 className="cart-page__title">Carrito</h1>
-        <Link href="/products" className="cart-page__back-link">← Seguir comprando</Link>
+        <Link href="/products" className="cart-page__back-link">
+          ← Seguir comprando
+        </Link>
       </div>
 
       {!cart || cart.items.length === 0 ? (
         <div className="cart-page__empty">
-          <svg className="cart-page__empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          <svg
+            className="cart-page__empty-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+            />
           </svg>
           <p className="cart-page__empty-title">Tu carrito está vacío</p>
           <p className="cart-page__empty-text">Agrega productos para comenzar tu pedido</p>
-          <Link href="/products" className="btn-primary">Ver Productos</Link>
+          <Link href="/products" className="btn-primary">
+            Ver Productos
+          </Link>
         </div>
       ) : (
         <div className="cart-page__layout">
@@ -82,8 +112,12 @@ export default function CartPage() {
               {clearConfirm ? (
                 <div className="cart-list__confirm">
                   <span className="cart-list__confirm-text">¿Vaciar todo?</span>
-                  <button className="cart-list__confirm-yes" onClick={handleClearCart}>Sí, vaciar</button>
-                  <button className="cart-list__confirm-no" onClick={() => setClearConfirm(false)}>Cancelar</button>
+                  <button className="cart-list__confirm-yes" onClick={handleClearCart}>
+                    Sí, vaciar
+                  </button>
+                  <button className="cart-list__confirm-no" onClick={() => setClearConfirm(false)}>
+                    Cancelar
+                  </button>
                 </div>
               ) : (
                 <button className="cart-list__clear-btn" onClick={() => setClearConfirm(true)}>
@@ -115,8 +149,19 @@ export default function CartPage() {
                             disabled={isUpdating}
                             aria-label="Eliminar"
                           >
-                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                            <svg
+                              width="14"
+                              height="14"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
                             </svg>
                           </button>
                         </div>
@@ -129,7 +174,9 @@ export default function CartPage() {
                               className="qty-stepper__btn"
                               onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                               disabled={item.quantity <= 1 || isUpdating}
-                            >−</button>
+                            >
+                              −
+                            </button>
                             <span className="qty-stepper__value">
                               {isUpdating ? '…' : item.quantity}
                             </span>
@@ -137,7 +184,9 @@ export default function CartPage() {
                               className="qty-stepper__btn"
                               onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                               disabled={item.quantity >= 99 || isUpdating}
-                            >+</button>
+                            >
+                              +
+                            </button>
                           </div>
                           <div className="cart-item-price">
                             <p className="cart-item-price__unit">

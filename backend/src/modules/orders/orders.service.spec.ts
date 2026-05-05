@@ -6,7 +6,6 @@ import { OrderStatus } from '@prisma/client';
 
 describe('OrdersService', () => {
   let service: OrdersService;
-  let _prisma: PrismaService;
 
   const mockPrismaService = {
     cart: {
@@ -32,8 +31,6 @@ describe('OrdersService', () => {
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    prisma = module.get<PrismaService>(PrismaService);
-
     jest.clearAllMocks();
   });
 
@@ -105,9 +102,7 @@ describe('OrdersService', () => {
     it('should throw error when order not found', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('invalid-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -134,9 +129,7 @@ describe('OrdersService', () => {
 
   describe('getByStatus', () => {
     it('should return orders by status', async () => {
-      const mockOrders = [
-        { id: 'order-1', status: OrderStatus.PENDING },
-      ];
+      const mockOrders = [{ id: 'order-1', status: OrderStatus.PENDING }];
 
       mockPrismaService.order.findMany.mockResolvedValue(mockOrders);
 

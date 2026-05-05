@@ -32,10 +32,13 @@ export function AddToCartSection({ productId, stockAvailable }: AddToCartSection
   };
 
   const btnLabel =
-    state === 'loading' ? 'Agregando...' :
-    state === 'added'   ? `✓ ${quantity > 1 ? `${quantity} productos` : 'Producto'} agregado` :
-    state === 'error'   ? 'Error — Reintentar' :
-    'Agregar al carrito';
+    state === 'loading'
+      ? 'Agregando...'
+      : state === 'added'
+        ? `✓ ${quantity > 1 ? `${quantity} productos` : 'Producto'} agregado`
+        : state === 'error'
+          ? 'Error — Reintentar'
+          : 'Agregar al carrito';
 
   return (
     <div className="add-to-cart">
@@ -47,7 +50,9 @@ export function AddToCartSection({ productId, stockAvailable }: AddToCartSection
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
             disabled={quantity <= 1}
             aria-label="Disminuir"
-          >−</button>
+          >
+            −
+          </button>
           <input
             type="number"
             value={quantity}
@@ -64,7 +69,9 @@ export function AddToCartSection({ productId, stockAvailable }: AddToCartSection
             onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
             disabled={quantity >= maxQuantity}
             aria-label="Aumentar"
-          >+</button>
+          >
+            +
+          </button>
         </div>
         <button
           onClick={handleAddToCart}
@@ -75,9 +82,7 @@ export function AddToCartSection({ productId, stockAvailable }: AddToCartSection
           {btnLabel}
         </button>
       </div>
-      {state === 'error' && errorMsg && (
-        <p className="add-to-cart__error">{errorMsg}</p>
-      )}
+      {state === 'error' && errorMsg && <p className="add-to-cart__error">{errorMsg}</p>}
     </div>
   );
 }

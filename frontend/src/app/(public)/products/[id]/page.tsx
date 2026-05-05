@@ -17,7 +17,9 @@ export default async function ProductDetailPage({ params }: Props) {
   const [product, reviews, ratingStats] = await Promise.all([
     serverFetch<Product>(`/products/${params.id}`, { revalidate: 60 }).catch(() => null),
     serverFetch<Review[]>(`/reviews/products/${params.id}`, { revalidate: 30 }).catch(() => []),
-    serverFetch<RatingStats>(`/reviews/products/${params.id}/stats`, { revalidate: 30 }).catch(() => null),
+    serverFetch<RatingStats>(`/reviews/products/${params.id}/stats`, { revalidate: 30 }).catch(
+      () => null
+    ),
   ]);
 
   if (!product) notFound();
@@ -30,7 +32,9 @@ export default async function ProductDetailPage({ params }: Props) {
     <div className="product-detail">
       {/* Breadcrumb */}
       <nav className="product-detail__breadcrumb">
-        <Link href="/products" className="product-detail__breadcrumb-link">Productos</Link>
+        <Link href="/products" className="product-detail__breadcrumb-link">
+          Productos
+        </Link>
         {product.category && (
           <>
             <span className="product-detail__breadcrumb-sep">/</span>
@@ -66,15 +70,15 @@ export default async function ProductDetailPage({ params }: Props) {
           <hr className="product-detail__divider" />
 
           <div className="product-detail__price-row">
-            <span className="product-detail__price">
-              ${product.price.toLocaleString('es-CO')}
-            </span>
+            <span className="product-detail__price">${product.price.toLocaleString('es-CO')}</span>
             <span className="product-detail__currency">COP</span>
           </div>
 
           <hr className="product-detail__divider" />
 
-          <p className={`product-detail__stock ${isOutOfStock ? 'product-detail__stock--out' : stockAvailable <= 5 ? 'product-detail__stock--low' : ''}`}>
+          <p
+            className={`product-detail__stock ${isOutOfStock ? 'product-detail__stock--out' : stockAvailable <= 5 ? 'product-detail__stock--low' : ''}`}
+          >
             {isOutOfStock
               ? 'Producto no disponible en este momento'
               : stockAvailable <= 5
@@ -104,9 +108,12 @@ export default async function ProductDetailPage({ params }: Props) {
                 <p className="rating-summary__number">{ratingStats.average.toFixed(1)}</p>
                 <div className="rating-summary__stars">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <svg key={star}
+                    <svg
+                      key={star}
                       className={`rating-summary__star ${star <= Math.round(ratingStats.average) ? 'rating-summary__star--filled' : 'rating-summary__star--empty'}`}
-                      fill="currentColor" viewBox="0 0 20 20">
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
@@ -117,7 +124,8 @@ export default async function ProductDetailPage({ params }: Props) {
               </div>
               <div className="rating-summary__bars">
                 {[5, 4, 3, 2, 1].map((star) => {
-                  const count = ratingStats.distribution[star as keyof typeof ratingStats.distribution];
+                  const count =
+                    ratingStats.distribution[star as keyof typeof ratingStats.distribution];
                   const pct = ratingStats.count > 0 ? (count / ratingStats.count) * 100 : 0;
                   return (
                     <div key={star} className="rating-summary__bar-row">

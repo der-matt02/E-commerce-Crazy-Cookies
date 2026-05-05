@@ -16,15 +16,21 @@ export default async function HomePage() {
       <section className="hero">
         <span className="hero__label">Repostería artesanal · Quito</span>
         <h1 className="hero__title">
-          Hecho con amor,<br />pensado para ti
+          Hecho con amor,
+          <br />
+          pensado para ti
         </h1>
         <p className="hero__subtitle">
-          Galletas y postres artesanales elaborados con los mejores ingredientes.
-          Envío a domicilio en Quito.
+          Galletas y postres artesanales elaborados con los mejores ingredientes. Envío a domicilio
+          en Quito.
         </p>
         <div className="hero__actions">
-          <Link href="/products" className="btn-primary">Ver Catálogo</Link>
-          <Link href="/cart" className="btn-secondary">Mi Carrito</Link>
+          <Link href="/products" className="btn-primary">
+            Ver Catálogo
+          </Link>
+          <Link href="/cart" className="btn-secondary">
+            Mi Carrito
+          </Link>
         </div>
       </section>
 
@@ -53,9 +59,7 @@ export default async function HomePage() {
           </div>
 
           {featured.length === 0 ? (
-            <p className="featured-section__empty">
-              No hay productos disponibles en este momento
-            </p>
+            <p className="featured-section__empty">No hay productos disponibles en este momento</p>
           ) : (
             <div className="product-grid product-grid--4col">
               {featured.map((product) => {
@@ -100,7 +104,9 @@ export default async function HomePage() {
           )}
 
           <div className="featured-section__cta">
-            <Link href="/products" className="btn-secondary">Ver todos los productos</Link>
+            <Link href="/products" className="btn-secondary">
+              Ver todos los productos
+            </Link>
           </div>
         </div>
       </section>
