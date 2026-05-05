@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/database/prisma.service';
 
@@ -76,7 +76,7 @@ describe('E-commerce User Journey (e2e)', () => {
       await prisma.orderItem.deleteMany({ where: { orderId } });
       await prisma.order.delete({ where: { id: orderId } });
     }
-    await prisma.inventoryMovement.deleteMany({ where: { productId } });
+    await prisma.inventoryMovement.deleteMany({ where: { inventory: { productId } } });
     await prisma.inventory.delete({ where: { productId } });
     await prisma.product.delete({ where: { id: productId } });
     await prisma.category.delete({ where: { id: categoryId } });
