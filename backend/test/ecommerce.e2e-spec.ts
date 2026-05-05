@@ -207,7 +207,7 @@ describe('E-commerce User Journey (e2e)', () => {
       expect(response.body.status).toBe('PENDING');
       expect(response.body.items).toBeDefined();
       expect(response.body.items.length).toBe(1);
-      expect(response.body.total).toBeGreaterThan(0);
+      expect(Number(response.body.total)).toBeGreaterThan(0);
     });
 
     it('Step 8: Verify cart deleted after order creation', async () => {
