@@ -38,8 +38,8 @@ export interface AuditLogData {
   entity: string;
   entityId?: string;
   adminId?: string;
-  oldValue?: Record<string, any>;
-  newValue?: Record<string, any>;
+  oldValue?: Record<string, unknown>;
+  newValue?: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
 }
@@ -82,6 +82,7 @@ export class AuditService {
     limit?: number;
     offset?: number;
   }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
 
     if (filters?.action) where.action = filters.action;

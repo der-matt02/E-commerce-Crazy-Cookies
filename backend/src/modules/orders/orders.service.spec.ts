@@ -6,7 +6,7 @@ import { OrderStatus } from '@prisma/client';
 
 describe('OrdersService', () => {
   let service: OrdersService;
-  let prisma: PrismaService;
+  let _prisma: PrismaService;
 
   const mockPrismaService = {
     cart: {

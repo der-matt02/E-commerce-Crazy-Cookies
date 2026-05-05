@@ -202,7 +202,7 @@ export class NotificationsService {
     }
   }
 
-  generateWhatsAppLink(orderNumber: string, phone: string): string {
+  generateWhatsAppLink(orderNumber: string, _phone: string): string {
     const businessPhone = this.configService.get<string>('WHATSAPP_PHONE') || '573001234567';
     const message = encodeURIComponent(
       `Hola, tengo una consulta sobre mi pedido #${orderNumber}`,

@@ -5,7 +5,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('ReviewsService', () => {
   let service: ReviewsService;
-  let prisma: PrismaService;
+  let _prisma: PrismaService;
 
   const mockPrismaService = {
     product: {

@@ -208,6 +208,7 @@ export class ProductsService {
       limit = 12,
     } = params;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       isActive: true,
     };
@@ -240,6 +241,7 @@ export class ProductsService {
     }
 
     // Sorting options
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let orderBy: any;
     switch (sortBy) {
       case 'price_asc':
