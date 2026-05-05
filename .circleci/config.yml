@@ -111,6 +111,9 @@ jobs:
       - run:
           name: Install dependencies
           command: pnpm install --frozen-lockfile
+      - run:
+          name: Generate Prisma client
+          command: pnpm --filter backend db:generate
       - save-deps-cache
       - persist_to_workspace:
           root: ~/project
