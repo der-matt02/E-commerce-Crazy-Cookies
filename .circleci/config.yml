@@ -1,16 +1,6 @@
 version: 2.1
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Orbs
-# ─────────────────────────────────────────────────────────────────────────────
-# Requiere las siguientes variables de entorno en CircleCI → Project Settings:
-#   SLACK_ACCESS_TOKEN   : OAuth token del Slack App (Bot Token)
-#   SLACK_DEFAULT_CHANNEL: ID del canal destino (ej. C0123456789)
-# ─────────────────────────────────────────────────────────────────────────────
-orbs:
-  slack: circleci/slack@4.13.3
-
-# ─────────────────────────────────────────────────────────────────────────────
 # Executors
 # ─────────────────────────────────────────────────────────────────────────────
 executors:
@@ -80,46 +70,27 @@ commands:
           name: Install pnpm (re-install in container)
           command: npm install -g pnpm@8
 
-  # Notificación Slack enriquecida al fallar cualquier job.
-  # El bloque se envía solo si el job está en estado FAILED (event: fail).
+  # Acción post-fallo: imprime un resumen del estado del job en el log.
+  # `when: on_fail` garantiza que este paso corre SOLO si el job falló.
+  # CircleCI además envía un email automático al committer cuando falla el build.
   notify-on-fail:
-    description: Notificar en Slack cuando el job falla
+    description: Registrar fallo en log (post action on_fail)
     steps:
-      - slack/notify:
-          event: fail
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": ":x:  Job fallido: ${CIRCLE_JOB}",
-                    "emoji": true
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    { "type": "mrkdwn", "text": "*Repositorio:*\n${CIRCLE_PROJECT_REPONAME}" },
-                    { "type": "mrkdwn", "text": "*Branch:*\n`${CIRCLE_BRANCH}`" },
-                    { "type": "mrkdwn", "text": "*Autor:*\n${CIRCLE_USERNAME}" },
-                    { "type": "mrkdwn", "text": "*Build:*\n#${CIRCLE_BUILD_NUM}" }
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": { "type": "plain_text", "text": "Ver Build" },
-                      "url": "${CIRCLE_BUILD_URL}",
-                      "style": "danger"
-                    }
-                  ]
-                }
-              ]
-            }
+      - run:
+          name: "[POST] Notificacion — fallo"
+          when: on_fail
+          command: |
+            echo "================================================"
+            echo "  FALLO EN PIPELINE"
+            echo "================================================"
+            echo "  Job      : ${CIRCLE_JOB}"
+            echo "  Branch   : ${CIRCLE_BRANCH}"
+            echo "  Commit   : ${CIRCLE_SHA1}"
+            echo "  Autor    : ${CIRCLE_USERNAME}"
+            echo "  Build #  : ${CIRCLE_BUILD_NUM}"
+            echo "  URL      : ${CIRCLE_BUILD_URL}"
+            echo "================================================"
+            echo "CircleCI enviará email de fallo automáticamente."
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Jobs
@@ -306,48 +277,33 @@ jobs:
           destination: frontend-next
       - notify-on-fail
 
-  # ── Stage 5: notificación final de éxito ────────────────────────────────────
-  # Solo se ejecuta cuando build-backend Y build-frontend completaron
-  # exitosamente. Si cualquier job anterior falló, este job no corre —
-  # la notificación de fallo ya fue enviada por notify-on-fail en ese job.
-  notify-success:
+  # ── Stage 5: notificación final ─────────────────────────────────────────────
+  # Solo se ejecuta cuando build-backend Y build-frontend completaron con éxito.
+  # Contiene dos pasos con `when` diferente para demostrar acciones post:
+  #   - when: on_success → resumen de éxito (camino feliz)
+  #   - when: always     → registro de cierre del pipeline (siempre corre)
+  notify-pipeline-result:
     executor: node-default
     steps:
-      - slack/notify:
-          event: always
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": ":white_check_mark:  Pipeline completado: ${CIRCLE_PROJECT_REPONAME}",
-                    "emoji": true
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    { "type": "mrkdwn", "text": "*Branch:*\n`${CIRCLE_BRANCH}`" },
-                    { "type": "mrkdwn", "text": "*Commit:*\n<${CIRCLE_BUILD_URL}|${CIRCLE_SHA1:0:7}>" },
-                    { "type": "mrkdwn", "text": "*Autor:*\n${CIRCLE_USERNAME}" },
-                    { "type": "mrkdwn", "text": "*Build:*\n#${CIRCLE_BUILD_NUM}" }
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": { "type": "plain_text", "text": "Ver Pipeline" },
-                      "url": "${CIRCLE_BUILD_URL}",
-                      "style": "primary"
-                    }
-                  ]
-                }
-              ]
-            }
+      - run:
+          name: "[POST] Notificacion — exito"
+          when: on_success
+          command: |
+            echo "================================================"
+            echo "  PIPELINE COMPLETADO EXITOSAMENTE"
+            echo "================================================"
+            echo "  Repo     : ${CIRCLE_PROJECT_REPONAME}"
+            echo "  Branch   : ${CIRCLE_BRANCH}"
+            echo "  Commit   : ${CIRCLE_SHA1}"
+            echo "  Autor    : ${CIRCLE_USERNAME}"
+            echo "  Build #  : ${CIRCLE_BUILD_NUM}"
+            echo "  URL      : ${CIRCLE_BUILD_URL}"
+            echo "================================================"
+      - run:
+          name: "[POST] Cierre del pipeline"
+          when: always
+          command: |
+            echo "Pipeline finalizado — Build #${CIRCLE_BUILD_NUM} | Branch: ${CIRCLE_BRANCH}"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Workflow principal
@@ -367,7 +323,7 @@ jobs:
 #                                         ┌── build-backend ───────────┤
 #                                         └── build-frontend ──────────┤
 #                                                                       │
-#                                                     notify-success ───┘
+#                                            notify-pipeline-result ───┘
 # ─────────────────────────────────────────────────────────────────────────────
 workflows:
   ci:
@@ -408,8 +364,8 @@ workflows:
           requires:
             - test-frontend
 
-      # ── Stage 5: notificación de éxito total ─────────────────────────────────
-      - notify-success:
+      # ── Stage 5: notificación de resultado total ──────────────────────────────
+      - notify-pipeline-result:
           requires:
             - build-backend
             - build-frontend
