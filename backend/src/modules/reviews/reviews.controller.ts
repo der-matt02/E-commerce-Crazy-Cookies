@@ -20,10 +20,7 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post('products/:productId')
-  async createReview(
-    @Param('productId') productId: string,
-    @Body() dto: CreateReviewDto,
-  ) {
+  async createReview(@Param('productId') productId: string, @Body() dto: CreateReviewDto) {
     return this.reviewsService.create(productId, dto);
   }
 
@@ -50,18 +47,14 @@ export class ReviewsController {
 
   @Get()
   async getAllReviews(@Query('approved') approved?: string) {
-    const isApproved =
-      approved === 'true' ? true : approved === 'false' ? false : undefined;
+    const isApproved = approved === 'true' ? true : approved === 'false' ? false : undefined;
     return this.reviewsService.getAll(isApproved);
   }
 
   @Patch(':id/approve')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  async approveReview(
-    @Param('id') id: string,
-    @Body() dto: ApproveReviewDto,
-  ) {
+  async approveReview(@Param('id') id: string, @Body() dto: ApproveReviewDto) {
     return this.reviewsService.approve(id, dto);
   }
 

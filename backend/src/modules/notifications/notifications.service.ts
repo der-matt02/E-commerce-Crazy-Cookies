@@ -133,7 +133,8 @@ export class NotificationsService {
     };
 
     const subject = `Actualización de Pedido #${data.orderNumber} - Crazy Cookies`;
-    const statusMessage = statusMessages[data.newStatus] || `Estado actualizado a: ${data.newStatus}`;
+    const statusMessage =
+      statusMessages[data.newStatus] || `Estado actualizado a: ${data.newStatus}`;
 
     const html = `
       <!DOCTYPE html>
@@ -204,9 +205,7 @@ export class NotificationsService {
 
   generateWhatsAppLink(orderNumber: string, _phone: string): string {
     const businessPhone = this.configService.get<string>('WHATSAPP_PHONE') || '573001234567';
-    const message = encodeURIComponent(
-      `Hola, tengo una consulta sobre mi pedido #${orderNumber}`,
-    );
+    const message = encodeURIComponent(`Hola, tengo una consulta sobre mi pedido #${orderNumber}`);
     return `https://wa.me/${businessPhone}?text=${message}`;
   }
 }

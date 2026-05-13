@@ -215,10 +215,7 @@ export class ProductsService {
 
     // Text search on name and description
     if (query) {
-      where.OR = [
-        { name: { contains: query } },
-        { description: { contains: query } },
-      ];
+      where.OR = [{ name: { contains: query } }, { description: { contains: query } }];
     }
 
     // Filter by category

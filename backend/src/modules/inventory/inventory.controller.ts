@@ -53,10 +53,7 @@ export class InventoryController {
   @ApiResponse({ status: 200, description: 'Stock ajustado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos inválidos o stock insuficiente' })
   @ApiResponse({ status: 404, description: 'Inventario no encontrado' })
-  adjustStock(
-    @Param('productId') productId: string,
-    @Body() dto: AdjustInventoryDto,
-  ) {
+  adjustStock(@Param('productId') productId: string, @Body() dto: AdjustInventoryDto) {
     return this.inventoryService.adjustStock(productId, dto);
   }
 }

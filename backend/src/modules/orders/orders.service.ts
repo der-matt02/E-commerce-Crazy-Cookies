@@ -44,17 +44,12 @@ export class OrdersService {
         item.product.inventory!.stockAvailable - item.product.inventory!.stockReserved;
 
       if (availableStock < item.quantity) {
-        throw new BadRequestException(
-          `Stock insuficiente para ${item.product.name}`,
-        );
+        throw new BadRequestException(`Stock insuficiente para ${item.product.name}`);
       }
     }
 
     // Calcular totales
-    const subtotal = cart.items.reduce(
-      (sum, item) => sum + Number(item.price) * item.quantity,
-      0,
-    );
+    const subtotal = cart.items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
     const tax = subtotal * 0.19; // IVA 19%
     const total = subtotal + tax;
 
@@ -214,9 +209,7 @@ export class OrdersService {
     };
 
     if (!validTransitions[order.status].includes(dto.status)) {
-      throw new BadRequestException(
-        `No se puede cambiar de ${order.status} a ${dto.status}`,
-      );
+      throw new BadRequestException(`No se puede cambiar de ${order.status} a ${dto.status}`);
     }
 
     // Actualizar en transacción

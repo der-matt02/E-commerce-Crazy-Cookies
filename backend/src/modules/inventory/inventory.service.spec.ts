@@ -104,9 +104,7 @@ describe('InventoryService', () => {
     it('should throw NotFoundException when inventory not found', async () => {
       mockPrismaService.inventory.findUnique.mockResolvedValue(null);
 
-      await expect(service.getOne('invalid-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.getOne('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -130,9 +128,7 @@ describe('InventoryService', () => {
     it('should throw NotFoundException when product inventory not found', async () => {
       mockPrismaService.inventory.findUnique.mockResolvedValue(null);
 
-      await expect(service.getMovements('invalid-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.getMovements('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 

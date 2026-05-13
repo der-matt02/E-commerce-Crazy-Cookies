@@ -57,10 +57,7 @@ export class AuditController {
   @ApiOperation({ summary: 'Obtener logs por entidad' })
   @ApiQuery({ name: 'entity', required: true })
   @ApiQuery({ name: 'entityId', required: true })
-  async getByEntity(
-    @Query('entity') entity: string,
-    @Query('entityId') entityId: string,
-  ) {
+  async getByEntity(@Query('entity') entity: string, @Query('entityId') entityId: string) {
     return this.auditService.getByEntity(entity, entityId);
   }
 }

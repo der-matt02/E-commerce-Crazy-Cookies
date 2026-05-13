@@ -41,9 +41,7 @@ export class ReviewsService {
   }
 
   async getByProduct(productId: string, includeUnapproved = false) {
-    const where = includeUnapproved
-      ? { productId }
-      : { productId, isApproved: true };
+    const where = includeUnapproved ? { productId } : { productId, isApproved: true };
 
     const reviews = await this.prisma.review.findMany({
       where,

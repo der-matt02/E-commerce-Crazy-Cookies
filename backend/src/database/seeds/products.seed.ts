@@ -64,8 +64,7 @@ export async function seedProducts(prisma: PrismaClient) {
     {
       name: 'Brownie Clásico',
       slug: 'brownie-clasico',
-      description:
-        'Brownie de chocolate oscuro, húmedo y delicioso. Perfecto con helado.',
+      description: 'Brownie de chocolate oscuro, húmedo y delicioso. Perfecto con helado.',
       price: 18000,
       categoryId: browniesCategory.id,
       isActive: true,

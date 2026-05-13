@@ -70,7 +70,9 @@ export class CategoriesService {
       });
 
       if (existingSlug && existingSlug.id !== id) {
-        throw new ConflictException(`Category with slug "${updateCategoryDto.slug}" already exists`);
+        throw new ConflictException(
+          `Category with slug "${updateCategoryDto.slug}" already exists`,
+        );
       }
     }
 
@@ -81,7 +83,9 @@ export class CategoriesService {
       });
 
       if (existingName && existingName.id !== id) {
-        throw new ConflictException(`Category with name "${updateCategoryDto.name}" already exists`);
+        throw new ConflictException(
+          `Category with name "${updateCategoryDto.name}" already exists`,
+        );
       }
     }
 
