@@ -335,43 +335,76 @@ workflows:
   ci:
     jobs:
       # ── Stage 1 ──────────────────────────────────────────────────────────────
-      - install
+      - install:
+          filters:
+            branches:
+              only: main
 
       # ── Stage 2: calidad de código (paralelo) ────────────────────────────────
       - lint-backend:
           requires: [install]
+          filters:
+            branches:
+              only: main
       - lint-frontend:
           requires: [install]
+          filters:
+            branches:
+              only: main
       - typecheck-backend:
           requires: [install]
+          filters:
+            branches:
+              only: main
       - typecheck-frontend:
           requires: [install]
+          filters:
+            branches:
+              only: main
 
       # ── Stage 3: tests (paralelo, después de calidad) ────────────────────────
       - test-backend-unit:
           requires:
             - lint-backend
             - typecheck-backend
+          filters:
+            branches:
+              only: main
       - test-backend-e2e:
           requires:
             - lint-backend
             - typecheck-backend
+          filters:
+            branches:
+              only: main
       - test-frontend:
           requires:
             - lint-frontend
             - typecheck-frontend
+          filters:
+            branches:
+              only: main
 
       # ── Stage 4: build (paralelo, solo si todos los tests pasan) ─────────────
       - build-backend:
           requires:
             - test-backend-unit
             - test-backend-e2e
+          filters:
+            branches:
+              only: main
       - build-frontend:
           requires:
             - test-frontend
+          filters:
+            branches:
+              only: main
 
       # ── Stage 5: notificación de resultado total ──────────────────────────────
       - notify-pipeline-result:
           requires:
             - build-backend
             - build-frontend
+          filters:
+            branches:
+              only: main
