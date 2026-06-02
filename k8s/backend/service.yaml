@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: crazy-cookies
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: crazy-cookies
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  type: ClusterIP
