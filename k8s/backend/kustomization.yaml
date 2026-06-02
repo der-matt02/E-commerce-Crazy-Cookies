@@ -9,6 +9,3 @@ resources:
   - service.yaml
   - migrate-job.yaml
 
-images:
-  - name: ghcr.io/der-matt02/e-commerce-crazy-cookies/backend
-    newTag: latest
