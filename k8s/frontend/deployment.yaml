@@ -22,7 +22,7 @@ spec:
         - name: frontend
           image: nginx:alpine
           ports:
-            - containerPort: 3000
+            - containerPort: 80
               name: http
           env:
             - name: NEXT_PUBLIC_API_URL
@@ -36,6 +36,3 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-          ports:
-            - containerPort: 80
-              name: http
