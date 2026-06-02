@@ -12,8 +12,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/der-matt02/E-commerce-Crazy-Cookies
-    targetRevision: HEAD
+    repoURL: https://github.com/der-matt02/E-commerce-Crazy-Cookies.git
+    targetRevision: main
     path: k8s/apps
   destination:
     server: https://kubernetes.default.svc
