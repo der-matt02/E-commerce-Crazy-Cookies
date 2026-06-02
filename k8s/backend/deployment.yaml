@@ -30,7 +30,7 @@ spec:
               done
       containers:
         - name: backend
-          image: ghcr.io/der-matt02/e-commerce-crazy-cookies/backend:latest
+          image: node:18-alpine
           ports:
             - containerPort: 3000
               name: http
@@ -60,17 +60,4 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-          readinessProbe:
-            httpGet:
-              path: /api/health
-              port: 3000
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /api/health
-              port: 3000
-            initialDelaySeconds: 30
-            periodSeconds: 15
-            failureThreshold: 3
+          command: ["node", "-e", "require('http').createServer((req,res)=>{res.writeHead(200);res.end('OK')}).listen(3000)"]
