@@ -1,20 +1,34 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
 import './globals.css';
+import '@/styles/globals.scss';
 import { CartProvider } from '@/features/cart/context/CartContext';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
+  variable: '--font-cormorant',
+  display: 'swap',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'Crazy Cookies - Galletas y Postres Artesanales',
+  title: 'Crazy Cookies — Galletas y Postres Artesanales',
   description: 'Las mejores galletas y postres artesanales, hechos con amor',
-  keywords: ['galletas', 'postres', 'brownies', 'pasteles', 'artesanal', 'bogotá'],
+  keywords: ['galletas', 'postres', 'brownies', 'pasteles', 'artesanal', 'quito'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={inter.variable}>
-      <body className="min-h-screen bg-gray-50 antialiased">
+    <html lang="es" className={`${cormorant.variable} ${dmSans.variable}`}>
+      <body className="min-h-screen bg-cream antialiased">
         <CartProvider>{children}</CartProvider>
       </body>
     </html>

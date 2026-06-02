@@ -1,4 +1,13 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsUUID, Min, MinLength, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  IsUUID,
+  Min,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -15,7 +24,10 @@ export class CreateProductDto {
   @MaxLength(200)
   slug!: string;
 
-  @ApiProperty({ example: 'Deliciosas galletas con chips de chocolate', description: 'Descripción del producto' })
+  @ApiProperty({
+    example: 'Deliciosas galletas con chips de chocolate',
+    description: 'Descripción del producto',
+  })
   @IsString()
   @MinLength(10)
   @MaxLength(2000)

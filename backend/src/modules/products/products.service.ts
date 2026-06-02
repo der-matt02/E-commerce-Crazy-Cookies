@@ -227,16 +227,14 @@ export class ProductsService {
       limit = 12,
     } = params;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       isActive: true,
     };
 
     // Text search on name and description
     if (query) {
-      where.OR = [
-        { name: { contains: query } },
-        { description: { contains: query } },
-      ];
+      where.OR = [{ name: { contains: query } }, { description: { contains: query } }];
     }
 
     // Filter by category
@@ -259,6 +257,7 @@ export class ProductsService {
     }
 
     // Sorting options
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let orderBy: any;
     switch (sortBy) {
       case 'price_asc':

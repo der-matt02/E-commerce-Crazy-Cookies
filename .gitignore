@@ -60,7 +60,6 @@ frontend/public/uploads/
 *.sqlite3
 
 # Prisma
-backend/prisma/migrations/**/*.sql
 
 # Docker
 docker-compose.override.yml

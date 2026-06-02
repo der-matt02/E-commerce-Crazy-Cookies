@@ -6,6 +6,7 @@ import { productsApi } from '@/features/products/api/products-api';
 import type { Product, Category } from '@/types/product.types';
 import type { SearchResult } from '@/features/products/api/products-api';
 import Link from 'next/link';
+import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 const PAGE_SIZE = 12;
@@ -31,7 +32,9 @@ export function ProductsCatalog({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
   const [totalProducts, setTotalProducts] = useState(initialPagination.total);
-  const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
+  const [cartState, setCartState] = useState<
+    Record<string, 'idle' | 'loading' | 'added' | 'error'>
+  >({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
 
@@ -86,36 +89,26 @@ export function ProductsCatalog({
   };
 
   const handleAddToCart = async (productId: string) => {
-    setAddingToCart((prev) => new Set(prev).add(productId));
+    setCartState((prev) => ({ ...prev, [productId]: 'loading' }));
     try {
       await addToCart({ productId, quantity: 1 });
-      alert('Producto agregado al carrito');
-    } catch (err: any) {
-      alert(err.message || 'Error al agregar al carrito');
-    } finally {
-      setAddingToCart((prev) => {
-        const next = new Set(prev);
-        next.delete(productId);
-        return next;
-      });
+      setCartState((prev) => ({ ...prev, [productId]: 'added' }));
+      setTimeout(() => setCartState((prev) => ({ ...prev, [productId]: 'idle' })), 2000);
+    } catch {
+      setCartState((prev) => ({ ...prev, [productId]: 'error' }));
+      setTimeout(() => setCartState((prev) => ({ ...prev, [productId]: 'idle' })), 2500);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="mb-8 text-4xl font-bold">Catálogo de Productos</h1>
+    <div className="catalog">
+      <h1 className="catalog__title">Catálogo</h1>
 
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-sm flex-1">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Buscar productos..."
-            className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-blue-500 focus:outline-none"
-          />
+      {/* Filtros */}
+      <div className="catalog__filters">
+        <div className="catalog__search-wrap">
           <svg
-            className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+            className="catalog__search-icon"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -123,15 +116,23 @@ export function ProductsCatalog({
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={1.5}
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Buscar productos..."
+            className="form-input form-input--search catalog__search"
+          />
         </div>
         <select
           value={sortBy}
           onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-          className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+          className="form-input"
+          style={{ width: '200px' }}
         >
           <option value="newest">Más recientes</option>
           <option value="price_asc">Precio: menor a mayor</option>
@@ -140,113 +141,130 @@ export function ProductsCatalog({
         </select>
       </div>
 
+      {/* Chips de categoría */}
       {categories.length > 0 && (
-        <div className="mb-8 flex flex-wrap gap-2">
+        <div className="catalog__chips">
           <button
             onClick={() => handleCategoryChange('')}
-            className={`rounded-full px-4 py-2 ${selectedCategory === '' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+            className={`chip ${selectedCategory === '' ? 'chip--active' : ''}`}
           >
             Todos
           </button>
-          {categories.map((category) => (
+          {categories.map((cat) => (
             <button
-              key={category.id}
-              onClick={() => handleCategoryChange(category.id)}
-              className={`rounded-full px-4 py-2 ${selectedCategory === category.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              key={cat.id}
+              onClick={() => handleCategoryChange(cat.id)}
+              className={`chip ${selectedCategory === cat.id ? 'chip--active' : ''}`}
             >
-              {category.name}
+              {cat.name}
             </button>
           ))}
         </div>
       )}
 
+      {/* Grid */}
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="text-gray-500">Cargando productos...</div>
+        <div className="product-grid product-grid--4col">
+          {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="rounded-lg bg-white p-12 text-center shadow">
-          <p className="text-gray-600">
-            {searchQuery
-              ? `No se encontraron productos para &quot;${searchQuery}&quot;`
-              : 'No hay productos disponibles'}
+        <div className="catalog__empty">
+          <p className="catalog__empty-text">
+            {searchQuery ? `Sin resultados para "${searchQuery}"` : 'Sin productos disponibles'}
           </p>
           {searchQuery && (
-            <button
-              onClick={() => handleSearchChange('')}
-              className="mt-4 text-blue-600 hover:underline"
-            >
+            <button className="catalog__empty-reset" onClick={() => handleSearchChange('')}>
               Limpiar búsqueda
             </button>
           )}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="product-grid product-grid--4col">
             {products.map((product) => {
-              const isAdding = addingToCart.has(product.id);
+              const state = cartState[product.id] ?? 'idle';
               const stockAvailable = product.inventory?.stockAvailable ?? 0;
               const isOutOfStock = stockAvailable <= 0;
               const firstImage = product.images?.[0];
 
+              const btnLabel =
+                state === 'loading'
+                  ? '···'
+                  : state === 'added'
+                    ? '✓'
+                    : state === 'error'
+                      ? '!'
+                      : '+';
+
+              const btnClass =
+                state === 'added'
+                  ? 'btn-add btn-add--added'
+                  : state === 'error'
+                    ? 'btn-add btn-add--error'
+                    : 'btn-add';
+
               return (
-                <div
-                  key={product.id}
-                  className="overflow-hidden rounded-lg bg-white shadow transition-shadow hover:shadow-lg"
-                >
-                  {firstImage ? (
-                    <img
-                      src={`${API_URL}${firstImage.url}`}
-                      alt={firstImage.alt ?? product.name}
-                      className="h-48 w-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-48 w-full bg-gradient-to-br from-blue-100 to-blue-200" />
-                  )}
-                  <div className="p-4">
-                    <Link href={`/products/${product.id}`} className="hover:text-blue-600">
-                      <h3 className="mb-2 text-lg font-semibold">{product.name}</h3>
-                    </Link>
-                    {product.category && (
-                      <p className="mb-2 text-sm text-gray-600">{product.category.name}</p>
-                    )}
-                    <p className="mb-4 line-clamp-2 text-sm text-gray-700">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-2xl font-bold text-gray-900">
-                          ${product.price.toLocaleString('es-CO')}
-                        </p>
-                        {stockAvailable > 0 && stockAvailable <= 5 && (
-                          <p className="text-xs text-orange-600">
-                            Solo {stockAvailable} disponibles
-                          </p>
-                        )}
+                <article key={product.id} className="product-card">
+                  <div className="product-card__image-wrap">
+                    {firstImage ? (
+                      <img
+                        src={`${API_URL}${firstImage.url}`}
+                        alt={firstImage.alt ?? product.name}
+                        className="product-card__image"
+                      />
+                    ) : null}
+                    {isOutOfStock && (
+                      <div className="product-card__sold-out-overlay">
+                        <span className="product-card__sold-out-label">Agotado</span>
                       </div>
-                      <button
-                        onClick={() => handleAddToCart(product.id)}
-                        disabled={isAdding || isOutOfStock}
-                        className={`rounded-lg px-4 py-2 font-semibold text-white transition-colors disabled:opacity-50 ${isOutOfStock ? 'cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-                      >
-                        {isOutOfStock ? 'Agotado' : isAdding ? 'Agregando...' : '+ Carrito'}
-                      </button>
+                    )}
+                  </div>
+                  <div className="product-card__body">
+                    {product.category && (
+                      <span className="product-card__category">{product.category.name}</span>
+                    )}
+                    <Link href={`/products/${product.id}`} className="product-card__name">
+                      {product.name}
+                    </Link>
+                    {stockAvailable > 0 && stockAvailable <= 5 && (
+                      <p className="product-card__low-stock">Solo {stockAvailable} disp.</p>
+                    )}
+                    <div className="product-card__footer">
+                      <span className="product-card__price">
+                        ${product.price.toLocaleString('es-CO')}
+                      </span>
+                      {isOutOfStock ? (
+                        <span className="product-card__out-label">Agotado</span>
+                      ) : (
+                        <button
+                          onClick={() => handleAddToCart(product.id)}
+                          disabled={state === 'loading'}
+                          aria-label="Agregar al carrito"
+                          className={btnClass}
+                        >
+                          {btnLabel}
+                        </button>
+                      )}
                     </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-10 flex flex-col items-center gap-3">
-              <p className="text-sm text-gray-500">
-                Mostrando {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalProducts)}{' '}
-                de {totalProducts} productos
+            <div className="catalog__pagination">
+              <p className="catalog__pagination-info">
+                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalProducts)} de{' '}
+                {totalProducts} productos
               </p>
-              <div className="flex gap-2">
+              <div className="catalog__pagination-controls">
                 <button
                   onClick={() => setPage((p) => p - 1)}
                   disabled={page === 1}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 disabled:opacity-40"
+                  className="catalog__page-btn"
                 >
                   ← Anterior
                 </button>
@@ -254,7 +272,7 @@ export function ProductsCatalog({
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`rounded-lg px-4 py-2 text-sm ${p === page ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50'}`}
+                    className={`catalog__page-btn ${p === page ? 'catalog__page-btn--active' : ''}`}
                   >
                     {p}
                   </button>
@@ -262,7 +280,7 @@ export function ProductsCatalog({
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page === totalPages}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 disabled:opacity-40"
+                  className="catalog__page-btn"
                 >
                   Siguiente →
                 </button>

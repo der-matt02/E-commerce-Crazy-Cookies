@@ -15,29 +15,42 @@ export function AddToCartButton({
   className = '',
 }: AddToCartButtonProps) {
   const { addToCart } = useCart();
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState<'idle' | 'loading' | 'added' | 'error'>('idle');
 
   const handleClick = async () => {
-    setLoading(true);
+    setState('loading');
     try {
       await addToCart({ productId, quantity: 1 });
-      alert('Producto agregado al carrito');
-    } catch (err: any) {
-      alert(err.message || 'Error al agregar al carrito');
-    } finally {
-      setLoading(false);
+      setState('added');
+      setTimeout(() => setState('idle'), 2000);
+    } catch {
+      setState('error');
+      setTimeout(() => setState('idle'), 2500);
     }
   };
+
+  if (outOfStock) {
+    return <span className="product-card__out-label">Agotado</span>;
+  }
+
+  const label =
+    state === 'loading' ? '···' : state === 'added' ? '✓' : state === 'error' ? '!' : '+';
+
+  const modifier =
+    state === 'added'
+      ? 'btn-add btn-add--added'
+      : state === 'error'
+        ? 'btn-add btn-add--error'
+        : 'btn-add';
 
   return (
     <button
       onClick={handleClick}
-      disabled={outOfStock || loading}
-      className={`rounded-lg px-3 py-2 text-sm font-semibold text-white disabled:opacity-50 ${
-        outOfStock ? 'cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
-      } ${className}`}
+      disabled={state === 'loading'}
+      aria-label="Agregar al carrito"
+      className={`${modifier} ${className}`}
     >
-      {outOfStock ? 'Agotado' : loading ? '...' : '+ Carrito'}
+      {label}
     </button>
   );
 }

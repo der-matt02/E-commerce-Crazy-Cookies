@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
+import * as bcrypt from 'bcryptjs';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/database/prisma.service';
 
@@ -11,6 +12,8 @@ describe('E-commerce User Journey (e2e)', () => {
   let categoryId: string;
   let cartSessionId: string;
   let orderId: string;
+  let adminId: string;
+  let authToken: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -23,17 +26,33 @@ describe('E-commerce User Journey (e2e)', () => {
 
     prisma = app.get<PrismaService>(PrismaService);
 
-    // Setup: Create test data
     await setupTestData();
+
+    // Login to get JWT token for protected routes
+    const loginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'test-admin@e2e.com', password: 'TestPass123!' });
+    authToken = loginResponse.body.token;
   });
 
   afterAll(async () => {
-    // Cleanup: Remove test data
     await cleanupTestData();
     await app.close();
   });
 
   async function setupTestData() {
+    // Create admin user for protected route tests
+    const hashedPassword = await bcrypt.hash('TestPass123!', 10);
+    const admin = await prisma.admin.create({
+      data: {
+        email: 'test-admin@e2e.com',
+        password: hashedPassword,
+        name: 'Test Admin',
+        isActive: true,
+      },
+    });
+    adminId = admin.id;
+
     // Create category
     const category = await prisma.category.create({
       data: {
@@ -76,10 +95,13 @@ describe('E-commerce User Journey (e2e)', () => {
       await prisma.orderItem.deleteMany({ where: { orderId } });
       await prisma.order.delete({ where: { id: orderId } });
     }
-    await prisma.inventoryMovement.deleteMany({ where: { productId } });
+    await prisma.inventoryMovement.deleteMany({ where: { inventory: { productId } } });
     await prisma.inventory.delete({ where: { productId } });
     await prisma.product.delete({ where: { id: productId } });
     await prisma.category.delete({ where: { id: categoryId } });
+    if (adminId) {
+      await prisma.admin.delete({ where: { id: adminId } });
+    }
   }
 
   describe('Complete User Journey: Browse → Add to Cart → Checkout → Order', () => {
@@ -108,11 +130,11 @@ describe('E-commerce User Journey (e2e)', () => {
       expect(response.body.inventory.stockAvailable).toBe(100);
     });
 
-    it('Step 3: POST /cart/items - should add product to cart', async () => {
+    it('Step 3: POST /cart - should add product to cart', async () => {
       cartSessionId = `test-session-${Date.now()}`;
 
       const response = await request(app.getHttpServer())
-        .post(`/cart/items?sessionId=${cartSessionId}`)
+        .post(`/cart?sessionId=${cartSessionId}`)
         .send({
           productId,
           quantity: 2,
@@ -185,7 +207,7 @@ describe('E-commerce User Journey (e2e)', () => {
       expect(response.body.status).toBe('PENDING');
       expect(response.body.items).toBeDefined();
       expect(response.body.items.length).toBe(1);
-      expect(response.body.total).toBeGreaterThan(0);
+      expect(Number(response.body.total)).toBeGreaterThan(0);
     });
 
     it('Step 8: Verify cart deleted after order creation', async () => {
@@ -223,6 +245,7 @@ describe('E-commerce User Journey (e2e)', () => {
     it('Step 11: PATCH /orders/:id/status - should update order status', async () => {
       const response = await request(app.getHttpServer())
         .patch(`/orders/${orderId}/status`)
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           status: 'CONFIRMED',
           note: 'Order confirmed by test',
@@ -266,6 +289,7 @@ describe('E-commerce User Journey (e2e)', () => {
     it('PATCH /reviews/:id/approve - should approve review', async () => {
       const response = await request(app.getHttpServer())
         .patch(`/reviews/${reviewId}/approve`)
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ isApproved: true })
         .expect(200);
 

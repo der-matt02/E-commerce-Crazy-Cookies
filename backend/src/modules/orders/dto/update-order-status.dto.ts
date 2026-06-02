@@ -7,7 +7,10 @@ export class UpdateOrderStatusDto {
   @IsEnum(OrderStatus)
   status!: OrderStatus;
 
-  @ApiPropertyOptional({ example: 'Pedido despachado por mensajería', description: 'Nota sobre el cambio' })
+  @ApiPropertyOptional({
+    example: 'Pedido despachado por mensajería',
+    description: 'Nota sobre el cambio',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)

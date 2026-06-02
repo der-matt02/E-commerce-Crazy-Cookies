@@ -16,7 +16,14 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -74,7 +81,11 @@ export class ProductsController {
   @ApiQuery({ name: 'minPrice', required: false, description: 'Minimum price' })
   @ApiQuery({ name: 'maxPrice', required: false, description: 'Maximum price' })
   @ApiQuery({ name: 'inStock', required: false, description: 'Only show in-stock products' })
-  @ApiQuery({ name: 'sortBy', required: false, enum: ['price_asc', 'price_desc', 'name', 'newest'] })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['price_asc', 'price_desc', 'name', 'newest'],
+  })
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
   search(

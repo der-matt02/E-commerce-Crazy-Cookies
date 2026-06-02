@@ -8,8 +8,6 @@ import {
   Param,
   Query,
   UseGuards,
-  ParseIntPipe,
-  DefaultValuePipe,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewsService } from './reviews.service';
@@ -22,10 +20,7 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post('products/:productId')
-  async createReview(
-    @Param('productId') productId: string,
-    @Body() dto: CreateReviewDto,
-  ) {
+  async createReview(@Param('productId') productId: string, @Body() dto: CreateReviewDto) {
     return this.reviewsService.create(productId, dto);
   }
 
@@ -33,11 +28,9 @@ export class ReviewsController {
   async getProductReviews(
     @Param('productId') productId: string,
     @Query('includeUnapproved') includeUnapproved?: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
   ) {
     const include = includeUnapproved === 'true';
-    return this.reviewsService.getByProduct(productId, include, page, limit);
+    return this.reviewsService.getByProduct(productId, include);
   }
 
   @Get('products/:productId/stats')
@@ -53,23 +46,15 @@ export class ReviewsController {
   }
 
   @Get()
-  async getAllReviews(
-    @Query('approved') approved?: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
-    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
-  ) {
-    const isApproved =
-      approved === 'true' ? true : approved === 'false' ? false : undefined;
-    return this.reviewsService.getAll(isApproved, page, limit);
+  async getAllReviews(@Query('approved') approved?: string) {
+    const isApproved = approved === 'true' ? true : approved === 'false' ? false : undefined;
+    return this.reviewsService.getAll(isApproved);
   }
 
   @Patch(':id/approve')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  async approveReview(
-    @Param('id') id: string,
-    @Body() dto: ApproveReviewDto,
-  ) {
+  async approveReview(@Param('id') id: string, @Body() dto: ApproveReviewDto) {
     return this.reviewsService.approve(id, dto);
   }
 

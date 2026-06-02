@@ -192,7 +192,9 @@ export class InventoryService {
         productName: inv.product.name,
         stockAvailable: inv.stockAvailable,
         stockReserved: inv.stockReserved,
-        reservedPercentage: Math.round((inv.stockReserved / (inv.stockAvailable + inv.stockReserved)) * 100),
+        reservedPercentage: Math.round(
+          (inv.stockReserved / (inv.stockAvailable + inv.stockReserved)) * 100,
+        ),
       })),
     };
   }

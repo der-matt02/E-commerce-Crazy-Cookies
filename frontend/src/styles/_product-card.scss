@@ -1,0 +1,189 @@
+@use 'tokens' as *;
+
+// ── Grid de productos (truco 1px de borde) ─────────────────────────────────
+.product-grid {
+  display: grid;
+  gap: 1px;
+  background-color: $border;
+  border: 1px solid $border;
+
+  &--4col {
+    grid-template-columns: repeat(4, 1fr);
+
+    @media (max-width: $bp-lg) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: $bp-sm) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &--2col {
+    grid-template-columns: repeat(2, 1fr);
+
+    @media (max-width: $bp-sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// ── Card individual ────────────────────────────────────────────────────────
+.product-card {
+  background-color: $cream;
+  transition: background-color $t-normal;
+
+  &:hover {
+    background-color: $white;
+  }
+
+  &__image-wrap {
+    aspect-ratio: 1;
+    overflow: hidden;
+    background-color: $cream-dark;
+    position: relative;
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform $t-img;
+
+    .product-card:hover & {
+      transform: scale(1.04);
+    }
+  }
+
+  &__sold-out-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(26, 23, 20, 0.30);
+  }
+
+  &__sold-out-label {
+    font-family: $font-sans;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: $white;
+  }
+
+  &__body {
+    padding: 16px 18px 20px;
+  }
+
+  &__category {
+    display: block;
+    font-family: $font-sans;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $ink-lighter;
+    margin-bottom: 4px;
+  }
+
+  &__name {
+    display: block;
+    font-family: $font-serif;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: $ink;
+    margin-bottom: 8px;
+    text-decoration: none;
+    transition: opacity $t-normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__price {
+    font-family: $font-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: $ink;
+  }
+
+  &__low-stock {
+    font-family: $font-sans;
+    font-size: 11px;
+    color: $accent;
+    margin-bottom: 6px;
+  }
+
+  &__out-label {
+    font-family: $font-sans;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: $ink-lighter;
+  }
+}
+
+// ── Sección de destacados ──────────────────────────────────────────────────
+.featured-section {
+  padding: 80px 0;
+
+  &__inner {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 $page-px;
+
+    @media (max-width: $bp-sm) {
+      padding: 0 $page-px-sm;
+    }
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  &__label {
+    font-family: $font-sans;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $ink-lighter;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  &__title {
+    font-family: $font-serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: $ink;
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 64px 0;
+    font-family: $font-sans;
+    font-size: 14px;
+    color: $ink-lighter;
+  }
+
+  &__cta {
+    text-align: center;
+    margin-top: 48px;
+  }
+}

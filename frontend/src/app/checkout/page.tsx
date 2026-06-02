@@ -126,7 +126,7 @@ export default function CheckoutPage() {
                   required
                   minLength={10}
                   rows={3}
-                  placeholder="Calle 123 #45-67, Apto 301, Bogotá"
+                  placeholder="Av. Amazonas N12-34, Piso 2, Quito"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2"
                 />
               </div>

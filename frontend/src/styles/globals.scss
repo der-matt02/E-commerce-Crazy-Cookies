@@ -1,0 +1,28 @@
+@use 'tokens' as *;
+@use 'reset';
+@use 'buttons';
+@use 'forms';
+@use 'nav';
+@use 'footer';
+@use 'hero';
+@use 'product-card';
+@use 'catalog';
+@use 'cart';
+@use 'product-detail';
+@use 'skeleton';
+
+// ─── Variables CSS (accesibles en JS / inline styles) ──────────────────────
+:root {
+  --cream:        #{$cream};
+  --cream-dark:   #{$cream-dark};
+  --ink:          #{$ink};
+  --ink-light:    #{$ink-light};
+  --ink-lighter:  #{$ink-lighter};
+  --border:       #{$border};
+  --border-md:    #{$border-md};
+  --accent:       #{$accent};
+  --accent-light: #{$accent-light};
+  --nav-h:        #{$nav-height};
+  --font-serif:   #{$font-serif};
+  --font-sans:    #{$font-sans};
+}

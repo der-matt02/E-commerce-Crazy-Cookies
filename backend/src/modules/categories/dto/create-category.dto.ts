@@ -14,13 +14,19 @@ export class CreateCategoryDto {
   @MaxLength(100)
   slug!: string;
 
-  @ApiPropertyOptional({ example: 'Deliciosas galletas artesanales', description: 'Descripción de la categoría' })
+  @ApiPropertyOptional({
+    example: 'Deliciosas galletas artesanales',
+    description: 'Descripción de la categoría',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   description?: string;
 
-  @ApiPropertyOptional({ example: 'https://example.com/image.jpg', description: 'URL de la imagen' })
+  @ApiPropertyOptional({
+    example: 'https://example.com/image.jpg',
+    description: 'URL de la imagen',
+  })
   @IsOptional()
   @IsString()
   imageUrl?: string;

@@ -11,36 +11,47 @@ interface AddToCartSectionProps {
 export function AddToCartSection({ productId, stockAvailable }: AddToCartSectionProps) {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [adding, setAdding] = useState(false);
+  const [state, setState] = useState<'idle' | 'loading' | 'added' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const maxQuantity = Math.min(stockAvailable, 99);
 
   const handleAddToCart = async () => {
-    setAdding(true);
+    setState('loading');
+    setErrorMsg('');
     try {
       await addToCart({ productId, quantity });
-      alert(
-        `${quantity} ${quantity === 1 ? 'producto agregado' : 'productos agregados'} al carrito`
-      );
+      setState('added');
       setQuantity(1);
+      setTimeout(() => setState('idle'), 3000);
     } catch (err: any) {
-      alert(err.message || 'Error al agregar al carrito');
-    } finally {
-      setAdding(false);
+      setErrorMsg(err.message || 'Error al agregar al carrito');
+      setState('error');
+      setTimeout(() => setState('idle'), 3000);
     }
   };
 
+  const btnLabel =
+    state === 'loading'
+      ? 'Agregando...'
+      : state === 'added'
+        ? `✓ ${quantity > 1 ? `${quantity} productos` : 'Producto'} agregado`
+        : state === 'error'
+          ? 'Error — Reintentar'
+          : 'Agregar al carrito';
+
   return (
-    <div className="mb-8">
-      <label className="mb-2 block text-sm font-medium text-gray-700">Cantidad</label>
-      <div className="flex gap-4">
-        <div className="flex items-center rounded-lg border border-gray-300">
+    <div className="add-to-cart">
+      <label className="form-label">Cantidad</label>
+      <div className="add-to-cart__row">
+        <div className="add-to-cart__stepper">
           <button
+            className="add-to-cart__step-btn"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
             disabled={quantity <= 1}
-            className="px-4 py-3 hover:bg-gray-100 disabled:opacity-50"
+            aria-label="Disminuir"
           >
-            -
+            −
           </button>
           <input
             type="number"
@@ -51,24 +62,27 @@ export function AddToCartSection({ productId, stockAvailable }: AddToCartSection
             }}
             min={1}
             max={maxQuantity}
-            className="w-20 border-x border-gray-300 py-3 text-center"
+            className="add-to-cart__input"
           />
           <button
+            className="add-to-cart__step-btn"
             onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
             disabled={quantity >= maxQuantity}
-            className="px-4 py-3 hover:bg-gray-100 disabled:opacity-50"
+            aria-label="Aumentar"
           >
             +
           </button>
         </div>
         <button
           onClick={handleAddToCart}
-          disabled={adding}
-          className="flex-1 rounded-lg bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          disabled={state === 'loading'}
+          className="btn-full"
+          style={{ flex: 1 }}
         >
-          {adding ? 'Agregando...' : 'Agregar al Carrito'}
+          {btnLabel}
         </button>
       </div>
+      {state === 'error' && errorMsg && <p className="add-to-cart__error">{errorMsg}</p>}
     </div>
   );
 }

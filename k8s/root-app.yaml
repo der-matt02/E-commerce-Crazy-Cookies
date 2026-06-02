@@ -1,0 +1,26 @@
+# Bootstrap — aplicar manualmente UNA SOLA VEZ:
+#   kubectl apply -f k8s/root-app.yaml
+#
+# A partir de aquí Argo CD gestiona todo el resto de forma automática.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crazy-cookies-root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/der-matt02/E-commerce-Crazy-Cookies.git
+    targetRevision: main
+    path: k8s/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

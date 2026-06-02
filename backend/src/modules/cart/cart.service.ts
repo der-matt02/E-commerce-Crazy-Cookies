@@ -112,9 +112,7 @@ export class CartService {
       },
     });
 
-    const totalQuantityNeeded = existingItem
-      ? existingItem.quantity + dto.quantity
-      : dto.quantity;
+    const totalQuantityNeeded = existingItem ? existingItem.quantity + dto.quantity : dto.quantity;
 
     if (availableStock < dto.quantity) {
       throw new BadRequestException(

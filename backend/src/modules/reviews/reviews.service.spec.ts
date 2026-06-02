@@ -5,7 +5,6 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('ReviewsService', () => {
   let service: ReviewsService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     product: {
@@ -33,8 +32,6 @@ describe('ReviewsService', () => {
     }).compile();
 
     service = module.get<ReviewsService>(ReviewsService);
-    prisma = module.get<PrismaService>(PrismaService);
-
     jest.clearAllMocks();
   });
 
@@ -216,9 +213,9 @@ describe('ReviewsService', () => {
     it('should throw error when review not found', async () => {
       mockPrismaService.review.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.approve('invalid-id', { isApproved: true }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.approve('invalid-id', { isApproved: true })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -288,9 +285,7 @@ describe('ReviewsService', () => {
     it('should throw error when review not found', async () => {
       mockPrismaService.review.findUnique.mockResolvedValue(null);
 
-      await expect(service.delete('invalid-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.delete('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 });

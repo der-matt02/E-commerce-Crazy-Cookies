@@ -38,7 +38,9 @@ export interface AuditLogData {
   entity: string;
   entityId?: string;
   adminId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   oldValue?: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   newValue?: Record<string, any>;
   ipAddress?: string;
   userAgent?: string;
@@ -82,6 +84,7 @@ export class AuditService {
     limit?: number;
     offset?: number;
   }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
 
     if (filters?.action) where.action = filters.action;

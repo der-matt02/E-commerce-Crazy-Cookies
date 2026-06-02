@@ -1,0 +1,72 @@
+@use 'tokens' as *;
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.skeleton {
+  background-color: $cream-dark;
+  border-radius: 2px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+
+  &--circle {
+    border-radius: 50%;
+  }
+}
+
+.product-card-skeleton {
+  background-color: $cream;
+
+  &__image {
+    aspect-ratio: 1;
+    background-color: $cream-dark;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  &__body {
+    padding: 16px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__cat {
+    height: 10px;
+    width: 33%;
+    background-color: $cream-dark;
+    border-radius: 2px;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  &__name {
+    height: 18px;
+    width: 75%;
+    background-color: $cream-dark;
+    border-radius: 2px;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 4px;
+  }
+
+  &__price {
+    height: 16px;
+    width: 80px;
+    background-color: $cream-dark;
+    border-radius: 2px;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  &__btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: $cream-dark;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+}
