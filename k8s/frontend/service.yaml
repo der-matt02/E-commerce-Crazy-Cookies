@@ -11,6 +11,7 @@ spec:
     app: frontend
   ports:
     - port: 3001
-      targetPort: 3000
+      targetPort: 80
+      nodePort: 30080
       name: http
-  type: ClusterIP
+  type: NodePort
