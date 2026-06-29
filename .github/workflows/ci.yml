@@ -15,7 +15,7 @@ jobs:
 
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 11
 
       - uses: actions/setup-node@v4
         with:
@@ -26,7 +26,18 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run ESLint (security)
-        run: pnpm --filter backend lint
+        run: |
+          pnpm --filter backend exec eslint "src/**/*.ts" \
+            --format json \
+            --output-file eslint-backend-report.json \
+            --max-warnings=0
+
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-backend-report
+          path: backend/eslint-backend-report.json
 
   lint-frontend:
     name: ESLint — Frontend
@@ -36,7 +47,7 @@ jobs:
 
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 11
 
       - uses: actions/setup-node@v4
         with:
@@ -47,32 +58,51 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run ESLint (security)
-        run: pnpm --filter frontend lint
+        run: |
+          pnpm --filter frontend exec eslint "src/**/*.{ts,tsx}" \
+            --format json \
+            --output-file eslint-frontend-report.json \
+            --max-warnings=0
+
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-frontend-report
+          path: frontend/eslint-frontend-report.json
 
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
-    container:
-      image: semgrep/semgrep
     steps:
       - uses: actions/checkout@v4
 
-      - name: Semgrep scan
-        run: >
-          semgrep scan
-          --config p/typescript
-          --config p/nodejs
-          --config p/jwt
-          --config p/owasp-top-ten
-          --error
-          --sarif
-          --output semgrep.sarif
+      - name: Install Semgrep
+        run: pip install semgrep
 
-      - name: Upload SARIF results
+      - name: Semgrep scan
+        run: |
+          semgrep scan \
+            --config p/typescript \
+            --config p/nodejs \
+            --config p/jwt \
+            --config p/owasp-top-ten \
+            --error \
+            --sarif \
+            --output semgrep.sarif
+
+      - name: Upload SARIF to GitHub Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif
+
+      - name: Upload Semgrep report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-sast-report
+          path: semgrep.sarif
 
   test-backend:
     name: Tests — Backend
@@ -83,7 +113,7 @@ jobs:
 
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 11
 
       - uses: actions/setup-node@v4
         with:
@@ -105,7 +135,7 @@ jobs:
 
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 11
 
       - uses: actions/setup-node@v4
         with:
