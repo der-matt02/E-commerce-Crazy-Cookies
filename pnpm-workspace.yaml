@@ -2,11 +2,11 @@ packages:
   - backend
   - frontend
 
-ignoredBuiltDependencies:
+onlyBuiltDependencies:
   - '@nestjs/core'
+  - '@parcel/watcher'
   - '@prisma/client'
   - '@prisma/engines'
-  - bcrypt
   - esbuild
   - prisma
   - sharp
