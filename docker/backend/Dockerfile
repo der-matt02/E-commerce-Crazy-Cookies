@@ -1,44 +1,46 @@
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
-RUN npm install -g pnpm@8
+RUN npm install -g pnpm@11 && \
+    apk add --no-cache openssl openssl-dev
 
 WORKDIR /app
 
-# Copy workspace manifests first (layer cache)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
 
-# Install all deps (including dev, needed to compile)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --ignore-scripts && \
+    pnpm approve-builds --all && \
+    pnpm rebuild
 
-# Copy source and build
+# Generate Prisma client before compiling TypeScript
+COPY backend/prisma ./backend/prisma
+RUN cd backend && npx prisma generate
+
 COPY backend ./backend
 WORKDIR /app/backend
 RUN pnpm run build
 
 # ─── Stage 2: Production ──────────────────────────────────────────────────────
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 
-RUN npm install -g pnpm@8 && \
-    apk add --no-cache curl
+RUN npm install -g pnpm@11 && \
+    apk add --no-cache curl openssl openssl-dev
 
 WORKDIR /app
 
-# Copy workspace manifests
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
+COPY backend/prisma ./backend/prisma
 
-# Copy Prisma schema BEFORE installing so @prisma/client postinstall can generate
-COPY --from=builder /app/backend/prisma ./backend/prisma
+# Install deps fresh (pnpm symlinks work correctly in a clean environment)
+RUN pnpm install --ignore-scripts && \
+    pnpm approve-builds --all && \
+    pnpm rebuild
 
-# Install production deps only (postinstall generates Prisma client from schema)
-RUN pnpm install --prod --frozen-lockfile
-
-# Copy compiled application
+# Copy compiled application over the installed source
 COPY --from=builder /app/backend/dist ./backend/dist
 
-# Copy entrypoint script
 COPY docker/backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
