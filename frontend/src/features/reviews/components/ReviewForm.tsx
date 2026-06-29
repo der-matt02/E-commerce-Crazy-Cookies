@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { CreateReviewDto } from '@/types/review.types';
+import { apiErrorMessage } from '@/lib/error';
 
 interface ReviewFormProps {
   productId: string;
@@ -36,8 +37,11 @@ export function ReviewForm({ productId: _productId, onSubmit }: ReviewFormProps)
         comment: '',
       });
       alert('¡Gracias por tu review! Será publicada después de ser aprobada.');
-    } catch (err: any) {
-      alert(err.message || 'Error al enviar review');
+    } catch (err) {
+      alert(
+        (err instanceof Error ? err.message : null) ||
+          apiErrorMessage(err, 'Error al enviar review')
+      );
     } finally {
       setSubmitting(false);
     }

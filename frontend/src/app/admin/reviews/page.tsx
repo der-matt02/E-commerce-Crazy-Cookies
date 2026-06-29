@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { reviewsApi } from '@/features/reviews/api/reviews-api';
 import type { Review } from '@/types/review.types';
+import { apiErrorMessage } from '@/lib/error';
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -10,11 +11,7 @@ export default function AdminReviewsPage() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('pending');
   const [processing, setProcessing] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadReviews();
-  }, [filter]);
-
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     try {
       setLoading(true);
       let data: Review[];
@@ -33,15 +30,19 @@ export default function AdminReviewsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
 
   const handleApprove = async (id: string, isApproved: boolean) => {
     setProcessing((prev) => new Set(prev).add(id));
     try {
       await reviewsApi.approve(id, { isApproved });
       await loadReviews();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al actualizar review');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al actualizar review'));
     } finally {
       setProcessing((prev) => {
         const next = new Set(prev);
@@ -58,8 +59,8 @@ export default function AdminReviewsPage() {
     try {
       await reviewsApi.delete(id);
       await loadReviews();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al eliminar review');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al eliminar review'));
     } finally {
       setProcessing((prev) => {
         const next = new Set(prev);

@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useState, useEffect, ReactNode } from 'react';
 import { cartApi } from '../api/cart-api';
+import { apiErrorMessage } from '@/lib/error';
 import type { Cart, AddToCartDto } from '@/types/cart.types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -36,14 +37,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setSessionId(sid);
   }, []);
 
-  // Cargar carrito cuando tenemos sessionId
-  useEffect(() => {
-    if (sessionId) {
-      refreshCart();
-    }
-  }, [sessionId]);
-
-  const refreshCart = async () => {
+  const refreshCart = useCallback(async () => {
     if (!sessionId) return;
 
     try {
@@ -51,13 +45,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null);
       const cartData = await cartApi.getCart(sessionId);
       setCart(cartData);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error al cargar carrito');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Error al cargar carrito'));
       console.error('Error loading cart:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId]);
+
+  // Cargar carrito cuando tenemos sessionId
+  useEffect(() => {
+    if (sessionId) {
+      refreshCart();
+    }
+  }, [sessionId, refreshCart]);
 
   const addToCart = async (dto: AddToCartDto) => {
     if (!sessionId) {
@@ -70,8 +71,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null);
       const updatedCart = await cartApi.addToCart(sessionId, dto);
       setCart(updatedCart);
-    } catch (err: any) {
-      const errorMsg = err?.response?.data?.message || 'Error al agregar al carrito';
+    } catch (err) {
+      const errorMsg = apiErrorMessage(err, 'Error al agregar al carrito');
       setError(errorMsg);
       throw new Error(errorMsg);
     } finally {
@@ -87,8 +88,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null);
       const updatedCart = await cartApi.updateCartItem(sessionId, itemId, { quantity });
       setCart(updatedCart);
-    } catch (err: any) {
-      const errorMsg = err?.response?.data?.message || 'Error al actualizar cantidad';
+    } catch (err) {
+      const errorMsg = apiErrorMessage(err, 'Error al actualizar cantidad');
       setError(errorMsg);
       throw new Error(errorMsg);
     } finally {
@@ -104,8 +105,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null);
       const updatedCart = await cartApi.removeCartItem(sessionId, itemId);
       setCart(updatedCart);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error al eliminar item');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Error al eliminar item'));
     } finally {
       setLoading(false);
     }
@@ -119,8 +120,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null);
       const updatedCart = await cartApi.clearCart(sessionId);
       setCart(updatedCart);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error al vaciar carrito');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Error al vaciar carrito'));
     } finally {
       setLoading(false);
     }

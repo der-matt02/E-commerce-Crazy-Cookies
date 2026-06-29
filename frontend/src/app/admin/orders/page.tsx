@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { apiErrorMessage } from '@/lib/error';
 import { ordersApi } from '@/features/orders/api/orders-api';
 import type { Order, OrderStatus } from '@/types/order.types';
 
@@ -70,8 +71,8 @@ export default function AdminOrdersPage() {
         setDetailOrder(null);
       }
       await loadOrders();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al actualizar estado');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al actualizar estado'));
     }
   };
 

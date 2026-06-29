@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiErrorMessage } from '@/lib/error';
 import { useCart } from '@/features/cart/context/CartContext';
 import { ordersApi } from '@/features/orders/api/orders-api';
 import type { CreateOrderDto } from '@/types/order.types';
@@ -40,8 +41,8 @@ export default function CheckoutPage() {
 
       const order = await ordersApi.create(sessionId, formData);
       router.push(`/order/${order.id}/success`);
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al crear la orden');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al crear la orden'));
       console.error(err);
     } finally {
       setLoading(false);

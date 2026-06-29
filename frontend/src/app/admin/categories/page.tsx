@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { apiErrorMessage } from '@/lib/error';
 import { categoriesApi } from '@/features/products/api/products-api';
 import type { Category } from '@/types/product.types';
 
@@ -71,8 +72,8 @@ export default function AdminCategoriesPage() {
     try {
       await categoriesApi.delete(id);
       await loadCategories();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al eliminar categoría');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al eliminar categoría'));
       console.error(err);
     }
   };
@@ -89,8 +90,8 @@ export default function AdminCategoriesPage() {
 
       setShowModal(false);
       await loadCategories();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al guardar categoría');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al guardar categoría'));
       console.error(err);
     }
   };

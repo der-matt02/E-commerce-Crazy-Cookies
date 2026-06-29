@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { serverFetch } from '@/lib/server-api';
 import { AddToCartSection } from '@/features/products/components/AddToCartSection';
 import { ReviewList } from '@/features/reviews/components/ReviewList';
@@ -49,9 +50,12 @@ export default async function ProductDetailPage({ params }: Props) {
         {/* Imagen */}
         <div className="product-detail__image-wrap">
           {firstImage ? (
-            <img
+            <Image
               src={`${API_URL}${firstImage.url}`}
               alt={firstImage.alt ?? product.name}
+              width={600}
+              height={500}
+              style={{ width: '100%', height: 'auto' }}
               className="product-detail__image"
             />
           ) : (

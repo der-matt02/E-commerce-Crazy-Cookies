@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { apiErrorMessage } from '@/lib/error';
 import { inventoryApi } from '@/features/inventory/api/inventory-api';
 import type { Inventory, InventoryMovement, StockAlerts } from '@/types/inventory.types';
 import { AdjustmentType } from '@/types/inventory.types';
@@ -81,8 +82,8 @@ export default function AdminInventoryPage() {
       await inventoryApi.adjustStock(selectedInventory.productId, adjustForm);
       setShowAdjustModal(false);
       await loadData();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al ajustar inventario');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al ajustar inventario'));
       console.error(err);
     }
   };
