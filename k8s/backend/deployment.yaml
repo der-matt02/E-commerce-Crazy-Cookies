@@ -36,6 +36,10 @@ spec:
       containers:
         - name: backend
           image: node:18-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
           ports:
             - containerPort: 3000
               name: http

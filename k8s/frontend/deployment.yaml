@@ -26,6 +26,10 @@ spec:
       containers:
         - name: frontend
           image: nginx:alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 101
           ports:
             - containerPort: 80
               name: http

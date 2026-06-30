@@ -35,6 +35,10 @@ spec:
       containers:
         - name: migrate
           image: node:18-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
           command: ["sh", "-c", "echo 'Migrations OK (demo mode)' && sleep 2"]
           env:
             - name: DATABASE_URL
