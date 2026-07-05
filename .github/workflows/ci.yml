@@ -247,23 +247,45 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
 
-      - name: Trivy — imagen backend (SARIF)
-        uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # v0.32.0
+      - name: Log in to GHCR (para que Trivy pueda pullear las imágenes)
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.6.0
         with:
-          image-ref: ${{ env.BACKEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
-          format: sarif
-          output: trivy-backend.sarif
-          severity: CRITICAL,HIGH
-          exit-code: "0"
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Se invoca la imagen oficial de Trivy directo por Docker en vez de la
+      # marketplace action: la action depende de un instalador (setup-trivy)
+      # que falla de forma silenciosa e intermitente en este runner.
+      - name: Trivy — imagen backend (SARIF)
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD":/output \
+            -v trivy-cache:/root/.cache/ \
+            -e TRIVY_USERNAME=${{ github.actor }} \
+            -e TRIVY_PASSWORD=${{ secrets.GITHUB_TOKEN }} \
+            aquasec/trivy:0.57.1 image \
+            --format sarif \
+            --output /output/trivy-backend.sarif \
+            --severity CRITICAL,HIGH \
+            --exit-code 0 \
+            ${{ env.BACKEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
 
       - name: Trivy — imagen frontend (SARIF)
-        uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # v0.32.0
-        with:
-          image-ref: ${{ env.FRONTEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
-          format: sarif
-          output: trivy-frontend.sarif
-          severity: CRITICAL,HIGH
-          exit-code: "0"
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD":/output \
+            -v trivy-cache:/root/.cache/ \
+            -e TRIVY_USERNAME=${{ github.actor }} \
+            -e TRIVY_PASSWORD=${{ secrets.GITHUB_TOKEN }} \
+            aquasec/trivy:0.57.1 image \
+            --format sarif \
+            --output /output/trivy-frontend.sarif \
+            --severity CRITICAL,HIGH \
+            --exit-code 0 \
+            ${{ env.FRONTEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
 
       - name: Upload SARIF (backend) a GitHub Security
         if: always()
@@ -280,11 +302,17 @@ jobs:
           category: trivy-frontend
 
       - name: Generar SBOM (backend, formato CycloneDX)
-        uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # v0.32.0
-        with:
-          image-ref: ${{ env.BACKEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
-          format: cyclonedx
-          output: sbom-backend.cdx.json
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD":/output \
+            -v trivy-cache:/root/.cache/ \
+            -e TRIVY_USERNAME=${{ github.actor }} \
+            -e TRIVY_PASSWORD=${{ secrets.GITHUB_TOKEN }} \
+            aquasec/trivy:0.57.1 image \
+            --format cyclonedx \
+            --output /output/sbom-backend.cdx.json \
+            ${{ env.BACKEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
 
       - name: Upload reportes Trivy + SBOM
         if: always()
