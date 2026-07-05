@@ -10,4 +10,4 @@ resources:
 images:
 - name: ghcr.io/der-matt02/e-commerce-crazy-cookies-frontend
   newName: ghcr.io/der-matt02/e-commerce-crazy-cookies-frontend
-  newTag: sha-1cdd011
+  newTag: sha-3d448c9
