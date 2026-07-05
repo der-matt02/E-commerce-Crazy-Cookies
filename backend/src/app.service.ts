@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 export class AppService {
   getRoot(): { message: string } {
     return {
-      message: 'Crazy Cookies E-commerce API - Welcome!',
+      message: '🍪 Crazy Cookies E-commerce API - Welcome!',
     };
   }
 

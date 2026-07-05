@@ -110,10 +110,11 @@ describe('E-commerce User Journey (e2e)', () => {
         .get('/products')
         .expect(200);
 
-      expect(response.body).toBeInstanceOf(Array);
-      expect(response.body.length).toBeGreaterThan(0);
+      expect(response.body.products).toBeInstanceOf(Array);
+      expect(response.body.products.length).toBeGreaterThan(0);
+      expect(response.body.pagination).toBeDefined();
 
-      const testProduct = response.body.find((p: any) => p.id === productId);
+      const testProduct = response.body.products.find((p: any) => p.id === productId);
       expect(testProduct).toBeDefined();
       expect(testProduct.name).toBe('Test Product');
       expect(testProduct.isActive).toBe(true);
