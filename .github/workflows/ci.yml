@@ -340,6 +340,9 @@ jobs:
           # Solo queremos el reporte como artifact, no que abra un Issue en
           # cada corrida (el token por defecto tampoco tiene permiso para eso).
           allow_issue_writing: false
+          # El nombre default del artifact interno de la action ("zap_scan",
+          # con guion bajo) es rechazado por la API de artifacts de GitHub.
+          artifact_name: zap-scan-internal
 
       - name: Upload reporte ZAP
         if: always()
