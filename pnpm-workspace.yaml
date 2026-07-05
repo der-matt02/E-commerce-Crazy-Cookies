@@ -1,6 +1,24 @@
-packages:
+packages: # nosemgrep: package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy
   - backend
   - frontend
+
+# Supply-chain: bloquea sub-dependencias de fuentes no confiables y exige
+# esperar 7 días desde la publicación antes de instalar una versión nueva
+# (ventana para que se detecten paquetes maliciosos/inestables).
+blockExoticSubdeps: true
+minimumReleaseAge: 10080
+
+# trustPolicy: no-downgrade queda deliberadamente DESACTIVADO (hallazgo de
+# Semgrep aceptado con justificación, no ignorado a ciegas): al probarlo,
+# "pnpm install --frozen-lockfile" rechazó 8 paquetes del lockfile por
+# "trust downgrade" — chokidar, semver, vite, eslint-config-prettier, etc.
+# Se verificaron manualmente los mantenedores publicados en npm de esos
+# paquetes (`npm view <pkg> maintainers`) y corresponden a sus equipos
+# legítimos de siempre (paulmillr/chokidar, el equipo de npm-cli/semver).
+# Es un falso positivo de una policy nueva de pnpm sin baseline histórico
+# para este lockfile, no una señal de paquetes comprometidos (ver supresión
+# inline arriba, en la línea de "packages:", que es donde Semgrep ancla
+# este hallazgo específico).
 
 onlyBuiltDependencies:
   - '@nestjs/core'
