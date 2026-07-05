@@ -35,7 +35,12 @@ spec:
               done
       containers:
         - name: backend
-          image: node:18-alpine
+          image: ghcr.io/der-matt02/e-commerce-crazy-cookies-backend:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
           ports:
             - containerPort: 3000
               name: http
@@ -65,4 +70,15 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-          command: ["node", "-e", "require('http').createServer((req,res)=>{res.writeHead(200);res.end('OK')}).listen(3000)"]
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20

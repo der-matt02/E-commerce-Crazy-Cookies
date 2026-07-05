@@ -15,6 +15,7 @@ describe('OrdersService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      count: jest.fn(),
     },
     $transaction: jest.fn(),
   };
@@ -68,18 +69,21 @@ describe('OrdersService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all orders', async () => {
+    it('should return paginated orders', async () => {
       const mockOrders = [
         { id: 'order-1', status: OrderStatus.PENDING },
         { id: 'order-2', status: OrderStatus.CONFIRMED },
       ];
 
       mockPrismaService.order.findMany.mockResolvedValue(mockOrders);
+      mockPrismaService.order.count.mockResolvedValue(2);
 
       const result = await service.findAll();
 
-      expect(result).toEqual(mockOrders);
+      expect(result.orders).toEqual(mockOrders);
+      expect(result.pagination.total).toBe(2);
       expect(mockPrismaService.order.findMany).toHaveBeenCalled();
+      expect(mockPrismaService.order.count).toHaveBeenCalled();
     });
   });
 

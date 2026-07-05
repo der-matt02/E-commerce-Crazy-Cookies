@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { apiErrorMessage } from '@/lib/error';
 import { productsApi, categoriesApi } from '@/features/products/api/products-api';
 import type { Product, ProductImage, Category } from '@/types/product.types';
 
@@ -84,8 +86,8 @@ export default function AdminProductsPage() {
     try {
       await productsApi.delete(id);
       await loadData();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al eliminar producto');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al eliminar producto'));
     }
   };
 
@@ -99,8 +101,8 @@ export default function AdminProductsPage() {
       }
       setShowModal(false);
       await loadData();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al guardar producto');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al guardar producto'));
     }
   };
 
@@ -135,8 +137,8 @@ export default function AdminProductsPage() {
         prev ? { ...prev, images: [...(prev.images ?? []), newImage] } : prev
       );
       await loadData();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al subir imagen');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al subir imagen'));
     } finally {
       setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -152,8 +154,8 @@ export default function AdminProductsPage() {
         prev ? { ...prev, images: prev.images?.filter((img) => img.id !== image.id) } : prev
       );
       await loadData();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Error al eliminar imagen');
+    } catch (err) {
+      alert(apiErrorMessage(err, 'Error al eliminar imagen'));
     }
   };
 
@@ -207,9 +209,11 @@ export default function AdminProductsPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {product.images && product.images.length > 0 ? (
-                        <img
+                        <Image
                           src={`${API_URL}${product.images[0].url}`}
                           alt={product.images[0].alt ?? product.name}
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded object-cover"
                         />
                       ) : (
@@ -297,10 +301,13 @@ export default function AdminProductsPage() {
                   <div className="grid grid-cols-3 gap-4">
                     {imageProduct.images.map((img) => (
                       <div key={img.id} className="group relative">
-                        <img
+                        <Image
                           src={`${API_URL}${img.url}`}
                           alt={img.alt ?? ''}
-                          className="h-32 w-full rounded-lg object-cover"
+                          width={200}
+                          height={128}
+                          style={{ width: '100%', height: '8rem', objectFit: 'cover' }}
+                          className="rounded-lg"
                         />
                         <button
                           onClick={() => handleDeleteImage(img)}

@@ -1,6 +1,7 @@
 import { serverFetch } from '@/lib/server-api';
 import type { Product } from '@/types/product.types';
 import Link from 'next/link';
+import Image from 'next/image';
 import { AddToCartButton } from '@/features/products/components/AddToCartButton';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -71,9 +72,12 @@ export default async function HomePage() {
                   <article key={product.id} className="product-card">
                     <div className="product-card__image-wrap">
                       {firstImage ? (
-                        <img
+                        <Image
                           src={`${API_URL}${firstImage.url}`}
                           alt={firstImage.alt ?? product.name}
+                          width={400}
+                          height={400}
+                          style={{ width: '100%', height: 'auto' }}
                           className="product-card__image"
                         />
                       ) : null}

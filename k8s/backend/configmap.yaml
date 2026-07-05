@@ -9,5 +9,6 @@ metadata:
 data:
   NODE_ENV: "production"
   BACKEND_PORT: "3000"
-  CORS_ORIGIN: "http://localhost:3001"
+  # Frontend expuesto vía NodePort 30090 (ver k8s/frontend/service.yaml)
+  CORS_ORIGIN: "http://localhost:30090"
   RATE_LIMIT_MAX: "100"

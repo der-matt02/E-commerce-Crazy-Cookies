@@ -34,8 +34,18 @@ spec:
               echo "MySQL listo."
       containers:
         - name: migrate
-          image: node:18-alpine
-          command: ["sh", "-c", "echo 'Migrations OK (demo mode)' && sleep 2"]
+          image: ghcr.io/der-matt02/e-commerce-crazy-cookies-backend:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+          command:
+            [
+              "sh",
+              "-c",
+              "export PATH=\"/app/node_modules/.bin:/app/backend/node_modules/.bin:$PATH\" && cd /app/backend && prisma migrate deploy",
+            ]
           env:
             - name: DATABASE_URL
               valueFrom:

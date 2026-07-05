@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -359,8 +364,14 @@ export class ProductsService {
       throw new NotFoundException('Image not found');
     }
 
+    const uploadsDir = join(process.cwd(), 'uploads');
     const filePath = join(process.cwd(), image.url);
+    if (!filePath.startsWith(uploadsDir)) {
+      throw new BadRequestException('Invalid file path');
+    }
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     if (existsSync(filePath)) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       await unlink(filePath);
     }
 

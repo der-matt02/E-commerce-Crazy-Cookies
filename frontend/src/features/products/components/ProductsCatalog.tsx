@@ -6,6 +6,7 @@ import { productsApi } from '@/features/products/api/products-api';
 import type { Product, Category } from '@/types/product.types';
 import type { SearchResult } from '@/features/products/api/products-api';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -209,9 +210,12 @@ export function ProductsCatalog({
                 <article key={product.id} className="product-card">
                   <div className="product-card__image-wrap">
                     {firstImage ? (
-                      <img
+                      <Image
                         src={`${API_URL}${firstImage.url}`}
                         alt={firstImage.alt ?? product.name}
+                        width={400}
+                        height={400}
+                        style={{ width: '100%', height: 'auto' }}
                         className="product-card__image"
                       />
                     ) : null}

@@ -18,13 +18,17 @@ export default function CartPage() {
     setUpdatingItems((prev) => new Set(prev).add(itemId));
     setErrors((prev) => {
       const n = { ...prev };
+      // eslint-disable-next-line security/detect-object-injection
       delete n[itemId];
       return n;
     });
     try {
       await updateQuantity(itemId, newQty);
-    } catch (err: any) {
-      setErrors((prev) => ({ ...prev, [itemId]: err.message || 'Error al actualizar' }));
+    } catch (err) {
+      setErrors((prev) => ({
+        ...prev,
+        [itemId]: (err instanceof Error ? err.message : null) || 'Error al actualizar',
+      }));
     } finally {
       setUpdatingItems((prev) => {
         const n = new Set(prev);

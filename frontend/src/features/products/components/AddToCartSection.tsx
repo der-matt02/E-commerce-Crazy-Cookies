@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useCart } from '@/features/cart/context/CartContext';
+import { apiErrorMessage } from '@/lib/error';
 
 interface AddToCartSectionProps {
   productId: string;
@@ -24,8 +25,11 @@ export function AddToCartSection({ productId, stockAvailable }: AddToCartSection
       setState('added');
       setQuantity(1);
       setTimeout(() => setState('idle'), 3000);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Error al agregar al carrito');
+    } catch (err) {
+      setErrorMsg(
+        (err instanceof Error ? err.message : null) ||
+          apiErrorMessage(err, 'Error al agregar al carrito')
+      );
       setState('error');
       setTimeout(() => setState('idle'), 3000);
     }
