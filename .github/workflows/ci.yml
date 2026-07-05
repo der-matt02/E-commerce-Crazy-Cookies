@@ -360,6 +360,12 @@ jobs:
           echo "frontend nunca respondió 200" && docker compose logs && exit 1
 
       - name: OWASP ZAP Baseline Scan
+        # continue-on-error: el scan en sí y sus resultados (report_html.html/
+        # report_md.md, subidos en el paso siguiente) no dependen de esto — la
+        # action intenta además subir su PROPIO artifact interno, y esa subida
+        # falla de forma reproducible en GitHub ("artifact name is not valid")
+        # sin importar el nombre que se le dé. No afecta la evidencia real.
+        continue-on-error: true
         uses: zaproxy/action-baseline@906a3c93ffde4864839d31a93daadcbd2737b4da # v0.12.0
         with:
           target: "http://localhost:3001"
@@ -368,8 +374,6 @@ jobs:
           # Solo queremos el reporte como artifact, no que abra un Issue en
           # cada corrida (el token por defecto tampoco tiene permiso para eso).
           allow_issue_writing: false
-          # El nombre default del artifact interno de la action ("zap_scan",
-          # con guion bajo) es rechazado por la API de artifacts de GitHub.
           artifact_name: zap-scan-internal
 
       - name: Upload reporte ZAP
