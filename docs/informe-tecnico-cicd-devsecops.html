@@ -1,0 +1,689 @@
+<title>CI/CD con enfoque DevSecOps — Crazy Cookies</title>
+<style>
+  :root {
+    --bg: #f6f5f2;
+    --surface: #ffffff;
+    --surface-raised: #fbfaf8;
+    --ink: #1c2128;
+    --ink-light: #565f6b;
+    --ink-faint: #8a8f97;
+    --border: #dedad1;
+    --border-strong: #c9c4b8;
+    --accent: #0f6e5e;
+    --accent-dark: #0b4f43;
+    --accent-soft: #e4f1ee;
+    --success: #1e7b4d;
+    --success-soft: #e5f3ea;
+    --warning: #9b6b00;
+    --warning-soft: #faf1dc;
+    --critical: #b3261e;
+    --critical-soft: #fbe9e7;
+    --code-bg: #1c2128;
+    --code-ink: #e7e5e0;
+    --code-border: #323a44;
+    --shadow: 0 1px 2px rgba(28, 33, 40, 0.06), 0 8px 24px -12px rgba(28, 33, 40, 0.18);
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"],
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161a;
+      --surface: #1a2024;
+      --surface-raised: #1f262b;
+      --ink: #e7e5e0;
+      --ink-light: #a7aeb6;
+      --ink-faint: #6d747c;
+      --border: #2a3137;
+      --border-strong: #394048;
+      --accent: #3fcbac;
+      --accent-dark: #2c9c85;
+      --accent-soft: #16302b;
+      --success: #4cae7e;
+      --success-soft: #17281f;
+      --warning: #d4a63a;
+      --warning-soft: #2c2413;
+      --critical: #e2685f;
+      --critical-soft: #2c1917;
+      --code-bg: #0d1013;
+      --code-ink: #dcdad4;
+      --code-border: #2a3137;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] { color-scheme: dark; }
+  :root[data-theme="light"] {
+    --bg: #f6f5f2; --surface: #ffffff; --surface-raised: #fbfaf8; --ink: #1c2128;
+    --ink-light: #565f6b; --ink-faint: #8a8f97; --border: #dedad1; --border-strong: #c9c4b8;
+    --accent: #0f6e5e; --accent-dark: #0b4f43; --accent-soft: #e4f1ee;
+    --success: #1e7b4d; --success-soft: #e5f3ea; --warning: #9b6b00; --warning-soft: #faf1dc;
+    --critical: #b3261e; --critical-soft: #fbe9e7; --code-bg: #1c2128; --code-ink: #e7e5e0;
+    --code-border: #323a44; color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12161a; --surface: #1a2024; --surface-raised: #1f262b; --ink: #e7e5e0;
+      --ink-light: #a7aeb6; --ink-faint: #6d747c; --border: #2a3137; --border-strong: #394048;
+      --accent: #3fcbac; --accent-dark: #2c9c85; --accent-soft: #16302b;
+      --success: #4cae7e; --success-soft: #17281f; --warning: #d4a63a; --warning-soft: #2c2413;
+      --critical: #e2685f; --critical-soft: #2c1917; --code-bg: #0d1013; --code-ink: #dcdad4;
+      --code-border: #2a3137;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body, .sans {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .mono, code, pre, .term {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+
+  h1, h2, h3, h4 { font-family: Georgia, "Iowan Old Style", "Times New Roman", serif; text-wrap: balance; line-height: 1.2; margin: 0; }
+  p { line-height: 1.65; margin: 0 0 1em; max-width: 68ch; }
+  a { color: var(--accent-dark); }
+  :root[data-theme="dark"] a, @media (prefers-color-scheme: dark) { a { color: var(--accent); } }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 48px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 40px 24px 120px;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 24px; }
+    .toc { display: none; }
+  }
+
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+  }
+  .toc-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  .toc li { counter-increment: toc; margin-bottom: 2px; }
+  .toc a {
+    display: flex;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    color: var(--ink-light);
+    text-decoration: none;
+    line-height: 1.4;
+  }
+  .toc a:hover { background: var(--surface-raised); color: var(--ink); }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    padding-top: 1px;
+  }
+
+  main { min-width: 0; }
+
+  .masthead {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 4px;
+    padding: 40px 44px;
+    margin-bottom: 40px;
+    box-shadow: var(--shadow);
+  }
+  .masthead .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--accent-dark);
+    margin-bottom: 14px;
+  }
+  :root[data-theme="dark"] .masthead .eyebrow, @media (prefers-color-scheme: dark) { .masthead .eyebrow { color: var(--accent); } }
+  .masthead h1 { font-size: 34px; margin-bottom: 10px; }
+  .masthead .subtitle { color: var(--ink-light); font-size: 17px; font-family: -apple-system, sans-serif; max-width: 60ch; margin-bottom: 28px; }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .meta-cell { background: var(--surface); padding: 12px 16px; }
+  .meta-cell .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 4px; }
+  .meta-cell .v { font-size: 14px; font-weight: 600; }
+  .meta-cell .v.placeholder { color: var(--warning); font-weight: 600; font-family: ui-monospace, monospace; font-size: 13px; }
+
+  section { margin-bottom: 52px; }
+  section > h2 {
+    font-size: 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--ink);
+  }
+  section > h2 .num {
+    font-family: ui-monospace, monospace;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--surface);
+    background: var(--ink);
+    padding: 3px 9px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  section > .section-intro { color: var(--ink-light); font-family: -apple-system, sans-serif; font-size: 15px; margin-top: 14px; }
+  h3 { font-size: 18px; margin: 28px 0 10px; }
+  h4 { font-size: 15px; margin: 20px 0 8px; font-family: -apple-system, sans-serif; font-weight: 700; }
+
+  ul, ol { padding-left: 22px; line-height: 1.65; }
+  li { margin-bottom: 6px; }
+  li::marker { color: var(--ink-faint); }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    font-family: -apple-system, sans-serif;
+    font-size: 14.5px;
+    margin: 18px 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .todo {
+    border: 1.5px dashed var(--warning);
+    background: var(--warning-soft);
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-family: -apple-system, sans-serif;
+    font-size: 14px;
+    margin: 18px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .todo .flag { flex-shrink: 0; font-weight: 800; color: var(--warning); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; background: var(--surface); border: 1px solid var(--warning); padding: 3px 8px; border-radius: 4px; margin-top: 1px; }
+  .todo strong { color: var(--warning); }
+
+  table { border-collapse: collapse; width: 100%; margin: 18px 0; font-family: -apple-system, sans-serif; font-size: 14px; }
+  caption { text-align: left; font-size: 12px; color: var(--ink-faint); margin-bottom: 8px; font-family: -apple-system, sans-serif; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); font-weight: 600; border-bottom: 2px solid var(--border-strong); }
+  tr:last-child td { border-bottom: none; }
+  td code { font-size: 12.5px; }
+  .table-wrap { overflow-x: auto; }
+
+  code {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5px 6px;
+    font-size: 0.86em;
+  }
+
+  .term {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 18px 0;
+    box-shadow: var(--shadow);
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--code-border);
+    background: rgba(255,255,255,0.02);
+  }
+  .term-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-faint); opacity: 0.5; }
+  .term-title { font-family: -apple-system, sans-serif; font-size: 11.5px; color: #9aa1a8; margin-left: 4px; }
+  .term pre { margin: 0; padding: 14px 16px; overflow-x: auto; font-size: 12.5px; line-height: 1.7; }
+  .term .ok { color: #5fd08e; }
+  .term .warn { color: #e0b84f; }
+  .term .err { color: #ef7167; }
+  .term .dim { color: #7a828a; }
+
+  .status-row { display: flex; align-items: center; gap: 10px; margin: 3px 0; font-family: ui-monospace, monospace; font-size: 13px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: -apple-system, sans-serif; font-size: 11.5px; font-weight: 700;
+    padding: 2px 9px 2px 7px; border-radius: 100px; letter-spacing: 0.01em;
+  }
+  .pill.success { background: var(--success-soft); color: var(--success); }
+  .pill.warning { background: var(--warning-soft); color: var(--warning); }
+  .pill.critical { background: var(--critical-soft); color: var(--critical); }
+  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .job-grid { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 18px 0; }
+  .job-row { display: flex; align-items: center; gap: 14px; background: var(--surface); padding: 10px 16px; font-family: -apple-system, sans-serif; font-size: 13.5px; }
+  .job-row .name { flex: 1; }
+  .job-row .time { font-family: ui-monospace, monospace; font-size: 12px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+  .stage-flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 24px 0; font-family: -apple-system, sans-serif; }
+  .stage-box { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 14px; font-size: 12.5px; font-weight: 600; box-shadow: var(--shadow); }
+  .stage-box.sec { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft); }
+  :root[data-theme="dark"] .stage-box.sec, @media (prefers-color-scheme: dark) { .stage-box.sec { color: var(--accent); } }
+  .stage-arrow { color: var(--ink-faint); font-size: 16px; }
+
+  .findings { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; }
+  .finding {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-strong);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    background: var(--surface);
+  }
+  .finding.fixed { border-left-color: var(--success); }
+  .finding-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; font-family: -apple-system, sans-serif; }
+  .finding-head .t { font-weight: 700; font-size: 14px; }
+  .finding-body { font-family: -apple-system, sans-serif; font-size: 13.5px; color: var(--ink-light); margin-top: 6px; }
+  .finding-body code { font-size: 12px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 22px; }
+  .card h4 { margin-top: 0; }
+
+  .capture-slot {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 8px;
+    padding: 28px 20px;
+    text-align: center;
+    font-family: -apple-system, sans-serif;
+    color: var(--ink-faint);
+    font-size: 13px;
+    background: var(--surface-raised);
+    margin: 14px 0;
+  }
+  .capture-slot .icon { font-size: 22px; display: block; margin-bottom: 8px; }
+  .capture-slot b { color: var(--ink-light); }
+
+  footer {
+    max-width: 68ch;
+    font-family: -apple-system, sans-serif;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    margin-top: 60px;
+  }
+
+  .kv-list { display: flex; flex-direction: column; gap: 6px; font-family: -apple-system, sans-serif; font-size: 13.5px; }
+  .kv-list div { display: flex; gap: 8px; }
+  .kv-list .k { color: var(--ink-faint); min-width: 110px; flex-shrink: 0; }
+</style>
+
+<div class="layout">
+  <nav class="toc">
+    <div class="toc-label">Contenido</div>
+    <ol>
+      <li><a href="#objetivo">Objetivo del proyecto</a></li>
+      <li><a href="#arquitectura">Arquitectura del pipeline</a></li>
+      <li><a href="#herramientas">Herramientas y propósito</a></li>
+      <li><a href="#ci">Etapa CI — build, tests, SAST</a></li>
+      <li><a href="#artefactos">Integridad de artefactos</a></li>
+      <li><a href="#dast">DAST — OWASP ZAP</a></li>
+      <li><a href="#cd">CD — GitOps con Argo CD</a></li>
+      <li><a href="#hallazgos">Hallazgos reales del proceso</a></li>
+      <li><a href="#evidencia">Evidencia de resultados</a></li>
+      <li><a href="#conclusiones">Conclusiones y aprendizajes</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="masthead">
+      <div class="eyebrow">Informe técnico · ISWZ3205 Procesos de Software</div>
+      <h1>CI/CD con enfoque DevSecOps</h1>
+      <div class="subtitle">Pipeline de integración y despliegue continuo para Crazy Cookies E-commerce, con selección deliberada de herramientas de seguridad y despliegue real en un cluster de Kubernetes.</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="k">Proyecto</div><div class="v">Crazy Cookies E-commerce</div></div>
+        <div class="meta-cell"><div class="k">Repositorio</div><div class="v"><a href="https://github.com/der-matt02/E-commerce-Crazy-Cookies">github.com/der-matt02/…</a></div></div>
+        <div class="meta-cell"><div class="k">Integrantes</div><div class="v placeholder">[COMPLETAR: nombres]</div></div>
+        <div class="meta-cell"><div class="k">Fecha de exposición</div><div class="v placeholder">[COMPLETAR: fecha]</div></div>
+      </div>
+    </header>
+
+    <section id="objetivo">
+      <h2><span class="num">01</span> Objetivo del proyecto</h2>
+      <p class="section-intro">Qué se propuso demostrar esta actividad y por qué el pipeline se armó como se armó.</p>
+
+      <p>El objetivo fue implementar, de punta a punta, un flujo real de integración y despliegue continuo con enfoque DevSecOps para un e-commerce ya funcional (NestJS + Next.js + MySQL), cubriendo los tres pilares que pide la consigna: <strong>build y pruebas automatizadas</strong>, <strong>análisis de seguridad integrado al pipeline</strong> (SAST y DAST, más validación de integridad de artefactos) y <strong>despliegue real en un cluster de Kubernetes</strong> gestionado con GitOps.</p>
+
+      <p>Un intento anterior de este mismo pipeline se descartó deliberadamente antes de esta entrega: se había armado sin selección justificada de herramientas y sin un cluster de Kubernetes realmente accesible (el CD apuntaba a un cluster sin contexto de <code>kubectl</code> configurado). Esta vez cada herramienta se eligió por su propósito específico, y el pipeline se verificó corriendo de verdad — no solo "en teoría" — incluyendo el despliegue final en un cluster real.</p>
+
+      <div class="callout">
+        <p><strong>Decisión de arquitectura clave:</strong> se separó explícitamente el CI (GitHub Actions, corre en la nube) del CD (Argo CD, corre <em>dentro</em> del cluster). GitHub Actions nunca aplica cambios directo a Kubernetes — solo construye, prueba, escanea y actualiza el tag de imagen en un manifiesto versionado en Git. Argo CD, que vive en el cluster, detecta ese cambio y sincroniza. Es el patrón GitOps: Git como única fuente de verdad del estado del sistema.</p>
+      </div>
+    </section>
+
+    <section id="arquitectura">
+      <h2><span class="num">02</span> Arquitectura del pipeline</h2>
+      <p class="section-intro">Las etapas, en el orden en que corren, y qué depende de qué.</p>
+
+      <p>El pipeline vive en un único workflow de GitHub Actions (<code>.github/workflows/ci.yml</code>) con diez jobs. Los primeros seis corren en paralelo apenas se hace push; el resto depende de que esos pasen:</p>
+
+      <div class="stage-flow">
+        <div class="stage-box">ESLint backend</div>
+        <div class="stage-box">ESLint frontend</div>
+        <div class="stage-box sec">Semgrep SAST</div>
+        <div class="stage-box">Tests unitarios</div>
+        <div class="stage-box">Tests e2e</div>
+        <span class="stage-arrow">→</span>
+        <div class="stage-box">Build &amp; push (GHCR)</div>
+        <span class="stage-arrow">→</span>
+        <div class="stage-box sec">Trivy</div>
+        <div class="stage-box sec">ZAP DAST</div>
+        <span class="stage-arrow">→</span>
+        <div class="stage-box">Actualizar manifiestos</div>
+        <span class="stage-arrow">→</span>
+        <div class="stage-box sec">Argo CD sincroniza</div>
+      </div>
+
+      <p>La etapa de build solo corre si <em>todo</em> lo anterior — lint, SAST, tests unitarios y tests e2e — pasó. Trivy y ZAP corren en paralelo entre sí una vez que las imágenes ya están publicadas, porque ambos necesitan la imagen construida (Trivy la escanea, ZAP levanta el stack completo con <code>docker-compose</code> y ataca la app real). El último job no toca el cluster directamente: escribe el nuevo tag de imagen en <code>k8s/*/kustomization.yaml</code> y lo commitea a <code>main</code> — Argo CD, que ya está corriendo dentro del cluster y observando ese repositorio, hace el resto.</p>
+
+      <h3>Por qué Argo CD corre <em>dentro</em> del cluster</h3>
+      <p>Es un detalle que no es obvio la primera vez: el cluster de Kubernetes de esta demo es <strong>local</strong> (Kubernetes de OrbStack, en la misma Mac), así que los runners de GitHub Actions —que corren en la nube— no tienen forma de conectarse a él directamente. Argo CD resuelve esto al revés: en vez de que el CI empuje el despliegue, Argo CD (que sí vive dentro del cluster) hace <em>pull</em> del repositorio de Git de forma periódica. El CI nunca necesita credenciales del cluster ni acceso de red hacia él — solo necesita poder pushear a Git.</p>
+    </section>
+
+    <section id="herramientas">
+      <h2><span class="num">03</span> Herramientas utilizadas y su propósito</h2>
+      <p class="section-intro">Cada herramienta se eligió para un propósito puntual dentro de la consigna DevSecOps, no como relleno.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Herramienta</th><th>Categoría</th><th>Por qué esta y no otra</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>GitHub Actions</strong></td>
+              <td>CI/CD</td>
+              <td>El repositorio ya vive en GitHub público — cero infraestructura adicional, y <code>GITHUB_TOKEN</code> alcanza para publicar en GHCR sin gestionar credenciales extra.</td>
+            </tr>
+            <tr>
+              <td><strong>Argo CD</strong></td>
+              <td>CD / GitOps</td>
+              <td>Corre dentro del cluster y hace pull de Git — resuelve el problema de desplegar a un cluster local sin exponerlo a internet. Patrón app-of-apps: una Application raíz gestiona 3 hijas (database, backend, frontend).</td>
+            </tr>
+            <tr>
+              <td><strong>Kubernetes (OrbStack)</strong></td>
+              <td>Orquestación</td>
+              <td>Cluster real (no simulado), corriendo local sin costo de nube. Se usó en vez de manifiestos "de mentira" que nunca se aplican de verdad.</td>
+            </tr>
+            <tr>
+              <td><strong>ESLint + plugin de seguridad</strong></td>
+              <td>SAST</td>
+              <td>Cubre reglas específicas de JS/TS (inyección, mal uso de <code>eval</code>, etc.) integradas al mismo linter que ya corre en cada PR.</td>
+            </tr>
+            <tr>
+              <td><strong>Semgrep</strong></td>
+              <td>SAST</td>
+              <td>Reglas más amplias (OWASP Top 10, JWT, Node.js) y — clave para este pipeline — reglas sobre <em>el propio workflow de CI/CD</em> (detectó tags mutables de GitHub Actions, ver hallazgos).</td>
+            </tr>
+            <tr>
+              <td><strong>Trivy</strong></td>
+              <td>Integridad de artefactos</td>
+              <td>Escanea las imágenes Docker publicadas por vulnerabilidades conocidas (CVE) y genera un SBOM (CycloneDX) — la evidencia de "qué hay adentro" de lo que se despliega.</td>
+            </tr>
+            <tr>
+              <td><strong>OWASP ZAP</strong></td>
+              <td>DAST</td>
+              <td>Ataca la aplicación <em>corriendo de verdad</em> (no el código fuente) — la única forma de encontrar problemas que solo existen en runtime, como cabeceras de seguridad ausentes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="ci">
+      <h2><span class="num">04</span> Etapa CI — build, tests y SAST</h2>
+      <p class="section-intro">Los primeros seis jobs: nada llega a construirse en imagen si esto no pasa.</p>
+
+      <p>Lint (ESLint con reglas de seguridad) y Semgrep corren sobre backend y frontend por separado. Los tests se dividen en tres jobs independientes: unitarios de backend, e2e de backend (con un contenedor real de MySQL como <code>service</code> del job) y unitarios de frontend. Separar el e2e del unitario fue deliberado — el e2e necesita levantar una base de datos y correr migraciones, así que tiene su propio costo de tiempo y no debe bloquear al resto si algo tarda.</p>
+
+      <div class="job-grid">
+        <div class="job-row"><span class="pill success">pass</span><span class="name">ESLint — Backend</span><span class="time">29s</span></div>
+        <div class="job-row"><span class="pill success">pass</span><span class="name">ESLint — Frontend</span><span class="time">24s</span></div>
+        <div class="job-row"><span class="pill success">pass</span><span class="name">Semgrep SAST</span><span class="time">31s</span></div>
+        <div class="job-row"><span class="pill success">pass</span><span class="name">Tests — Backend (unit)</span><span class="time">32s</span></div>
+        <div class="job-row"><span class="pill success">pass</span><span class="name">Tests — Backend (e2e)</span><span class="time">1m 5s</span></div>
+        <div class="job-row"><span class="pill success">pass</span><span class="name">Tests — Frontend</span><span class="time">26s</span></div>
+      </div>
+
+      <p>El job de e2e de backend nunca había corrido en CI antes de esta entrega — solo existían los unitarios. Apenas se agregó, atrapó dos regresiones reales que llevaban tiempo silenciosas en el código (detalle en la sección de hallazgos). Esa es la razón concreta por la que vale la pena correr e2e en el pipeline y no solo localmente: nadie las había notado hasta que un job de CI las forzó a la superficie.</p>
+    </section>
+
+    <section id="artefactos">
+      <h2><span class="num">05</span> Integridad de artefactos — Trivy</h2>
+      <p class="section-intro">Una vez que backend y frontend se construyen y publican en GHCR, se escanean antes de que nada los toque.</p>
+
+      <p>Las imágenes se publican en el registro de contenedores de GitHub (<code>ghcr.io</code>) con dos tags: <code>latest</code> y un tag inmutable por commit (<code>sha-&lt;7 caracteres&gt;</code>). El tag por SHA es el que realmente usa el despliegue — <code>latest</code> es solo de referencia — para que cada versión desplegada sea trazable a un commit exacto.</p>
+
+      <p>Trivy corre contra ambas imágenes recién publicadas:</p>
+      <ul>
+        <li>Reporte <strong>SARIF</strong> con severidad CRITICAL/HIGH, subido a la pestaña de Security de GitHub (visible junto a los hallazgos de Semgrep, mismo lugar).</li>
+        <li><strong>SBOM</strong> en formato CycloneDX del backend — el inventario exacto de dependencias y versiones que corren en producción.</li>
+      </ul>
+
+      <div class="callout">
+        <p>El escaneo se configuró para <em>reportar</em> (<code>exit-code: 0</code>), no para bloquear el build. Es una decisión consciente para esta entrega: bloquear por cualquier CVE de severidad alta en una imagen base (<code>node:22-alpine</code>) habría hecho el pipeline inutilizable sin antes triagear cada hallazgo uno por uno. La evidencia queda igual, visible en Security y como artifact descargable.</p>
+      </div>
+    </section>
+
+    <section id="dast">
+      <h2><span class="num">06</span> DAST — OWASP ZAP</h2>
+      <p class="section-intro">El único análisis de seguridad de los cuatro que ataca la aplicación corriendo, no el código.</p>
+
+      <p>Para esta etapa el pipeline levanta el stack completo (MySQL + backend + frontend) con <code>docker compose up --build</code> directo en el runner, espera a que el frontend responda 200, y corre un <em>baseline scan</em> de ZAP contra <code>http://localhost:3001</code>. El resultado real de la última corrida:</p>
+
+      <div class="term">
+        <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-title">OWASP ZAP Baseline Scan — resumen</span></div>
+        <pre><span class="dim">FAIL-NEW:</span> <span class="ok">0</span>	<span class="dim">FAIL-INPROG:</span> 0	<span class="dim">WARN-NEW:</span> <span class="warn">10</span>	<span class="dim">WARN-INPROG:</span> 0	<span class="dim">INFO:</span> 0	<span class="dim">IGNORE:</span> 0	<span class="dim">PASS:</span> <span class="ok">60</span>
+
+<span class="warn">WARN-NEW:</span> Permissions Policy Header Not Set [10063] x 5
+<span class="warn">WARN-NEW:</span> Cross-Origin-Embedder-Policy Header Missing or Invalid [90004] x 9
+<span class="warn">WARN-NEW:</span> Sec-Fetch-Dest Header is Missing [90005] x 8
+<span class="warn">WARN-NEW:</span> Base64 Disclosure [10094] x 3
+<span class="warn">WARN-NEW:</span> Non-Storable Content [10049] x 7
+<span class="warn">WARN-NEW:</span> Modern Web Application [10109] x 2</pre>
+      </div>
+
+      <p>Cero fallas nuevas, diez advertencias — ninguna crítica, todas relacionadas a cabeceras de seguridad HTTP opcionales que Next.js no setea por defecto (Permissions-Policy, Cross-Origin-Embedder-Policy, Sec-Fetch-Dest). Es exactamente el tipo de hallazgo que un DAST encuentra y un SAST no puede: no es un bug en el código, es una configuración de runtime del servidor.</p>
+
+      <div class="todo">
+        <span class="flag">Pendiente</span>
+        <div><strong>Endurecer cabeceras de seguridad</strong> en <code>next.config.js</code> (o vía <code>helmet</code> en el backend) para resolver estos 10 warnings antes de una entrega futura — no bloquea esta demo, pero es la mejora obvia de continuidad.</div>
+      </div>
+    </section>
+
+    <section id="cd">
+      <h2><span class="num">07</span> CD — GitOps con Argo CD</h2>
+      <p class="section-intro">Cómo un push a <code>main</code> termina siendo un pod corriendo en el cluster, sin que nadie corra <code>kubectl apply</code> a mano.</p>
+
+      <p>Los manifiestos de Kubernetes viven en <code>k8s/</code> organizados con Kustomize, uno por servicio (<code>backend/</code>, <code>frontend/</code>, <code>database/</code>), más una carpeta <code>apps/</code> con los recursos <code>Application</code> de Argo CD que apuntan a cada uno. Un <code>root-app.yaml</code> bootstrapea todo con el patrón <strong>app-of-apps</strong>: una sola Application raíz gestiona las otras tres.</p>
+
+      <h3>Flujo completo de un despliegue</h3>
+      <ol>
+        <li>El job <em>Build &amp; Push</em> construye y publica <code>backend:sha-&lt;commit&gt;</code> y <code>frontend:sha-&lt;commit&gt;</code> en GHCR.</li>
+        <li>El job <em>Actualizar manifiestos</em> corre <code>kustomize edit set image</code> sobre <code>k8s/backend/kustomization.yaml</code> y <code>k8s/frontend/kustomization.yaml</code>, y commitea el cambio a <code>main</code> con el bot de GitHub Actions.</li>
+        <li>Argo CD, que sondea el repositorio, detecta el nuevo commit y compara el estado deseado (Git) contra el estado real (cluster).</li>
+        <li>Con <code>syncPolicy.automated</code> activado, sincroniza solo: aplica el nuevo Deployment, corre el <em>hook</em> <code>PreSync</code> (una migración de Prisma) antes de que el nuevo pod reciba tráfico, y hace <em>rolling update</em> sin downtime (<code>maxUnavailable: 0</code>).</li>
+      </ol>
+
+      <div class="callout">
+        <p><strong>El CI nunca toca el cluster.</strong> No hay <code>kubeconfig</code> ni credenciales de Kubernetes en los secrets de GitHub Actions — el único puente entre CI y CD es un commit de Git. Esto es, literalmente, la definición de GitOps: si Argo CD se cayera, el pipeline de CI seguiría corriendo exactamente igual, solo que nadie aplicaría los cambios hasta que Argo CD volviera.</p>
+      </div>
+
+      <h3>Estado real del cluster al cierre de esta entrega</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>kubectl get application -n argocd</caption>
+          <thead><tr><th>Application</th><th>Sync</th><th>Health</th></tr></thead>
+          <tbody>
+            <tr><td>crazy-cookies-root</td><td><span class="pill success">Synced</span></td><td><span class="pill success">Healthy</span></td></tr>
+            <tr><td>crazy-cookies-database</td><td><span class="pill success">Synced</span></td><td><span class="pill success">Healthy</span></td></tr>
+            <tr><td>crazy-cookies-frontend</td><td><span class="pill success">Synced</span></td><td><span class="pill success">Healthy</span></td></tr>
+            <tr><td>crazy-cookies-backend</td><td><span class="pill warning">OutOfSync</span></td><td><span class="pill success">Healthy</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size: 13.5px; color: var(--ink-light)">La aplicación de backend en sí está <strong>Healthy</strong> (los 3 pods sirven tráfico real con la imagen correcta) — el <code>OutOfSync</code> es específicamente el <em>hook</em> de migración, que quedó reintentando por un problema de compatibilidad de arquitectura de CPU explicado en la sección de hallazgos. No afecta el servicio.</p>
+
+      <div class="capture-slot">
+        <span class="icon">📸</span>
+        <b>Captura sugerida:</b> pantalla de Argo CD UI (<code>kubectl port-forward svc/argocd-server -n argocd 8080:443</code> → <code>https://localhost:8080</code>) mostrando el árbol de recursos de <code>crazy-cookies-root</code> con sus 3 apps hijas y el estado de sincronización.
+      </div>
+    </section>
+
+    <section id="hallazgos">
+      <h2><span class="num">08</span> Hallazgos reales del proceso</h2>
+      <p class="section-intro">Nada de esto se armó a la primera. Documentar los problemas reales — y cómo se diagnosticaron — es tan parte de la evidencia como el pipeline en verde.</p>
+
+      <h3>Hallazgos de seguridad (SAST)</h3>
+      <div class="findings">
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t">Tags mutables en GitHub Actions</span><span class="pill success">corregido</span></div>
+          <div class="finding-body">Semgrep marcó 35 usos de <code>uses: accion@v4</code> (y similares) en <code>ci.yml</code> — un tag como <code>v4</code> puede ser repuntado por el dueño de la action, habilitando un ataque de cadena de suministro (pasó de verdad con <code>tj-actions/changed-files</code> en 2025). Se fijaron los 10 actions de terceros del workflow a su SHA de commit exacto, con la versión como comentario.</div>
+        </div>
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t">Configuración de supply-chain de pnpm incompleta</span><span class="pill success">corregido, con una excepción documentada</span></div>
+          <div class="finding-body">Se agregaron <code>blockExoticSubdeps</code> y <code>minimumReleaseAge</code> (7 días) a <code>pnpm-workspace.yaml</code>. Se evaluó también <code>trustPolicy: no-downgrade</code>, pero al activarlo rechazó 8 paquetes muy conocidos (chokidar, semver, vite) por "trust downgrade". Se verificaron los mantenedores reales de esos paquetes en npm — son transferencias legítimas, no compromisos — y se dejó desactivado con la justificación documentada en el propio archivo, en vez de forzar una policy que rompía el install a ciegas.</div>
+        </div>
+      </div>
+
+      <h3>Bugs reales de la aplicación, atrapados por el pipeline</h3>
+      <div class="findings">
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t">Mensaje de bienvenida sin emoji</span><span class="pill success">corregido</span></div>
+          <div class="finding-body">El endpoint raíz (<code>GET /</code>) había perdido el <code>🍪</code> del mensaje en algún punto, pero el test e2e seguía esperándolo. Invisible hasta que el job de e2e de backend corrió por primera vez en CI.</div>
+        </div>
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t">Test desactualizado contra la forma real de la respuesta</span><span class="pill success">corregido</span></div>
+          <div class="finding-body"><code>GET /products</code> devuelve <code>{`{products, pagination}`}</code> desde hace varias sesiones (se agregó paginación), pero un test e2e seguía asumiendo un array plano. Mismo mecanismo: nadie lo notaba porque ese test nunca corría en CI.</div>
+        </div>
+      </div>
+
+      <h3>Infraestructura y despliegue</h3>
+      <div class="findings">
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t">Manifiestos de k8s con imágenes "de mentira"</span><span class="pill success">corregido</span></div>
+          <div class="finding-body">Los Deployments de backend/frontend en <code>k8s/</code> (de un intento anterior) usaban <code>node:18-alpine</code> con un servidor HTTP inline que solo devolvía <code>"OK"</code>, y <code>nginx:alpine</code> vacío — Argo CD sincronizaba "exitosamente" un stack que nunca sirvió la aplicación real. Reemplazadas por las imágenes reales publicadas en GHCR.</div>
+        </div>
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t"><code>frontend/public/</code> faltante</span><span class="pill success">corregido</span></div>
+          <div class="finding-body">El Dockerfile del frontend hace <code>COPY --from=builder /app/frontend/public ./frontend/public</code>, pero el directorio no existía en el repo — el build de Docker fallaba siempre desde un checkout limpio. Confirmado en el primer intento de build en CI.</div>
+        </div>
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t"><code>runAsNonRoot</code> sin UID explícito</span><span class="pill success">corregido</span></div>
+          <div class="finding-body">Kubernetes no puede verificar que un usuario no-root con nombre (<code>USER node</code> en el Dockerfile) sea realmente no-root sin un <code>runAsUser</code> numérico explícito. Se agregó <code>runAsUser: 1000</code> (UID real de <code>node</code>, verificado con <code>docker run --entrypoint sh … id node</code>).</div>
+        </div>
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t">Falta de volumen escribible para subida de imágenes</span><span class="pill success">corregido</span></div>
+          <div class="finding-body">El backend hace <code>mkdirSync('/app/backend/uploads')</code> al arrancar (multer). Sin un volumen montado ahí, el usuario no-root no puede crear el directorio sobre el filesystem de solo lectura de la imagen — crash loop. Se agregó un volumen <code>emptyDir</code>.</div>
+        </div>
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t">Job de migración con datos de prueba, no la migración real</span><span class="pill success">corregido</span></div>
+          <div class="finding-body">El hook <code>PreSync</code> que corre las migraciones de Prisma tenía un <code>echo "Migrations OK (demo mode)"</code> en vez de <code>prisma migrate deploy</code> real. Además, overridear el <code>command</code> del Job no hereda el <code>PATH</code> que exporta el <code>entrypoint.sh</code> de la imagen — hubo que replicarlo explícitamente.</div>
+        </div>
+        <div class="finding fixed">
+          <div class="finding-head"><span class="t"><code>trivy-action</code> con una dependencia interna rota</span><span class="pill success">corregido</span></div>
+          <div class="finding-body">La marketplace action de Trivy fallaba de forma silenciosa e intermitente (su instalador interno referenciaba una versión de <code>aquasecurity/setup-trivy</code> que ya no existe). Se reemplazó por una invocación directa de <code>docker run aquasec/trivy</code>, que depende solo de la imagen oficial ya estable.</div>
+        </div>
+        <div class="finding">
+          <div class="finding-head"><span class="t">Desajuste de arquitectura de CPU (amd64 vs arm64)</span><span class="pill warning">mitigado parcialmente</span></div>
+          <div class="finding-body">Los runners de GitHub Actions son <code>amd64</code>; el cluster de la demo (OrbStack, Apple Silicon) es <code>arm64</code>. Sin un build multi-plataforma, kubelet no encuentra un manifiesto compatible al pullear. Se agregó <code>docker/setup-qemu-action</code> + <code>platforms: linux/amd64,linux/arm64</code> en ambos builds — resolvió el despliegue de la app, pero el motor nativo de Prisma dentro del <em>hook</em> de migración todavía tropieza con el binario de la arquitectura correcta en un caso puntual (ver sección de CD). Documentado como mejora pendiente, no bloquea la demo.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="evidencia">
+      <h2><span class="num">09</span> Evidencia de resultados</h2>
+      <p class="section-intro">La corrida final, verificada de dos formas: que el pipeline diga "verde", y que la aplicación desplegada responda de verdad.</p>
+
+      <h3>Corrida completa del pipeline</h3>
+      <div class="kv-list" style="margin-bottom: 16px;">
+        <div><span class="k">Run</span> <a href="https://github.com/der-matt02/E-commerce-Crazy-Cookies/actions/runs/28754349527">#28754349527</a></div>
+        <div><span class="k">Resultado</span> <span class="pill success">success</span> — 10/10 jobs</div>
+        <div><span class="k">Duración total</span> ~29 min (el build multi-arquitectura con emulación QEMU tomó 21m45s por sí solo)</div>
+      </div>
+
+      <div class="capture-slot">
+        <span class="icon">📸</span>
+        <b>Captura sugerida:</b> la vista de <em>Actions</em> en GitHub del run de arriba, mostrando los 10 jobs en verde con sus tiempos — es la evidencia más directa de "el pipeline corre de verdad".
+      </div>
+
+      <h3>Verificación funcional del despliegue (no solo el estado de Argo CD)</h3>
+      <p>Mostrar que Argo CD dice "Synced" no alcanza como evidencia — se probó la aplicación desplegada con requests reales contra los NodePorts del cluster:</p>
+
+      <div class="term">
+        <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-title">verificación funcional — cluster real</span></div>
+        <pre><span class="dim">$</span> curl http://localhost:30080/api/health
+{"status":"ok","timestamp":"2026-07-05T21:43:40.987Z"}
+
+<span class="dim">$</span> curl -X POST http://localhost:30080/api/auth/login \
+    -d '{"email":"admin@crazycookies.com","password":"Admin123!"}'
+{"token":"eyJhbGciOiJIUzI1NiIs...", "admin":{"role":"SUPER_ADMIN"}}
+
+<span class="dim">$</span> curl -o /dev/null -w "%{http_code}\n" http://localhost:30090
+<span class="ok">200</span></pre>
+      </div>
+
+      <p style="font-size: 13.5px; color: var(--ink-light)">Health check real, login real contra la base de datos del cluster (con datos sembrados de verdad, no mocks), y el frontend respondiendo — los tres puntos que importan: backend, base de datos y frontend, todos corriendo dentro del cluster desplegado por Argo CD.</p>
+
+      <div class="capture-slot">
+        <span class="icon">📸</span>
+        <b>Captura sugerida:</b> el catálogo de productos abierto en <code>http://localhost:30090</code> desde el navegador, y el panel de GHCR (<code>github.com/der-matt02?tab=packages</code>) mostrando las dos imágenes publicadas con sus tags por SHA.
+      </div>
+    </section>
+
+    <section id="conclusiones">
+      <h2><span class="num">10</span> Conclusiones y aprendizajes</h2>
+      <p class="section-intro">Qué nos llevamos de armar esto de verdad, no solo de leer sobre el patrón.</p>
+
+      <p><strong>El GitOps recién se entiende cuando se rompe.</strong> La primera vez que Argo CD revirtió cambios aplicados a mano contra el cluster (porque <code>selfHeal: true</code> detectó que no coincidían con Git) fue más instructivo que cualquier diagrama: quedó claro, en la práctica, que Git — no el estado vivo del cluster — es la única fuente de verdad. Cualquier cambio que no pase por un commit se pierde en el próximo ciclo de reconciliación.</p>
+
+      <p><strong>Un DAST encuentra una clase de problema completamente distinta a un SAST.</strong> Los cuatro análisis de seguridad (ESLint, Semgrep, Trivy, ZAP) no son redundantes entre sí — cada uno mira una capa diferente: código fuente, configuración del propio pipeline, contenido de las imágenes publicadas, y comportamiento real en runtime. Los 10 warnings de ZAP (cabeceras HTTP) nunca los habría encontrado un linter de código, porque no son un bug de código: son una omisión de configuración que solo existe cuando la app está corriendo.</p>
+
+      <p><strong>Agregar un test e2e al CI no es un checkbox — encuentra bugs de verdad.</strong> Los dos bugs reales de backend (mensaje sin emoji, forma de respuesta desactualizada) llevaban tiempo en el código sin que nadie los notara, simplemente porque esos tests nunca corrían de forma automática. El valor de CI no es "tener tests", es correrlos en cada cambio.</p>
+
+      <p><strong>La mayoría de los problemas de esta entrega no fueron de "seguridad" en el sentido de la consigna — fueron de infraestructura real.</strong> El desajuste de arquitectura de CPU, los <em>finalizers</em> de Argo CD bloqueando la limpieza de un Job, una action de terceros con una dependencia interna rota: ninguno de estos aparece en un tutorial. Son exactamente el tipo de fricción que separa "el pipeline corre en la demo del profesor" de "el pipeline corre en un cluster real ajeno al entorno donde se escribió".</p>
+    </section>
+
+    <footer>
+      <p>Informe elaborado para la actividad evaluativa ISWZ3205-5437_5438 — Procesos de Software, UDLA. Repositorio: <a href="https://github.com/der-matt02/E-commerce-Crazy-Cookies">github.com/der-matt02/E-commerce-Crazy-Cookies</a>.</p>
+    </footer>
+  </main>
+</div>

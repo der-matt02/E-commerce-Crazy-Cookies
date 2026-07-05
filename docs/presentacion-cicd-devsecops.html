@@ -1,0 +1,298 @@
+<title>CI/CD DevSecOps — Presentación</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --surface: #ffffff; --ink: #1c2128; --ink-light: #565f6b; --ink-faint: #8a8f97;
+    --border: #dedad1; --border-strong: #c9c4b8; --accent: #0f6e5e; --accent-dark: #0b4f43; --accent-soft: #e4f1ee;
+    --success: #1e7b4d; --success-soft: #e5f3ea; --warning: #9b6b00; --warning-soft: #faf1dc;
+    --critical: #b3261e; --code-bg: #1c2128; --code-ink: #e7e5e0; --code-border: #323a44;
+    --shadow: 0 1px 2px rgba(28,33,40,0.06), 0 8px 24px -12px rgba(28,33,40,0.18);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12161a; --surface: #1a2024; --ink: #e7e5e0; --ink-light: #a7aeb6; --ink-faint: #6d747c;
+      --border: #2a3137; --border-strong: #394048; --accent: #3fcbac; --accent-dark: #2c9c85; --accent-soft: #16302b;
+      --success: #4cae7e; --success-soft: #17281f; --warning: #d4a63a; --warning-soft: #2c2413;
+      --critical: #e2685f; --code-bg: #0d1013; --code-ink: #dcdad4; --code-border: #2a3137;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12161a; --surface: #1a2024; --ink: #e7e5e0; --ink-light: #a7aeb6; --ink-faint: #6d747c;
+    --border: #2a3137; --border-strong: #394048; --accent: #3fcbac; --accent-dark: #2c9c85; --accent-soft: #16302b;
+    --success: #4cae7e; --success-soft: #17281f; --warning: #d4a63a; --warning-soft: #2c2413;
+    --critical: #e2685f; --code-bg: #0d1013; --code-ink: #dcdad4; --code-border: #2a3137; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--ink); }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  h1, h2, h3 { font-family: Georgia, "Iowan Old Style", serif; text-wrap: balance; margin: 0; line-height: 1.15; }
+
+  .deck { max-width: 980px; margin: 0 auto; padding: 32px 20px 100px; display: flex; flex-direction: column; gap: 28px; }
+
+  .slide {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    aspect-ratio: 16 / 9;
+    padding: 48px 56px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide-num {
+    position: absolute; top: 20px; right: 24px;
+    font-family: ui-monospace, monospace; font-size: 12px; color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .kicker {
+    text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; font-weight: 700;
+    color: var(--accent-dark); margin-bottom: 14px;
+  }
+  :root[data-theme="dark"] .kicker { color: var(--accent); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .kicker { color: var(--accent); } }
+
+  .slide h2 { font-size: 30px; margin-bottom: 18px; }
+  .slide .lede { font-size: 16px; color: var(--ink-light); max-width: 60ch; margin-bottom: 20px; }
+  .slide-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+
+  .cover { justify-content: center; align-items: flex-start; }
+  .cover h1 { font-size: 44px; margin-bottom: 12px; }
+  .cover .sub { font-size: 18px; color: var(--ink-light); margin-bottom: 32px; }
+  .cover .meta { display: flex; gap: 32px; font-size: 13px; }
+  .cover .meta .k { text-transform: uppercase; letter-spacing: 0.06em; font-size: 10.5px; color: var(--ink-faint); margin-bottom: 4px; }
+  .cover .meta .v { font-weight: 600; }
+  .cover .meta .v.ph { color: var(--warning); font-family: ui-monospace, monospace; font-weight: 600; }
+
+  ul.points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  ul.points li { display: flex; gap: 12px; font-size: 16px; line-height: 1.5; }
+  ul.points li::before { content: "—"; color: var(--accent); flex-shrink: 0; font-weight: 700; }
+
+  .stage-flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .stage-box { background: var(--accent-soft); border: 1px solid var(--accent); color: var(--accent-dark); border-radius: 6px; padding: 8px 12px; font-size: 12.5px; font-weight: 700; }
+  :root[data-theme="dark"] .stage-box { color: var(--accent); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stage-box { color: var(--accent); } }
+  .stage-box.plain { background: var(--surface); border-color: var(--border-strong); color: var(--ink); }
+  .stage-arrow { color: var(--ink-faint); font-size: 16px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  th { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); border-bottom: 2px solid var(--border-strong); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; }
+  .card h3 { font-size: 15px; margin-bottom: 8px; font-family: -apple-system, sans-serif; }
+  .card p { font-size: 13.5px; color: var(--ink-light); margin: 0; line-height: 1.5; }
+
+  .term { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--code-border); border-radius: 8px; padding: 16px 18px; font-size: 13px; line-height: 1.7; }
+  .term .ok { color: #5fd08e; } .term .warn { color: #e0b84f; } .term .dim { color: #7a828a; }
+
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
+  .pill.success { background: var(--success-soft); color: var(--success); }
+  .pill.warning { background: var(--warning-soft); color: var(--warning); }
+  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .job-list { display: flex; flex-direction: column; gap: 6px; }
+  .job-row { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+  .job-row .name { flex: 1; }
+  .job-row .time { font-family: ui-monospace, monospace; font-size: 11.5px; color: var(--ink-faint); }
+
+  .findings-mini { display: flex; flex-direction: column; gap: 8px; }
+  .finding-mini { display: flex; gap: 10px; align-items: baseline; font-size: 14px; border-left: 3px solid var(--success); padding-left: 12px; }
+  .finding-mini .t { font-weight: 700; }
+  .finding-mini .d { color: var(--ink-light); font-size: 13px; }
+
+  .big-quote { font-family: Georgia, serif; font-size: 22px; line-height: 1.5; color: var(--ink); text-wrap: balance; }
+  .big-quote + .attrib { margin-top: 16px; font-size: 13px; color: var(--ink-faint); }
+
+  .todo-mini {
+    border: 1.5px dashed var(--warning); background: var(--warning-soft); border-radius: 6px;
+    padding: 8px 12px; font-size: 12.5px; color: var(--warning); font-weight: 600; display: inline-flex;
+    align-self: flex-start; margin-top: auto;
+  }
+
+  .print-hint { max-width: 980px; margin: 0 auto 8px; padding: 0 20px; font-size: 12px; color: var(--ink-faint); }
+  @media print {
+    body { background: white; }
+    .slide { break-after: page; box-shadow: none; }
+    .print-hint { display: none; }
+  }
+</style>
+
+<div class="print-hint">10 láminas · usar Cmd/Ctrl+P → PDF para exportar, o como guion para armar el PPT.</div>
+<div class="deck">
+
+  <div class="slide cover">
+    <div class="kicker">ISWZ3205 · Procesos de Software</div>
+    <h1>CI/CD con enfoque DevSecOps</h1>
+    <div class="sub">Crazy Cookies E-commerce — pipeline real, cluster real, seguridad integrada.</div>
+    <div class="meta">
+      <div><div class="k">Integrantes</div><div class="v ph">[COMPLETAR]</div></div>
+      <div><div class="k">Fecha de exposición</div><div class="v ph">[COMPLETAR]</div></div>
+      <div><div class="k">Repositorio</div><div class="v">github.com/der-matt02/…</div></div>
+    </div>
+    <div class="slide-num">1 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">Objetivo</div>
+    <h2>Qué se propuso demostrar</h2>
+    <div class="slide-body">
+      <ul class="points">
+        <li>Implementar un flujo de CI/CD real — no simulado — con build, pruebas, generación de artefactos y despliegue en un cluster Kubernetes.</li>
+        <li>Integrar dos herramientas de seguridad (SAST + DAST), más validación de integridad de artefactos, con evidencia real de resultados.</li>
+        <li>Corregir un intento anterior que se había armado sin selección justificada de herramientas ni cluster accesible.</li>
+      </ul>
+    </div>
+    <div class="slide-num">2 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">Arquitectura</div>
+    <h2>Las 10 etapas del pipeline</h2>
+    <div class="slide-body">
+      <div class="stage-flow">
+        <div class="stage-box plain">Lint ×2</div>
+        <div class="stage-box">Semgrep SAST</div>
+        <div class="stage-box plain">Tests ×3</div>
+        <span class="stage-arrow">→</span>
+        <div class="stage-box plain">Build &amp; push (GHCR)</div>
+        <span class="stage-arrow">→</span>
+        <div class="stage-box">Trivy</div>
+        <div class="stage-box">ZAP DAST</div>
+        <span class="stage-arrow">→</span>
+        <div class="stage-box plain">Actualizar manifiestos</div>
+        <span class="stage-arrow">→</span>
+        <div class="stage-box">Argo CD sincroniza</div>
+      </div>
+      <p style="font-size: 14px; color: var(--ink-light); margin-top: 8px;">GitHub Actions nunca toca el cluster directamente — solo actualiza un manifiesto en Git. Argo CD, corriendo dentro del cluster, hace el resto.</p>
+    </div>
+    <div class="slide-num">3 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">Herramientas</div>
+    <h2>Selección deliberada, no relleno</h2>
+    <div class="slide-body">
+      <table>
+        <thead><tr><th>Herramienta</th><th>Rol</th><th>Por qué</th></tr></thead>
+        <tbody>
+          <tr><td>GitHub Actions</td><td>CI/CD</td><td>Repo ya público en GitHub, cero infra extra</td></tr>
+          <tr><td>Argo CD</td><td>CD / GitOps</td><td>Hace pull desde dentro del cluster local</td></tr>
+          <tr><td>Kubernetes (OrbStack)</td><td>Orquestación</td><td>Cluster real, sin costo de nube</td></tr>
+          <tr><td>ESLint + Semgrep</td><td>SAST</td><td>Código propio + el propio workflow de CI</td></tr>
+          <tr><td>Trivy</td><td>Integridad de artefactos</td><td>CVEs de imágenes + SBOM</td></tr>
+          <tr><td>OWASP ZAP</td><td>DAST</td><td>Ataca la app corriendo, no el código</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="slide-num">4 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">Evidencia — CI</div>
+    <h2>Los 6 primeros jobs, en verde</h2>
+    <div class="slide-body">
+      <div class="job-list">
+        <div class="job-row"><span class="pill success">pass</span><span class="name">ESLint — Backend / Frontend</span><span class="time">~30s c/u</span></div>
+        <div class="job-row"><span class="pill success">pass</span><span class="name">Semgrep SAST</span><span class="time">31s</span></div>
+        <div class="job-row"><span class="pill success">pass</span><span class="name">Tests unitarios (backend + frontend)</span><span class="time">~30s c/u</span></div>
+        <div class="job-row"><span class="pill success">pass</span><span class="name">Tests e2e backend (con MySQL real)</span><span class="time">1m 5s</span></div>
+      </div>
+      <p style="font-size: 13.5px; color: var(--ink-light); margin-top: 4px;">El job de e2e nunca había corrido en CI — apenas se agregó, atrapó 2 bugs reales que llevaban tiempo silenciosos (ver lámina 8).</p>
+    </div>
+    <div class="slide-num">5 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">DevSecOps — DAST</div>
+    <h2>OWASP ZAP contra la app real</h2>
+    <div class="slide-body">
+      <div class="term">
+<span class="dim">FAIL-NEW:</span> <span class="ok">0</span>&nbsp;&nbsp;&nbsp;<span class="dim">WARN-NEW:</span> <span class="warn">10</span>&nbsp;&nbsp;&nbsp;<span class="dim">PASS:</span> <span class="ok">60</span>
+
+<span class="warn">•</span> Permissions Policy Header Not Set ×5
+<span class="warn">•</span> Cross-Origin-Embedder-Policy Missing ×9
+<span class="warn">•</span> Sec-Fetch-Dest Header Missing ×8
+      </div>
+      <p style="font-size: 13.5px; color: var(--ink-light);">Cero fallas críticas. Las 10 advertencias son cabeceras de seguridad HTTP que Next.js no setea por defecto — el tipo de hallazgo que solo un DAST encuentra, porque no existe en el código, solo en runtime.</p>
+    </div>
+    <div class="slide-num">6 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">CD</div>
+    <h2>GitOps: de un commit a un pod corriendo</h2>
+    <div class="slide-body">
+      <div class="grid2">
+        <div class="card">
+          <h3>1 — 2 · Build y publicación</h3>
+          <p>CI construye backend/frontend y los publica en GHCR taggeados por SHA de commit.</p>
+        </div>
+        <div class="card">
+          <h3>3 — Commit del manifiesto</h3>
+          <p>CI actualiza <code>k8s/*/kustomization.yaml</code> con el nuevo tag y lo pushea a <code>main</code>.</p>
+        </div>
+        <div class="card">
+          <h3>4 — Argo CD detecta</h3>
+          <p>Compara el estado deseado (Git) contra el real (cluster) — sin credenciales del cluster en el CI.</p>
+        </div>
+        <div class="card">
+          <h3>5 — Sincroniza</h3>
+          <p>Corre la migración (hook PreSync) y hace rolling update sin downtime.</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">7 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">Hallazgos reales</div>
+    <h2>Lo que el pipeline encontró de verdad</h2>
+    <div class="slide-body">
+      <div class="findings-mini">
+        <div class="finding-mini"><span class="t">Tags mutables</span><span class="d">— 35 GitHub Actions fijadas a SHA exacto (riesgo de supply-chain)</span></div>
+        <div class="finding-mini"><span class="t">2 bugs de backend</span><span class="d">— atrapados por el e2e que nunca había corrido en CI</span></div>
+        <div class="finding-mini"><span class="t">Imágenes "de mentira"</span><span class="d">— k8s desplegaba stubs, no la app real</span></div>
+        <div class="finding-mini"><span class="t">amd64 vs arm64</span><span class="d">— el cluster local no encontraba manifiesto compatible</span></div>
+        <div class="finding-mini"><span class="t">Permisos no-root</span><span class="d">— UID explícito + volumen de uploads faltante</span></div>
+      </div>
+    </div>
+    <div class="slide-num">8 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">Verificación funcional</div>
+    <h2>No solo "Argo CD dice Synced"</h2>
+    <div class="slide-body">
+      <div class="term">
+<span class="dim">$</span> curl http://localhost:30080/api/health
+{"status":"ok"}
+
+<span class="dim">$</span> curl -o /dev/null -w "%{http_code}" http://localhost:30090
+<span class="ok">200</span>
+      </div>
+      <p style="font-size: 14px; color: var(--ink-light);">Health check, login contra la base real, y frontend respondiendo — verificado con requests reales contra el cluster desplegado, no solo el estado del dashboard de Argo CD.</p>
+    </div>
+    <div class="slide-num">9 / 10</div>
+  </div>
+
+  <div class="slide">
+    <div class="kicker">Conclusiones</div>
+    <h2>Qué nos llevamos</h2>
+    <div class="slide-body">
+      <div class="big-quote">"El GitOps recién se entiende cuando se rompe" — la primera vez que Argo CD revirtió un cambio manual dejó claro, en la práctica, que Git es la única fuente de verdad.</div>
+      <ul class="points" style="margin-top: 8px;">
+        <li>Un DAST encuentra una clase de problema que un SAST no puede: comportamiento en runtime.</li>
+        <li>Los tests en CI no son un checkbox — encontraron bugs reales, invisibles hasta que corrieron ahí.</li>
+        <li>La mayoría de la fricción real no fue "seguridad" en sentido estricto — fue infraestructura: arquitecturas de CPU, permisos, dependencias rotas de terceros.</li>
+      </ul>
+    </div>
+    <div class="slide-num">10 / 10</div>
+  </div>
+
+</div>
