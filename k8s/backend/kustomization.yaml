@@ -7,4 +7,12 @@ resources:
   - configmap.yaml
   - deployment.yaml
   - service.yaml
+  - migrate-job.yaml
+
+# El pipeline de CI actualiza este tag (kustomize edit set image) después de
+# construir y publicar la imagen en GHCR, y commitea el cambio — Argo CD lo
+# sincroniza automáticamente al detectar el commit.
+images:
+  - name: ghcr.io/der-matt02/e-commerce-crazy-cookies-backend
+    newTag: latest
 
