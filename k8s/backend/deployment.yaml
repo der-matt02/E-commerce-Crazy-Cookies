@@ -82,3 +82,12 @@ spec:
               port: http
             initialDelaySeconds: 15
             periodSeconds: 20
+          volumeMounts:
+            # main.ts hace mkdirSync en este path al arrancar; sin un volumen
+            # escribible acá, el usuario no-root del contenedor no puede crear
+            # el directorio sobre el filesystem de la imagen (EACCES).
+            - name: uploads
+              mountPath: /app/backend/uploads
+      volumes:
+        - name: uploads
+          emptyDir: {}
