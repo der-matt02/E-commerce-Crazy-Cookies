@@ -4,10 +4,10 @@ kind: Kustomization
 namespace: crazy-cookies
 
 resources:
-  - deployment.yaml
-  - service.yaml
+- deployment.yaml
+- service.yaml
 
 images:
-  - name: ghcr.io/der-matt02/e-commerce-crazy-cookies-frontend
-    newTag: latest
-
+- name: ghcr.io/der-matt02/e-commerce-crazy-cookies-frontend
+  newName: ghcr.io/der-matt02/e-commerce-crazy-cookies-frontend
+  newTag: sha-1cdd011
