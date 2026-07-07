@@ -38,6 +38,13 @@ RUN pnpm install --ignore-scripts && \
     pnpm approve-builds --all && \
     pnpm rebuild
 
+# Generate the Prisma client while still root, then hand node_modules over to
+# the unprivileged "node" user the container runs as: prisma migrate deploy
+# writes into the pnpm store (engine checksum cache, lockfiles) at runtime,
+# and pre-generating alone doesn't change ownership away from root.
+RUN cd backend && npx prisma generate && \
+    chown -R node:node /app/node_modules
+
 # Copy compiled application over the installed source
 COPY --from=builder /app/backend/dist ./backend/dist
 
