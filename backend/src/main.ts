@@ -30,12 +30,27 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Rate limiting: límite estricto para la búsqueda pública de pedidos
+  // (evita fuerza bruta sobre orderNumber + teléfono), antes del límite global.
+  app.use(
+    '/api/orders/lookup',
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: configService.get('RATE_LIMIT_LOOKUP_MAX') || 10,
+      message: 'Demasiados intentos de búsqueda, intenta de nuevo más tarde.',
+    }),
+  );
+
   // Rate limiting
+  // Se excluye /api/health: los liveness/readiness probes de Kubernetes lo
+  // llaman cada 10-20s y superaban la cuota, provocando 429 que kubelet
+  // interpreta como fallo de salud y reinicia el pod en loop.
   app.use(
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: configService.get('RATE_LIMIT_MAX') || 100,
       message: 'Too many requests from this IP, please try again later.',
+      skip: (req) => req.path === '/api/health',
     }),
   );
 
