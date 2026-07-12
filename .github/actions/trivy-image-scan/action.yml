@@ -26,19 +26,24 @@ runs:
     # que falla de forma silenciosa e intermitente en este runner.
     - name: Trivy — escanear imagen
       shell: bash
+      env:
+        TRIVY_SCAN_IMAGE: ${{ inputs.image }}
+        TRIVY_SCAN_OUTPUT_FILE: ${{ inputs.output-file }}
+        TRIVY_USERNAME: ${{ inputs.registry-username }}
+        TRIVY_PASSWORD: ${{ inputs.registry-password }}
       run: |
         docker run --rm \
           -v /var/run/docker.sock:/var/run/docker.sock \
           -v "$PWD":/output \
           -v trivy-cache:/root/.cache/ \
-          -e TRIVY_USERNAME="${{ inputs.registry-username }}" \
-          -e TRIVY_PASSWORD="${{ inputs.registry-password }}" \
+          -e TRIVY_USERNAME="$TRIVY_USERNAME" \
+          -e TRIVY_PASSWORD="$TRIVY_PASSWORD" \
           aquasec/trivy:0.57.1 image \
           --format sarif \
-          --output "/output/${{ inputs.output-file }}" \
+          --output "/output/$TRIVY_SCAN_OUTPUT_FILE" \
           --severity CRITICAL,HIGH \
           --exit-code 0 \
-          "${{ inputs.image }}"
+          "$TRIVY_SCAN_IMAGE"
 
     - name: Subir SARIF a GitHub Security
       if: always()
