@@ -1,0 +1,53 @@
+name: 'Trivy — escaneo de imagen (SARIF)'
+description: 'Escanea una imagen Docker con Trivy y sube el SARIF resultante a la pestaña Security de GitHub'
+
+inputs:
+  image:
+    description: 'Imagen completa con tag, ej. ghcr.io/org/app:sha-abc123'
+    required: true
+  output-file:
+    description: 'Nombre del archivo SARIF de salida'
+    required: true
+  category:
+    description: 'Categoría para el upload a GitHub Security (distingue backend/frontend)'
+    required: true
+  registry-username:
+    description: 'Usuario del registro (para que Trivy pueda pullear la imagen)'
+    required: true
+  registry-password:
+    description: 'Password/token del registro'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Se invoca la imagen oficial de Trivy directo por Docker en vez de la
+    # marketplace action: la action depende de un instalador (setup-trivy)
+    # que falla de forma silenciosa e intermitente en este runner.
+    - name: Trivy — escanear imagen
+      shell: bash
+      env:
+        TRIVY_SCAN_IMAGE: ${{ inputs.image }}
+        TRIVY_SCAN_OUTPUT_FILE: ${{ inputs.output-file }}
+        TRIVY_USERNAME: ${{ inputs.registry-username }}
+        TRIVY_PASSWORD: ${{ inputs.registry-password }}
+      run: |
+        docker run --rm \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          -v "$PWD":/output \
+          -v trivy-cache:/root/.cache/ \
+          -e TRIVY_USERNAME="$TRIVY_USERNAME" \
+          -e TRIVY_PASSWORD="$TRIVY_PASSWORD" \
+          aquasec/trivy:0.57.1 image \
+          --format sarif \
+          --output "/output/$TRIVY_SCAN_OUTPUT_FILE" \
+          --severity CRITICAL,HIGH \
+          --exit-code 0 \
+          "$TRIVY_SCAN_IMAGE"
+
+    - name: Subir SARIF a GitHub Security
+      if: always()
+      uses: github/codeql-action/upload-sarif@fb84f6228fd846d3c392887f22b18ce2d9139495 # v4.31.0
+      with:
+        sarif_file: ${{ inputs.output-file }}
+        category: ${{ inputs.category }}
