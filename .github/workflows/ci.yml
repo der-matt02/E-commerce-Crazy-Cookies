@@ -7,6 +7,10 @@ on:
     branches: [develop, main]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   BACKEND_IMAGE: ghcr.io/der-matt02/e-commerce-crazy-cookies-backend
@@ -17,17 +21,10 @@ jobs:
   lint-backend:
     name: ESLint — Backend
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
-      - uses: pnpm/action-setup@e9540b3eafaf84907c087a645d3258bfaa861427 # v3.0.0
-        with:
-          version: 11
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 22
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: ./.github/actions/setup-pnpm-node
       - name: Run ESLint (security)
         run: |
           pnpm --filter backend exec eslint "src/**/*.ts" \
@@ -44,17 +41,10 @@ jobs:
   lint-frontend:
     name: ESLint — Frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
-      - uses: pnpm/action-setup@e9540b3eafaf84907c087a645d3258bfaa861427 # v3.0.0
-        with:
-          version: 11
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 22
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: ./.github/actions/setup-pnpm-node
       - name: Run ESLint (security)
         run: |
           pnpm --filter frontend exec eslint "src/**/*.{ts,tsx}" \
@@ -71,6 +61,7 @@ jobs:
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       security-events: write
     steps:
@@ -103,18 +94,11 @@ jobs:
   test-backend:
     name: Tests — Backend (unit)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [lint-backend]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
-      - uses: pnpm/action-setup@e9540b3eafaf84907c087a645d3258bfaa861427 # v3.0.0
-        with:
-          version: 11
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 22
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: ./.github/actions/setup-pnpm-node
       - name: Generate Prisma client
         run: pnpm --filter backend exec prisma generate
       - name: Run tests
@@ -123,6 +107,7 @@ jobs:
   test-backend-e2e:
     name: Tests — Backend (e2e)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [lint-backend]
     services:
       mysql:
@@ -146,15 +131,7 @@ jobs:
       NODE_ENV: test
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
-      - uses: pnpm/action-setup@e9540b3eafaf84907c087a645d3258bfaa861427 # v3.0.0
-        with:
-          version: 11
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 22
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: ./.github/actions/setup-pnpm-node
       - name: Generate Prisma client
         run: pnpm --filter backend exec prisma generate
       - name: Run migrations
@@ -165,18 +142,11 @@ jobs:
   test-frontend:
     name: Tests — Frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [lint-frontend]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
-      - uses: pnpm/action-setup@e9540b3eafaf84907c087a645d3258bfaa861427 # v3.0.0
-        with:
-          version: 11
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 22
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: ./.github/actions/setup-pnpm-node
       - name: Run tests
         run: pnpm --filter frontend test run
 
@@ -184,6 +154,7 @@ jobs:
   build-and-push:
     name: Build & Push images (GHCR)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: [semgrep, test-backend, test-backend-e2e, test-frontend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
@@ -246,6 +217,7 @@ jobs:
   trivy-scan:
     name: Trivy — Vulnerabilidades de imágenes
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [build-and-push]
     permissions:
       contents: read
@@ -260,52 +232,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Se invoca la imagen oficial de Trivy directo por Docker en vez de la
-      # marketplace action: la action depende de un instalador (setup-trivy)
-      # que falla de forma silenciosa e intermitente en este runner.
-      - name: Trivy — imagen backend (SARIF)
-        run: |
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v "$PWD":/output \
-            -v trivy-cache:/root/.cache/ \
-            -e TRIVY_USERNAME=${{ github.actor }} \
-            -e TRIVY_PASSWORD=${{ secrets.GITHUB_TOKEN }} \
-            aquasec/trivy:0.57.1 image \
-            --format sarif \
-            --output /output/trivy-backend.sarif \
-            --severity CRITICAL,HIGH \
-            --exit-code 0 \
-            ${{ env.BACKEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
-
-      - name: Trivy — imagen frontend (SARIF)
-        run: |
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v "$PWD":/output \
-            -v trivy-cache:/root/.cache/ \
-            -e TRIVY_USERNAME=${{ github.actor }} \
-            -e TRIVY_PASSWORD=${{ secrets.GITHUB_TOKEN }} \
-            aquasec/trivy:0.57.1 image \
-            --format sarif \
-            --output /output/trivy-frontend.sarif \
-            --severity CRITICAL,HIGH \
-            --exit-code 0 \
-            ${{ env.FRONTEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
-
-      - name: Upload SARIF (backend) a GitHub Security
-        if: always()
-        uses: github/codeql-action/upload-sarif@fb84f6228fd846d3c392887f22b18ce2d9139495 # v4.31.0
+      - name: Trivy — imagen backend
+        uses: ./.github/actions/trivy-image-scan
         with:
-          sarif_file: trivy-backend.sarif
+          image: ${{ env.BACKEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
+          output-file: trivy-backend.sarif
           category: trivy-backend
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload SARIF (frontend) a GitHub Security
-        if: always()
-        uses: github/codeql-action/upload-sarif@fb84f6228fd846d3c392887f22b18ce2d9139495 # v4.31.0
+      - name: Trivy — imagen frontend
+        uses: ./.github/actions/trivy-image-scan
         with:
-          sarif_file: trivy-frontend.sarif
+          image: ${{ env.FRONTEND_IMAGE }}:${{ needs.build-and-push.outputs.sha_tag }}
+          output-file: trivy-frontend.sarif
           category: trivy-frontend
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generar SBOM (backend, formato CycloneDX)
         run: |
@@ -334,6 +277,7 @@ jobs:
   dast-zap:
     name: OWASP ZAP — DAST
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [build-and-push]
     permissions:
       contents: read
@@ -399,6 +343,7 @@ jobs:
   update-manifests:
     name: Actualizar manifiestos k8s (dispara Argo CD)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [build-and-push, trivy-scan, dast-zap]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
