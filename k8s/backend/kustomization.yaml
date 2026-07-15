@@ -15,4 +15,4 @@ resources:
 images:
 - name: ghcr.io/der-matt02/e-commerce-crazy-cookies-backend
   newName: ghcr.io/der-matt02/e-commerce-crazy-cookies-backend
-  newTag: sha-1170ebb
+  newTag: sha-3e60489
