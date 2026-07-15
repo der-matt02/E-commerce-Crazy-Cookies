@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 // ============================================
@@ -181,7 +182,10 @@ model Order {
   subtotal        Decimal     @db.Decimal(10, 2)
   tax             Decimal     @db.Decimal(10, 2) @default(0)
   shipping        Decimal     @db.Decimal(10, 2) @default(0)
+  discount        Decimal     @db.Decimal(10, 2) @default(0)
   total           Decimal     @db.Decimal(10, 2)
+
+  couponCode      String?
 
   status          OrderStatus @default(PENDING)
   paymentMethod   String      @default("pending")
@@ -207,6 +211,37 @@ enum OrderStatus {
   READY
   DELIVERED
   CANCELLED
+}
+
+// ============================================
+// COUPONS
+// ============================================
+
+model Coupon {
+  id          String     @id @default(uuid())
+  code        String     @unique
+
+  type        CouponType
+  value       Decimal    @db.Decimal(10, 2)
+
+  minPurchase Decimal?   @db.Decimal(10, 2)
+  maxUses     Int?
+  usedCount   Int        @default(0)
+
+  isActive    Boolean    @default(true)
+  expiresAt   DateTime?
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("coupons")
+  @@index([code])
+  @@index([isActive])
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
 }
 
 model OrderItem {

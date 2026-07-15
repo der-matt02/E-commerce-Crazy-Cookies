@@ -3,9 +3,7 @@ set -e
 
 export PATH="/app/node_modules/.bin:/app/backend/node_modules/.bin:$PATH"
 
-echo "==> Generating Prisma client..."
 cd /app/backend
-prisma generate
 
 echo "==> Running Prisma migrations..."
 prisma migrate deploy

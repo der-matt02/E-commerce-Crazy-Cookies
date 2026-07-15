@@ -16,23 +16,23 @@ interface AuditLog {
 }
 
 const ACTION_COLORS: Record<string, string> = {
-  PRODUCT_CREATED: 'bg-green-100 text-green-800',
-  PRODUCT_UPDATED: 'bg-blue-100 text-blue-800',
-  PRODUCT_DELETED: 'bg-red-100 text-red-800',
-  CATEGORY_CREATED: 'bg-green-100 text-green-800',
-  CATEGORY_UPDATED: 'bg-blue-100 text-blue-800',
-  CATEGORY_DELETED: 'bg-red-100 text-red-800',
+  PRODUCT_CREATED: 'bg-success/15 text-success-dark',
+  PRODUCT_UPDATED: 'bg-accent-light text-accent-dark',
+  PRODUCT_DELETED: 'bg-error/15 text-error-dark',
+  CATEGORY_CREATED: 'bg-success/15 text-success-dark',
+  CATEGORY_UPDATED: 'bg-accent-light text-accent-dark',
+  CATEGORY_DELETED: 'bg-error/15 text-error-dark',
   INVENTORY_ADJUSTED: 'bg-purple-100 text-purple-800',
   STOCK_LOW_ALERT: 'bg-orange-100 text-orange-800',
-  ORDER_CREATED: 'bg-green-100 text-green-800',
-  ORDER_STATUS_CHANGED: 'bg-blue-100 text-blue-800',
-  ORDER_CANCELLED: 'bg-red-100 text-red-800',
-  REVIEW_CREATED: 'bg-gray-100 text-gray-700',
-  REVIEW_APPROVED: 'bg-green-100 text-green-800',
-  REVIEW_REJECTED: 'bg-red-100 text-red-800',
-  REVIEW_DELETED: 'bg-red-100 text-red-800',
+  ORDER_CREATED: 'bg-success/15 text-success-dark',
+  ORDER_STATUS_CHANGED: 'bg-accent-light text-accent-dark',
+  ORDER_CANCELLED: 'bg-error/15 text-error-dark',
+  REVIEW_CREATED: 'bg-cream text-ink',
+  REVIEW_APPROVED: 'bg-success/15 text-success-dark',
+  REVIEW_REJECTED: 'bg-error/15 text-error-dark',
+  REVIEW_DELETED: 'bg-error/15 text-error-dark',
   ADMIN_LOGIN: 'bg-indigo-100 text-indigo-800',
-  ADMIN_LOGOUT: 'bg-gray-100 text-gray-700',
+  ADMIN_LOGOUT: 'bg-cream text-ink',
 };
 
 const ACTION_LABELS: Record<string, string> = {
@@ -118,7 +118,7 @@ export default function AdminAuditPage() {
         <select
           value={filterAction}
           onChange={(e) => handleFilterChange(setFilterAction)(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="rounded-card border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none"
         >
           <option value="">Todas las acciones</option>
           {Object.entries(ACTION_LABELS).map(([val, label]) => (
@@ -131,7 +131,7 @@ export default function AdminAuditPage() {
         <select
           value={filterEntity}
           onChange={(e) => handleFilterChange(setFilterEntity)(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="rounded-card border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none"
         >
           <option value="">Todas las entidades</option>
           {Object.entries(ENTITY_LABELS).map(([val, label]) => (
@@ -148,65 +148,65 @@ export default function AdminAuditPage() {
               setFilterEntity('');
               setPage(1);
             }}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-ink-light hover:text-ink"
           >
             Limpiar filtros
           </button>
         )}
 
-        <span className="ml-auto self-center text-sm text-gray-500">
+        <span className="ml-auto self-center text-sm text-ink-light">
           {total} registro{total !== 1 ? 's' : ''}
         </span>
       </div>
 
       {/* Tabla */}
-      <div className="rounded-lg bg-white shadow">
+      <div className="rounded-card bg-white shadow-card">
         {loading ? (
-          <div className="flex h-48 items-center justify-center text-gray-500">
+          <div className="flex h-48 items-center justify-center text-ink-light">
             Cargando registros...
           </div>
         ) : logs.length === 0 ? (
-          <div className="py-16 text-center text-gray-500">No hay registros de auditoría</div>
+          <div className="py-16 text-center text-ink-light">No hay registros de auditoría</div>
         ) : (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-cream">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Fecha</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Acción</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Entidad</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">IP</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-600">Detalle</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-ink-light">Fecha</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-ink-light">Acción</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-ink-light">Entidad</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-ink-light">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-ink-light">IP</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-ink-light">Detalle</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-border bg-white">
               {logs.map((log) => (
                 <>
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                  <tr key={log.id} className="hover:bg-cream">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-ink-light">
                       {new Date(log.createdAt).toLocaleString('es-CO')}
                     </td>
                     <td className="px-4 py-3">
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-medium ${
-                          ACTION_COLORS[log.action] ?? 'bg-gray-100 text-gray-700'
+                          ACTION_COLORS[log.action] ?? 'bg-cream text-ink'
                         }`}
                       >
                         {ACTION_LABELS[log.action] ?? log.action}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
+                    <td className="px-4 py-3 text-sm text-ink">
                       {ENTITY_LABELS[log.entity] ?? log.entity}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">
+                    <td className="px-4 py-3 font-mono text-xs text-ink-light">
                       {log.entityId ? log.entityId.slice(0, 8) : '-'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{log.ipAddress ?? '-'}</td>
+                    <td className="px-4 py-3 text-sm text-ink-light">{log.ipAddress ?? '-'}</td>
                     <td className="px-4 py-3 text-right">
                       {(log.oldValue || log.newValue) && (
                         <button
                           onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
-                          className="text-xs text-blue-600 hover:text-blue-800"
+                          className="text-xs text-accent hover:text-accent-dark"
                         >
                           {expandedLog === log.id ? 'Ocultar' : 'Ver cambios'}
                         </button>
@@ -215,21 +215,21 @@ export default function AdminAuditPage() {
                   </tr>
 
                   {expandedLog === log.id && (
-                    <tr key={`${log.id}-detail`} className="bg-gray-50">
+                    <tr key={`${log.id}-detail`} className="bg-cream">
                       <td colSpan={6} className="px-4 py-3">
                         <div className="grid grid-cols-2 gap-4 text-xs">
                           {log.oldValue && (
                             <div>
-                              <p className="mb-1 font-semibold text-gray-600">Antes:</p>
-                              <pre className="overflow-auto rounded bg-red-50 p-2 text-red-800">
+                              <p className="mb-1 font-semibold text-ink-light">Antes:</p>
+                              <pre className="overflow-auto rounded bg-error/10 p-2 text-error-dark">
                                 {JSON.stringify(log.oldValue, null, 2)}
                               </pre>
                             </div>
                           )}
                           {log.newValue && (
                             <div>
-                              <p className="mb-1 font-semibold text-gray-600">Después:</p>
-                              <pre className="overflow-auto rounded bg-green-50 p-2 text-green-800">
+                              <p className="mb-1 font-semibold text-ink-light">Después:</p>
+                              <pre className="overflow-auto rounded bg-success/10 p-2 text-success-dark">
                                 {JSON.stringify(log.newValue, null, 2)}
                               </pre>
                             </div>
@@ -248,21 +248,21 @@ export default function AdminAuditPage() {
       {/* Paginación */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-ink-light">
             Página {page} de {totalPages}
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage((p) => p - 1)}
               disabled={page === 1}
-              className="rounded-lg border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-40"
+              className="rounded-card border border-border px-3 py-1 text-sm hover:bg-cream disabled:opacity-40"
             >
               Anterior
             </button>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={page === totalPages}
-              className="rounded-lg border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-40"
+              className="rounded-card border border-border px-3 py-1 text-sm hover:bg-cream disabled:opacity-40"
             >
               Siguiente
             </button>

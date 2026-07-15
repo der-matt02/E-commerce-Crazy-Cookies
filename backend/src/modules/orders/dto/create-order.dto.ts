@@ -1,5 +1,8 @@
 import { IsString, IsOptional, IsEmail, MinLength, MaxLength, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+const emptyToUndefined = ({ value }: { value: string }) => (value === '' ? undefined : value);
 
 export class CreateOrderDto {
   @ApiProperty({ example: 'Juan Pérez', description: 'Nombre completo del cliente' })
@@ -14,6 +17,7 @@ export class CreateOrderDto {
   customerPhone!: string;
 
   @ApiPropertyOptional({ example: 'juan@example.com', description: 'Email del cliente' })
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsEmail()
   customerEmail?: string;
@@ -29,4 +33,10 @@ export class CreateOrderDto {
   @IsString()
   @MaxLength(500)
   notes?: string;
+
+  @ApiPropertyOptional({ example: 'VERANO10', description: 'Código de cupón de descuento' })
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  couponCode?: string;
 }

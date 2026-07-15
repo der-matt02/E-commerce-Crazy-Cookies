@@ -36,9 +36,16 @@ export enum AdjustmentType {
   ADJUSTMENT = 'ADJUSTMENT',
 }
 
+export enum AdjustmentDirection {
+  INCREASE = 'INCREASE',
+  DECREASE = 'DECREASE',
+}
+
 export interface AdjustInventoryDto {
   quantity: number;
   type: AdjustmentType;
+  /** Solo aplica cuando type=ADJUSTMENT. Por defecto INCREASE. */
+  direction?: AdjustmentDirection;
   reason?: string;
 }
 

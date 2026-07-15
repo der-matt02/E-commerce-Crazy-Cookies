@@ -8,6 +8,13 @@ export class ReviewsService {
   constructor(private prisma: PrismaService) {}
 
   async create(productId: string, dto: CreateReviewDto) {
+    // Defensa en profundidad: CreateReviewDto ya valida Min(1)/Max(5) vía class-validator,
+    // pero eso solo corre en el ValidationPipe de HTTP. Se re-valida aquí para que el
+    // service sea seguro si algún día se invoca desde otro entrypoint.
+    if (!Number.isInteger(dto.rating) || dto.rating < 1 || dto.rating > 5) {
+      throw new BadRequestException('El rating debe ser un entero entre 1 y 5');
+    }
+
     // Verificar que el producto existe
     const product = await this.prisma.product.findUnique({
       where: { id: productId },

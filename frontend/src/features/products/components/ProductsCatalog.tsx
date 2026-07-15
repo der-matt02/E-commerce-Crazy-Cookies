@@ -8,6 +8,8 @@ import type { SearchResult } from '@/features/products/api/products-api';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
+import { WishlistButton } from '@/components/ui/WishlistButton';
+import { formatPrice } from '@/lib/format';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 const PAGE_SIZE = 12;
@@ -208,7 +210,10 @@ export function ProductsCatalog({
 
               return (
                 <article key={product.id} className="product-card">
-                  <div className="product-card__image-wrap">
+                  <div
+                    className={`product-card__image-wrap ${!firstImage ? 'product-card__image-wrap--placeholder' : ''}`}
+                  >
+                    <WishlistButton productId={product.id} />
                     {firstImage ? (
                       <Image
                         src={`${API_URL}${firstImage.url}`}
@@ -218,7 +223,9 @@ export function ProductsCatalog({
                         style={{ width: '100%', height: 'auto' }}
                         className="product-card__image"
                       />
-                    ) : null}
+                    ) : (
+                      <span className="product-card__image-placeholder-label">foto</span>
+                    )}
                     {isOutOfStock && (
                       <div className="product-card__sold-out-overlay">
                         <span className="product-card__sold-out-label">Agotado</span>
@@ -236,9 +243,7 @@ export function ProductsCatalog({
                       <p className="product-card__low-stock">Solo {stockAvailable} disp.</p>
                     )}
                     <div className="product-card__footer">
-                      <span className="product-card__price">
-                        ${product.price.toLocaleString('es-CO')}
-                      </span>
+                      <span className="product-card__price">{formatPrice(product.price)}</span>
                       {isOutOfStock ? (
                         <span className="product-card__out-label">Agotado</span>
                       ) : (

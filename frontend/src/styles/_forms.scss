@@ -3,13 +3,13 @@
 .form-input {
   display: block;
   width: 100%;
-  border: 1px solid $border-md;
-  border-radius: 2px;
+  border: 1.5px solid $border;
+  border-radius: $radius-lg;
   background-color: $white;
   color: $ink;
   font-family: $font-sans;
   font-size: 13px;
-  padding: 11px 14px;
+  padding: 12px 14px;
   outline: none;
   transition: border-color $t-fast;
   appearance: none;
@@ -19,7 +19,11 @@
   }
 
   &:focus {
-    border-color: $ink;
+    border-color: $accent;
+  }
+
+  &--error {
+    border-color: $error;
   }
 
   &--search {
@@ -39,11 +43,9 @@ select.form-input {
 .form-label {
   display: block;
   font-family: $font-sans;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  color: $ink-lighter;
+  font-size: 12px;
+  font-weight: 500;
+  color: $ink-light;
   margin-bottom: 7px;
 }
 
@@ -53,7 +55,7 @@ select.form-input {
 
 .form-error {
   font-family: $font-sans;
-  font-size: 11px;
-  color: #dc2626;
+  font-size: 12px;
+  color: $error;
   margin-top: 6px;
 }

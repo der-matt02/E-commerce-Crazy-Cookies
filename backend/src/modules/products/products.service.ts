@@ -369,9 +369,9 @@ export class ProductsService {
     if (!filePath.startsWith(uploadsDir)) {
       throw new BadRequestException('Invalid file path');
     }
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- filePath is validated above to stay within uploadsDir
     if (existsSync(filePath)) {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- filePath is validated above to stay within uploadsDir
       await unlink(filePath);
     }
 

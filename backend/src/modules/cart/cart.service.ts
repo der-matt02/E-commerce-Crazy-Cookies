@@ -80,6 +80,13 @@ export class CartService {
   }
 
   async addToCart(sessionId: string, dto: AddToCartDto) {
+    // Defensa en profundidad: AddToCartDto ya valida Min(1)/Max(99) vía class-validator,
+    // pero eso solo corre en el ValidationPipe de HTTP. Se re-valida aquí para que el
+    // service sea seguro si algún día se invoca desde otro entrypoint (cola, script interno).
+    if (!Number.isInteger(dto.quantity) || dto.quantity < 1 || dto.quantity > 99) {
+      throw new BadRequestException('La cantidad debe ser un entero entre 1 y 99');
+    }
+
     // Obtener o crear carrito
     const cart = await this.getOrCreateCart(sessionId);
 

@@ -32,7 +32,6 @@ E-commerce escalable para venta de galletas y postres artesanales, construido co
 - **Monorepo**: pnpm workspaces
 - **Linting**: ESLint + Prettier
 - **Git Hooks**: Husky + Commitlint
-- **CI/CD**: GitHub Actions
 
 ## 📁 Estructura del Proyecto
 
@@ -56,7 +55,6 @@ crazy-cookies-ecommerce/
 │   └── test/              # Tests
 ├── docker/                # Dockerfiles
 ├── docs/                  # Documentación
-├── .github/               # GitHub Actions
 ├── .husky/                # Git hooks
 ├── docker-compose.yml
 ├── pnpm-workspace.yaml

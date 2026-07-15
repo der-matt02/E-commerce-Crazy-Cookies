@@ -1,21 +1,32 @@
-// ─── Design tokens — Crazy Cookies / Dulcerie ──────────────────────────────
+// ─── Design tokens — Crazy Cookies / Dulcerie (rediseño 1a) ────────────────
 
 // Colores
-$cream:        #F9F6F1;
-$cream-dark:   #F0EBE3;
-$white:        #ffffff;
-$ink:          #1A1714;
-$ink-light:    #6B6560;
-$ink-lighter:  #A8A29C;
+$cream:        #FAF9F5; // bg
+$cream-dark:   #F0ECE3;
+$white:        #FFFFFF; // surface
+$ink:          #1A1714; // texto primario
+$ink-light:    #736B62; // secondary — texto de apoyo
+$ink-lighter:  #A39A8E;
 $accent:       #C4956A;
+$accent-dark:  #A97748; // hover/active de accent
 $accent-light: #EDD9C5;
 
-$border:       rgba(26, 23, 20, 0.10);
-$border-md:    rgba(26, 23, 20, 0.18);
+$success:      #7C8F6B;
+$error:        #B24B3C;
+$whatsapp:     #3FA34D;
 
-// Tipografía
-$font-serif: var(--font-cormorant, 'Cormorant Garamond', Georgia, serif);
-$font-sans:  var(--font-dm-sans, 'DM Sans', system-ui, sans-serif);
+$border:       #E8E2D8;
+$border-md:    #D9D0C2;
+
+// Tipografía — una sola familia (Inter)
+$font-serif: var(--font-inter, 'Inter', system-ui, sans-serif);
+$font-sans:  var(--font-inter, 'Inter', system-ui, sans-serif);
+
+// Forma
+$radius-lg:   14px; // cards, botones grandes
+$radius-md:   9px;  // elementos internos (imagen, botón +)
+$radius-full: 999px; // pills, badges
+$shadow-card: 0 2px 16px rgba(26, 23, 20, 0.07);
 
 // Spacing
 $nav-height:  64px;

@@ -1,20 +1,23 @@
 import { CartWidget } from '@/features/cart/components/CartWidget';
+import { WishlistWidget } from '@/features/wishlist/components/WishlistWidget';
+import { NavSecondaryLinks } from '@/components/ui/NavSecondaryLinks';
 import Link from 'next/link';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
       <header className="nav">
-        <div className="nav__inner">
-          <Link href="/" className="nav__logo">
-            Crazy Cookies
-          </Link>
-          <nav className="nav__links">
-            <Link href="/products" className="nav__link">
-              Catálogo
+        <div className="nav__card">
+          <div className="nav__top">
+            <Link href="/" className="nav__logo">
+              Crazy Cookies
             </Link>
-            <CartWidget />
-          </nav>
+            <div className="nav__icons">
+              <WishlistWidget />
+              <CartWidget />
+            </div>
+          </div>
+          <NavSecondaryLinks />
         </div>
       </header>
 
@@ -40,6 +43,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                 { href: '/', label: 'Inicio' },
                 { href: '/products', label: 'Productos' },
                 { href: '/cart', label: 'Carrito' },
+                { href: '/pedidos/buscar', label: 'Buscar mi pedido' },
               ].map(({ href, label }) => (
                 <li key={href} className="footer__list-item">
                   <Link href={href} className="footer__link">

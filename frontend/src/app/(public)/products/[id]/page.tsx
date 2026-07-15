@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { serverFetch } from '@/lib/server-api';
 import { AddToCartSection } from '@/features/products/components/AddToCartSection';
+import { WishlistButton } from '@/components/ui/WishlistButton';
+import { formatPrice } from '@/lib/format';
 import { ReviewList } from '@/features/reviews/components/ReviewList';
 import { ReviewSectionClient } from '@/features/reviews/components/ReviewSectionClient';
 import type { Product } from '@/types/product.types';
@@ -59,7 +61,9 @@ export default async function ProductDetailPage({ params }: Props) {
               className="product-detail__image"
             />
           ) : (
-            <div className="product-detail__image-placeholder" />
+            <div className="product-detail__image-placeholder">
+              <span className="product-detail__image-placeholder-label">foto producto grande</span>
+            </div>
           )}
         </div>
 
@@ -68,14 +72,25 @@ export default async function ProductDetailPage({ params }: Props) {
           {product.category && (
             <span className="product-detail__category">{product.category.name}</span>
           )}
-          <h1 className="product-detail__name">{product.name}</h1>
+          <div
+            className="product-detail__title-row"
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: '12px',
+            }}
+          >
+            <h1 className="product-detail__name">{product.name}</h1>
+            <WishlistButton productId={product.id} variant="detail" />
+          </div>
           <p className="product-detail__description">{product.description}</p>
 
           <hr className="product-detail__divider" />
 
           <div className="product-detail__price-row">
-            <span className="product-detail__price">${product.price.toLocaleString('es-CO')}</span>
-            <span className="product-detail__currency">COP</span>
+            <span className="product-detail__price">{formatPrice(product.price)}</span>
+            <span className="product-detail__currency">USD</span>
           </div>
 
           <hr className="product-detail__divider" />

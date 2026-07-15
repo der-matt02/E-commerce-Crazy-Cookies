@@ -1,8 +1,11 @@
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { AdminRole } from '@prisma/client';
 import { InventoryService } from './inventory.service';
 import { AdjustInventoryDto } from './dto/adjust-inventory.dto';
 import { JwtAuthGuard } from '@modules/admin/guards/jwt-auth.guard';
+import { RolesGuard } from '@modules/admin/guards/roles.guard';
+import { Roles } from '@modules/admin/decorators/roles.decorator';
 
 @ApiTags('inventory')
 @ApiBearerAuth()
@@ -49,6 +52,8 @@ export class InventoryController {
   }
 
   @Post(':productId/adjust')
+  @UseGuards(RolesGuard)
+  @Roles(AdminRole.SUPER_ADMIN, AdminRole.ADMIN)
   @ApiOperation({ summary: 'Ajustar stock de un producto' })
   @ApiResponse({ status: 200, description: 'Stock ajustado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos inválidos o stock insuficiente' })

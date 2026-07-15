@@ -67,6 +67,11 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: http://localhost:3000
+      # NEXT_PUBLIC_API_URL apunta al navegador (localhost:3000, para el
+      # cliente). El renderizado del lado del servidor corre dentro de este
+      # mismo contenedor, donde "localhost" no llega al contenedor del
+      # backend — necesita el nombre del servicio de Docker Compose.
+      BACKEND_URL: http://backend:3000
     ports:
       - '3001:3000'
     depends_on:

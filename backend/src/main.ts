@@ -19,7 +19,17 @@ async function bootstrap() {
   // Ensure uploads directory exists and serve static files
   const uploadsDir = join(process.cwd(), 'uploads', 'products');
   mkdirSync(uploadsDir, { recursive: true });
-  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+  app.use(
+    '/uploads',
+    // El frontend corre en un origen distinto (puerto/host distinto) y usa
+    // Cross-Origin-Embedder-Policy: require-corp — sin esta cabecera el
+    // navegador bloquearía la carga de las imágenes de producto.
+    (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      next();
+    },
+    express.static(join(process.cwd(), 'uploads')),
+  );
 
   // Security
   app.use(helmet());

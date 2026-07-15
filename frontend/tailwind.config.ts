@@ -10,35 +10,47 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ─── Dulcerie tokens ───────────────────────────────────────────
+        // ─── Dulcerie tokens (rediseño 1a) ─────────────────────────────
+        bg: '#FAF9F5',
+        surface: '#FFFFFF',
         cream: {
-          DEFAULT: '#F9F6F1',
-          dark: '#F0EBE3',
+          DEFAULT: '#FAF9F5',
+          dark: '#F0ECE3',
         },
         ink: {
           DEFAULT: '#1A1714',
-          light: '#6B6560',
-          lighter: '#A8A29C',
+          light: '#736B62',
+          lighter: '#A39A8E',
+        },
+        secondary: '#736B62',
+        border: {
+          DEFAULT: '#E8E2D8',
+          md: '#D9D0C2',
         },
         accent: {
           DEFAULT: '#C4956A',
+          dark: '#A97748',
           light: '#EDD9C5',
         },
-        // ─── Legacy (panel admin) ──────────────────────────────────────
-        primary: {
-          50: '#fef3f2', 100: '#ffe4e1', 200: '#ffcdc8', 300: '#ffa9a1',
-          400: '#ff766a', 500: '#f74c3a', 600: '#e42e1c', 700: '#c02313',
-          800: '#9f2013', 900: '#832217',
+        success: {
+          DEFAULT: '#7C8F6B',
+          dark: '#65775A',
         },
-        secondary: {
-          50: '#fefce8', 100: '#fef9c3', 200: '#fef08a', 300: '#fde047',
-          400: '#facc15', 500: '#eab308', 600: '#ca8a04', 700: '#a16207',
-          800: '#854d0e', 900: '#713f12',
+        error: {
+          DEFAULT: '#B24B3C',
+          dark: '#943D30',
         },
+        whatsapp: '#3FA34D',
+      },
+      borderRadius: {
+        card: '14px',
+      },
+      boxShadow: {
+        card: '0 2px 16px rgba(26, 23, 20, 0.07)',
       },
       fontFamily: {
-        serif: ['var(--font-cormorant)', 'Georgia', 'serif'],
-        sans:  ['var(--font-dm-sans)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans:  ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
         wide2: '0.06em',

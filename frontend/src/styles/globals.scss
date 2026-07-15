@@ -10,6 +10,7 @@
 @use 'cart';
 @use 'product-detail';
 @use 'skeleton';
+@use 'checkout';
 
 // ─── Variables CSS (accesibles en JS / inline styles) ──────────────────────
 :root {
@@ -21,7 +22,15 @@
   --border:       #{$border};
   --border-md:    #{$border-md};
   --accent:       #{$accent};
+  --accent-dark:  #{$accent-dark};
   --accent-light: #{$accent-light};
+  --success:      #{$success};
+  --error:        #{$error};
+  --whatsapp:     #{$whatsapp};
+  --radius-lg:    #{$radius-lg};
+  --radius-md:    #{$radius-md};
+  --radius-full:  #{$radius-full};
+  --shadow-card:  #{$shadow-card};
   --nav-h:        #{$nav-height};
   --font-serif:   #{$font-serif};
   --font-sans:    #{$font-sans};

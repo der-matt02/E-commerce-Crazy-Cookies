@@ -1,12 +1,18 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { LookupOrderDto } from './dto/lookup-order.dto';
 import { OrderStatus, InventoryMovementType } from '@prisma/client';
+import { CouponsService } from '@modules/coupons/coupons.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private couponsService: CouponsService,
+  ) {}
 
   async create(sessionId: string, dto: CreateOrderDto) {
     // Obtener carrito
@@ -51,12 +57,19 @@ export class OrdersService {
     // Calcular totales
     const subtotal = cart.items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
     const tax = subtotal * 0.19; // IVA 19%
-    const total = subtotal + tax;
+
+    // Validar cupón, si viene uno
+    const couponCode = dto.couponCode?.trim().toUpperCase();
+    const { coupon, discount } = couponCode
+      ? await this.couponsService.validate(couponCode, subtotal)
+      : { coupon: null, discount: 0 };
+
+    const total = subtotal + tax - discount;
 
     // Crear orden en transacción
     const order = await this.prisma.$transaction(async (prisma) => {
       // Generar orderNumber único
-      const orderNumber = `ORD-${Date.now()}`;
+      const orderNumber = `ORD-${Date.now()}-${randomBytes(3).toString('hex').toUpperCase()}`;
 
       // Crear orden
       const newOrder = await prisma.order.create({
@@ -71,9 +84,18 @@ export class OrdersService {
           status: OrderStatus.PENDING,
           subtotal,
           tax,
+          discount,
+          couponCode: coupon?.code,
           total,
         },
       });
+
+      if (coupon) {
+        await prisma.coupon.update({
+          where: { id: coupon.id },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
 
       // Crear items de la orden
       for (const cartItem of cart.items) {
@@ -303,5 +325,21 @@ export class OrdersService {
         createdAt: 'desc',
       },
     });
+  }
+
+  /**
+   * Búsqueda pública de una orden por número + teléfono (sin login).
+   * Mensaje de error genérico: no revela si el orderNumber existe pero el teléfono no coincide.
+   */
+  async findByOrderNumberAndPhone(dto: LookupOrderDto) {
+    const order = await this.prisma.order.findUnique({
+      where: { orderNumber: dto.orderNumber.trim() },
+    });
+
+    if (!order || order.customerPhone !== dto.customerPhone) {
+      throw new NotFoundException('Pedido no encontrado');
+    }
+
+    return this.findOne(order.id);
   }
 }

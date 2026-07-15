@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { formatPrice } from '@/lib/format';
 
 export default function CartPage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function CartPage() {
     setUpdatingItems((prev) => new Set(prev).add(itemId));
     setErrors((prev) => {
       const n = { ...prev };
-      // eslint-disable-next-line security/detect-object-injection
+      // eslint-disable-next-line security/detect-object-injection -- itemId comes from the user's own cart items, not external input
       delete n[itemId];
       return n;
     });
@@ -193,11 +194,9 @@ export default function CartPage() {
                             </button>
                           </div>
                           <div className="cart-item-price">
-                            <p className="cart-item-price__unit">
-                              ${item.price.toLocaleString('es-CO')} c/u
-                            </p>
+                            <p className="cart-item-price__unit">{formatPrice(item.price)} c/u</p>
                             <p className="cart-item-price__total">
-                              ${(item.price * item.quantity).toLocaleString('es-CO')}
+                              {formatPrice(item.price * item.quantity)}
                             </p>
                           </div>
                         </div>
@@ -215,16 +214,16 @@ export default function CartPage() {
             <div className="order-summary__lines">
               <div className="order-summary__line">
                 <span>Subtotal</span>
-                <span>${subtotal.toLocaleString('es-CO')}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="order-summary__line">
                 <span>IVA (19%)</span>
-                <span>${tax.toLocaleString('es-CO')}</span>
+                <span>{formatPrice(tax)}</span>
               </div>
             </div>
             <div className="order-summary__total-row">
               <span className="order-summary__total-label">Total</span>
-              <span className="order-summary__total-value">${total.toLocaleString('es-CO')}</span>
+              <span className="order-summary__total-value">{formatPrice(total)}</span>
             </div>
             <button
               onClick={() => router.push('/checkout')}
