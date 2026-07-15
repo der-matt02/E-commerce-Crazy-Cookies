@@ -1,0 +1,281 @@
+@use 'tokens' as *;
+
+// ── Contenedor de página angosto (checkout / confirmación / buscar pedido) ──
+.page-narrow {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 40px $page-px;
+
+  @media (max-width: $bp-sm) {
+    padding: 28px $page-px-sm;
+  }
+
+  &__title {
+    font-family: $font-sans;
+    font-size: 22px;
+    font-weight: 700;
+    color: $ink;
+    margin-bottom: 4px;
+  }
+
+  &__subtitle {
+    font-family: $font-sans;
+    font-size: 13px;
+    color: $ink-light;
+    margin-bottom: 24px;
+  }
+}
+
+.page-card {
+  background-color: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: 20px;
+
+  & + & {
+    margin-top: 16px;
+  }
+}
+
+// ── Step indicator (checkout) ────────────────────────────────────────────
+.step-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+
+  &__step {
+    font-family: $font-sans;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: $ink-lighter;
+    white-space: nowrap;
+
+    &--done {
+      color: $ink-light;
+    }
+
+    &--active {
+      font-weight: 700;
+      color: $ink;
+    }
+  }
+
+  &__line {
+    flex: 1;
+    height: 2px;
+    background-color: $border;
+    margin: 0 10px;
+
+    &--done {
+      background-color: $accent;
+    }
+  }
+}
+
+// ── Order summary (checkout / confirmación) ──────────────────────────────
+.order-summary {
+  &__title {
+    font-family: $font-sans;
+    font-size: 14px;
+    font-weight: 600;
+    color: $ink;
+    margin-bottom: 12px;
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: $font-sans;
+    font-size: 12.5px;
+  }
+
+  &__line-label {
+    color: $ink-light;
+  }
+
+  &__line-value {
+    color: $ink;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  &__edit-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: $font-sans;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: $accent;
+    text-decoration: none;
+
+    &:hover {
+      color: $accent-dark;
+    }
+  }
+
+  &__totals {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid $border;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__discount {
+    color: $success;
+  }
+
+  &__total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid $border;
+    font-family: $font-sans;
+    font-size: 16px;
+    font-weight: 800;
+    color: $ink;
+  }
+}
+
+// ── Bloque de entrega (dirección) ────────────────────────────────────────
+.delivery-block {
+  &__title {
+    font-family: $font-sans;
+    font-size: 13px;
+    font-weight: 600;
+    color: $ink;
+    margin-bottom: 4px;
+  }
+
+  &__text {
+    font-family: $font-sans;
+    font-size: 12.5px;
+    color: $ink-light;
+  }
+}
+
+// ── Input de cupón (fila input + botón) ──────────────────────────────────
+.coupon-row {
+  display: flex;
+  gap: 8px;
+
+  .form-input {
+    flex: 1;
+  }
+}
+
+.coupon-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(124, 143, 107, 0.12);
+  border: 1px solid $success;
+  border-radius: $radius-md;
+  padding: 10px 12px;
+  font-family: $font-sans;
+  font-size: 12.5px;
+
+  &__label {
+    color: $success;
+    font-weight: 600;
+  }
+
+  &__remove {
+    color: $ink-light;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: $font-sans;
+    font-size: 12.5px;
+  }
+}
+
+// ── Ícono de estado (check de confirmación) ──────────────────────────────
+.status-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+
+  &--success {
+    background-color: rgba(124, 143, 107, 0.18);
+    color: $success;
+  }
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+.status-header {
+  text-align: center;
+  margin-bottom: 20px;
+
+  &__title {
+    font-family: $font-sans;
+    font-size: 20px;
+    font-weight: 700;
+    color: $ink;
+  }
+
+  &__subtitle {
+    font-family: $font-sans;
+    font-size: 12.5px;
+    color: $ink-light;
+    margin-top: 4px;
+  }
+}
+
+// ── Badge de estado (buscar pedido) ──────────────────────────────────────
+.status-badge {
+  display: inline-block;
+  font-family: $font-sans;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: $radius-full;
+
+  &--success {
+    background-color: rgba(124, 143, 107, 0.15);
+    color: $success;
+  }
+
+  &--pending {
+    background-color: $accent-light;
+    color: $accent-dark;
+  }
+
+  &--error {
+    background-color: rgba(178, 75, 60, 0.12);
+    color: $error;
+  }
+}
+
+// ── Banner de error (formularios) ────────────────────────────────────────
+.form-banner-error {
+  background-color: rgba(178, 75, 60, 0.08);
+  border: 1px solid $error;
+  border-radius: $radius-md;
+  padding: 12px 14px;
+  font-family: $font-sans;
+  font-size: 12.5px;
+  color: $error;
+  margin-bottom: 16px;
+}

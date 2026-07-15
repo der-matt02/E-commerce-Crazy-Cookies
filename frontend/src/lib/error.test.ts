@@ -23,4 +23,31 @@ describe('apiErrorMessage', () => {
   it('returns the fallback when err is undefined', () => {
     expect(apiErrorMessage(undefined, 'fallback')).toBe('fallback');
   });
+
+  it('returns the fallback when response.data is missing', () => {
+    const err = { response: {} };
+    expect(apiErrorMessage(err, 'fallback')).toBe('fallback');
+  });
+
+  it('returns the fallback when err is a plain string', () => {
+    expect(apiErrorMessage('some string error', 'fallback')).toBe('fallback');
+  });
+
+  it('returns the fallback when err is a number', () => {
+    expect(apiErrorMessage(42, 'fallback')).toBe('fallback');
+  });
+
+  it('returns the message when response.data.message is a non-empty string with whitespace', () => {
+    const err = { response: { data: { message: '  Server exploded  ' } } };
+    expect(apiErrorMessage(err, 'fallback')).toBe('  Server exploded  ');
+  });
+
+  it('returns the fallback when response.data.message is null', () => {
+    const err = { response: { data: { message: null } } };
+    expect(apiErrorMessage(err, 'fallback')).toBe('fallback');
+  });
+
+  it('returns the fallback when err is an empty object', () => {
+    expect(apiErrorMessage({}, 'fallback')).toBe('fallback');
+  });
 });

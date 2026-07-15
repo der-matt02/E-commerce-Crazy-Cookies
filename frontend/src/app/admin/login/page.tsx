@@ -35,23 +35,23 @@ export default function AdminLoginPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <div className="text-gray-500">Cargando...</div>
+      <div className="flex min-h-screen items-center justify-center bg-cream">
+        <div className="text-ink-light">Cargando...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-cream">
+      <div className="w-full max-w-md rounded-card bg-white p-8 shadow-lg">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="mt-1 text-sm text-gray-500">Crazy Cookies</p>
+          <h1 className="text-3xl font-bold text-ink">Admin Panel</h1>
+          <p className="mt-1 text-sm text-ink-light">Crazy Cookies</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-ink">
               Email
             </label>
             <input
@@ -61,13 +61,13 @@ export default function AdminLoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-card border border-border px-3 py-2 focus:border-accent focus:outline-none"
               placeholder="admin@crazycookies.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="mb-1 block text-sm font-medium text-ink">
               Contraseña
             </label>
             <input
@@ -77,18 +77,18 @@ export default function AdminLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-card border border-border px-3 py-2 focus:border-accent focus:outline-none"
             />
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+            <div className="rounded-card bg-error/10 px-4 py-3 text-sm text-error">{error}</div>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-card bg-accent py-2 font-semibold text-white hover:bg-accent-dark disabled:opacity-50"
           >
             {submitting ? 'Ingresando...' : 'Iniciar sesión'}
           </button>

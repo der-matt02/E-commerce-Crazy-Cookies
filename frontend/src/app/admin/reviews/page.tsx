@@ -73,7 +73,7 @@ export default function AdminReviewsPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="text-gray-500">Cargando reviews...</div>
+        <div className="text-ink-light">Cargando reviews...</div>
       </div>
     );
   }
@@ -86,35 +86,29 @@ export default function AdminReviewsPage() {
       <div className="mb-6 flex gap-2">
         <button
           onClick={() => setFilter('pending')}
-          className={`rounded-lg px-4 py-2 ${
-            filter === 'pending'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          className={`rounded-card px-4 py-2 ${
+            filter === 'pending' ? 'bg-accent text-white' : 'bg-border text-ink hover:bg-border'
           }`}
         >
           Pendientes
           {filter !== 'pending' && reviews.filter((r) => !r.isApproved).length > 0 && (
-            <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
+            <span className="ml-2 rounded-full bg-error/100 px-2 py-0.5 text-xs text-white">
               {reviews.filter((r) => !r.isApproved).length}
             </span>
           )}
         </button>
         <button
           onClick={() => setFilter('approved')}
-          className={`rounded-lg px-4 py-2 ${
-            filter === 'approved'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          className={`rounded-card px-4 py-2 ${
+            filter === 'approved' ? 'bg-accent text-white' : 'bg-border text-ink hover:bg-border'
           }`}
         >
           Aprobadas
         </button>
         <button
           onClick={() => setFilter('all')}
-          className={`rounded-lg px-4 py-2 ${
-            filter === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          className={`rounded-card px-4 py-2 ${
+            filter === 'all' ? 'bg-accent text-white' : 'bg-border text-ink hover:bg-border'
           }`}
         >
           Todas
@@ -123,8 +117,8 @@ export default function AdminReviewsPage() {
 
       {/* Lista de reviews */}
       {reviews.length === 0 ? (
-        <div className="rounded-lg bg-white p-12 text-center shadow">
-          <p className="text-gray-600">No hay reviews para mostrar</p>
+        <div className="rounded-card bg-white p-12 text-center shadow-card">
+          <p className="text-ink-light">No hay reviews para mostrar</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -134,8 +128,8 @@ export default function AdminReviewsPage() {
             return (
               <div
                 key={review.id}
-                className={`rounded-lg border bg-white p-6 ${
-                  review.isApproved ? 'border-green-200' : 'border-yellow-200'
+                className={`rounded-card border bg-white p-6 ${
+                  review.isApproved ? 'border-success' : 'border-accent-light'
                 }`}
               >
                 <div className="flex gap-6">
@@ -143,10 +137,10 @@ export default function AdminReviewsPage() {
                   <div className="flex-1">
                     <div className="mb-3 flex items-start justify-between">
                       <div>
-                        <p className="font-semibold text-gray-900">{review.customerName}</p>
-                        <p className="text-sm text-gray-600">{review.customerEmail}</p>
+                        <p className="font-semibold text-ink">{review.customerName}</p>
+                        <p className="text-sm text-ink-light">{review.customerEmail}</p>
                         {review.product && (
-                          <p className="mt-1 text-sm text-gray-500">
+                          <p className="mt-1 text-sm text-ink-light">
                             Producto: <span className="font-medium">{review.product.name}</span>
                           </p>
                         )}
@@ -158,7 +152,7 @@ export default function AdminReviewsPage() {
                           <svg
                             key={star}
                             className={`h-5 w-5 ${
-                              star <= review.rating ? 'text-yellow-400' : 'text-gray-300'
+                              star <= review.rating ? 'text-accent' : 'text-ink-lighter'
                             }`}
                             fill="currentColor"
                             viewBox="0 0 20 20"
@@ -170,17 +164,17 @@ export default function AdminReviewsPage() {
                     </div>
 
                     {/* Comentario */}
-                    {review.comment && <p className="mb-3 text-gray-700">{review.comment}</p>}
+                    {review.comment && <p className="mb-3 text-ink">{review.comment}</p>}
 
                     {/* Metadata */}
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-4 text-sm text-ink-light">
                       <span>{new Date(review.createdAt).toLocaleDateString('es-CO')}</span>
                       {review.isApproved ? (
-                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-800">
+                        <span className="rounded-full bg-success/15 px-2 py-0.5 text-success-dark">
                           Aprobada
                         </span>
                       ) : (
-                        <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-yellow-800">
+                        <span className="rounded-full bg-accent-light px-2 py-0.5 text-accent-dark">
                           Pendiente
                         </span>
                       )}
@@ -193,7 +187,7 @@ export default function AdminReviewsPage() {
                       <button
                         onClick={() => handleApprove(review.id, true)}
                         disabled={isProcessing}
-                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                        className="rounded-card bg-success px-4 py-2 text-sm font-semibold text-white hover:bg-success-dark disabled:opacity-50"
                       >
                         Aprobar
                       </button>
@@ -201,7 +195,7 @@ export default function AdminReviewsPage() {
                       <button
                         onClick={() => handleApprove(review.id, false)}
                         disabled={isProcessing}
-                        className="rounded-lg bg-yellow-600 px-4 py-2 text-sm font-semibold text-white hover:bg-yellow-700 disabled:opacity-50"
+                        className="rounded-card bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-dark disabled:opacity-50"
                       >
                         Desaprobar
                       </button>
@@ -210,7 +204,7 @@ export default function AdminReviewsPage() {
                     <button
                       onClick={() => handleDelete(review.id, review.product?.name || 'producto')}
                       disabled={isProcessing}
-                      className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                      className="rounded-card bg-error px-4 py-2 text-sm font-semibold text-white hover:bg-error-dark disabled:opacity-50"
                     >
                       Eliminar
                     </button>

@@ -33,8 +33,13 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
 COPY backend/prisma ./backend/prisma
 
-# Install deps fresh (pnpm symlinks work correctly in a clean environment)
-RUN pnpm install --ignore-scripts && \
+# Install solo dependencies de producción de backend (--filter, no solo
+# --prod: sin él, pnpm igual resuelve las devDependencies de frontend —
+# vite/vitest/webpack/esbuild — porque el lockfile es del workspace
+# completo y frontend/package.json no está copiado en esta imagen. La
+# mayoría de los hallazgos CRITICAL/HIGH de Trivy en este backend venían
+# de ahí, no del código propio ni de dependencias que corren en runtime).
+RUN pnpm install --prod --filter backend --ignore-scripts && \
     pnpm approve-builds --all && \
     pnpm rebuild
 

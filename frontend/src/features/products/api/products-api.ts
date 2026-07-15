@@ -23,9 +23,13 @@ export interface SearchResult {
 
 export const productsApi = {
   async getAll(categoryId?: string): Promise<Product[]> {
+    // GET /products devuelve un array plano cuando se filtra por categoryId,
+    // y { products, pagination } cuando se listan todos (ver products.controller.ts).
     const params = categoryId ? { categoryId } : {};
-    const { data } = await apiClient.get<Product[]>('/products', { params });
-    return data;
+    const { data } = await apiClient.get<Product[] | { products: Product[] }>('/products', {
+      params,
+    });
+    return Array.isArray(data) ? data : data.products;
   },
 
   async getOne(id: string): Promise<Product> {

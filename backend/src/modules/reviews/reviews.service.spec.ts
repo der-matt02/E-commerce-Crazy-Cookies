@@ -288,4 +288,95 @@ describe('ReviewsService', () => {
       await expect(service.delete('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
+
+  // --- Casos límite y adversariales agregados ---
+
+  describe('create - rating fuera de rango', () => {
+    // CreateReviewDto valida @Min(1) @Max(5) con class-validator, pero esa validación solo
+    // corre en el ValidationPipe global de HTTP. create() ahora re-valida el rango al inicio
+    // del método, así que el service es seguro incluso si se invoca desde otro entrypoint
+    // que no pase por el pipe (p.ej. un futuro job interno).
+    it('FIX: rejects rating = 0 at the service level', async () => {
+      await expect(
+        service.create('product-1', {
+          customerName: 'Test',
+          customerEmail: 'test@test.com',
+          rating: 0,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockPrismaService.product.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('FIX: rejects rating = 6 (above the documented 1-5 range) at the service level', async () => {
+      await expect(
+        service.create('product-1', {
+          customerName: 'Test',
+          customerEmail: 'test@test.com',
+          rating: 6,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('FIX: rejects a negative rating at the service level', async () => {
+      await expect(
+        service.create('product-1', {
+          customerName: 'Test',
+          customerEmail: 'test@test.com',
+          rating: -3,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('create - reviews duplicados', () => {
+    it('BEHAVIOR: allows a second review from the same email for the same product (no duplicate-check exists in the service)', async () => {
+      const productId = 'product-1';
+      mockPrismaService.product.findUnique.mockResolvedValue({ id: productId, isActive: true });
+      mockPrismaService.review.create.mockResolvedValue({
+        id: 'review-dup',
+        productId,
+        customerEmail: 'dup@test.com',
+        rating: 4,
+        isApproved: false,
+      });
+
+      await expect(
+        service.create(productId, {
+          customerName: 'Dup Customer',
+          customerEmail: 'dup@test.com',
+          rating: 4,
+        }),
+      ).resolves.toBeDefined();
+
+      // El service jamás consulta reviews existentes por email/producto antes de crear:
+      // no hay ninguna regla de "un review por email por producto" implementada.
+      expect(mockPrismaService.review.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('approve - review ya aprobada', () => {
+    it('BEHAVIOR: allows re-approving an already-approved review (idempotent update, no guard against double-approval)', async () => {
+      const reviewId = 'review-1';
+      mockPrismaService.review.findUnique.mockResolvedValue({
+        id: reviewId,
+        isApproved: true,
+        approvedBy: 'admin-old',
+      });
+      mockPrismaService.review.update.mockResolvedValue({
+        id: reviewId,
+        isApproved: true,
+        approvedBy: 'admin-new',
+        approvedAt: new Date(),
+      });
+
+      const result = await service.approve(reviewId, { isApproved: true }, 'admin-new');
+
+      expect(result.isApproved).toBe(true);
+      expect(mockPrismaService.review.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ isApproved: true, approvedBy: 'admin-new' }),
+        }),
+      );
+    });
+  });
 });

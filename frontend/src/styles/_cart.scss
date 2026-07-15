@@ -340,15 +340,15 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 2px;
-  border: 1px solid $border-md;
+  border-radius: $radius-md;
+  border: none;
   background-color: transparent;
-  color: $ink-light;
+  color: $ink;
   text-decoration: none;
   transition: background-color $t-fast;
 
   &:hover {
-    background-color: $cream-dark;
+    background-color: $cream;
   }
 
   &__badge {

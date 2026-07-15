@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { AdjustInventoryDto, AdjustmentType } from './dto/adjust-inventory.dto';
+import {
+  AdjustInventoryDto,
+  AdjustmentDirection,
+  AdjustmentType,
+} from './dto/adjust-inventory.dto';
 import { InventoryMovementType } from '@prisma/client';
 
 @Injectable()
@@ -73,40 +77,44 @@ export class InventoryService {
       throw new NotFoundException('Inventario no encontrado');
     }
 
-    // Validar que no se quede en negativo
-    if (dto.type === AdjustmentType.OUT && inventory.stockAvailable < dto.quantity) {
-      throw new BadRequestException(
-        `Stock insuficiente. Disponible: ${inventory.stockAvailable}, Solicitado: ${dto.quantity}`,
-      );
-    }
-
-    // Mapear tipo de ajuste a tipo de movimiento
+    // Mapear tipo de ajuste a tipo de movimiento y calcular el delta con signo.
     let movementType: InventoryMovementType;
-    let newStockAvailable = inventory.stockAvailable;
+    let stockDelta: number;
 
     switch (dto.type) {
       case AdjustmentType.IN:
         movementType = InventoryMovementType.IN;
-        newStockAvailable += dto.quantity;
+        stockDelta = dto.quantity;
         break;
       case AdjustmentType.OUT:
         movementType = InventoryMovementType.OUT;
-        newStockAvailable -= dto.quantity;
+        stockDelta = -dto.quantity;
         break;
       case AdjustmentType.ADJUSTMENT:
         movementType = InventoryMovementType.ADJUSTMENT;
-        // Para ajustes, la cantidad puede ser positiva o negativa
-        // pero el DTO solo acepta positivos, así que asumimos que es un incremento
-        newStockAvailable += dto.quantity;
+        // Un ajuste manual puede incrementar o reducir el stock (p.ej. para corregir
+        // un sobre-conteo tras un conteo físico). El DTO solo acepta cantidades
+        // positivas, así que la dirección la indica `direction`.
+        stockDelta = dto.direction === AdjustmentDirection.DECREASE ? -dto.quantity : dto.quantity;
         break;
+      default:
+        throw new BadRequestException(`Tipo de ajuste no soportado: ${dto.type as string}`);
     }
 
-    // Transacción para actualizar inventario y crear movimiento
+    // Validar que no se quede en negativo (aplica a cualquier ajuste que reste stock)
+    if (stockDelta < 0 && inventory.stockAvailable + stockDelta < 0) {
+      throw new BadRequestException(
+        `Stock insuficiente. Disponible: ${inventory.stockAvailable}, Solicitado: ${-stockDelta}`,
+      );
+    }
+
+    // Transacción para actualizar inventario y crear movimiento. Se usa un increment
+    // atómico de Prisma (en vez de leer-calcular-escribir un valor absoluto) para que
+    // dos ajustes concurrentes sobre el mismo producto no se pisen (lost update).
     const result = await this.prisma.$transaction(async (prisma) => {
-      // Actualizar inventario
       const updatedInventory = await prisma.inventory.update({
         where: { productId },
-        data: { stockAvailable: newStockAvailable },
+        data: { stockAvailable: { increment: stockDelta } },
         include: {
           product: {
             include: {
@@ -116,7 +124,6 @@ export class InventoryService {
         },
       });
 
-      // Crear movimiento
       await prisma.inventoryMovement.create({
         data: {
           inventoryId: inventory.id,

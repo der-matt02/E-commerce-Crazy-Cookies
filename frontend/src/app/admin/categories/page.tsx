@@ -121,13 +121,13 @@ export default function AdminCategoriesPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="text-gray-500">Cargando categorías...</div>
+        <div className="text-ink-light">Cargando categorías...</div>
       </div>
     );
   }
 
   if (error) {
-    return <div className="rounded-lg bg-red-50 p-4 text-red-600">{error}</div>;
+    return <div className="rounded-card bg-error/10 p-4 text-error">{error}</div>;
   }
 
   return (
@@ -136,67 +136,65 @@ export default function AdminCategoriesPage() {
         <h1 className="text-4xl font-bold">Categorías</h1>
         <button
           onClick={handleCreate}
-          className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+          className="rounded-card bg-accent px-4 py-2 font-medium text-white hover:bg-accent-dark"
         >
           + Nueva Categoría
         </button>
       </div>
 
       {/* Categories Table */}
-      <div className="rounded-lg bg-white shadow">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="rounded-card bg-white shadow-card">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-cream">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Nombre</th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Slug</th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Productos</th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Estado</th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Orden</th>
-              <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">Acciones</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-ink">Nombre</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-ink">Slug</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-ink">Productos</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-ink">Estado</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-ink">Orden</th>
+              <th className="px-6 py-3 text-right text-sm font-medium text-ink">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-border bg-white">
             {categories.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-12 text-center text-ink-light">
                   No hay categorías registradas
                 </td>
               </tr>
             ) : (
               categories.map((category) => (
-                <tr key={category.id} className="hover:bg-gray-50">
+                <tr key={category.id} className="hover:bg-cream">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{category.name}</div>
+                    <div className="font-medium text-ink">{category.name}</div>
                     {category.description && (
-                      <div className="mt-1 text-sm text-gray-500">{category.description}</div>
+                      <div className="mt-1 text-sm text-ink-light">{category.description}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{category.slug}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-ink-light">{category.slug}</td>
+                  <td className="px-6 py-4 text-sm text-ink-light">
                     {category._count?.products || 0}
                   </td>
                   <td className="px-6 py-4">
                     <span
                       className={`rounded-full px-2 py-1 text-xs font-medium ${
-                        category.isActive
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
+                        category.isActive ? 'bg-success/15 text-success-dark' : 'bg-cream text-ink'
                       }`}
                     >
                       {category.isActive ? 'Activa' : 'Inactiva'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{category.order}</td>
+                  <td className="px-6 py-4 text-sm text-ink-light">{category.order}</td>
                   <td className="px-6 py-4 text-right text-sm">
                     <button
                       onClick={() => handleEdit(category)}
-                      className="mr-3 text-blue-600 hover:text-blue-800"
+                      className="mr-3 text-accent hover:text-accent-dark"
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => handleDelete(category.id, category.name)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-error hover:text-error-dark"
                     >
                       Eliminar
                     </button>
@@ -211,7 +209,7 @@ export default function AdminCategoriesPage() {
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
+          <div className="w-full max-w-2xl rounded-card bg-white p-6 shadow-xl">
             <h2 className="mb-6 text-2xl font-bold">
               {editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
             </h2>
@@ -220,20 +218,20 @@ export default function AdminCategoriesPage() {
               <div className="space-y-4">
                 {/* Name */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Nombre *</label>
+                  <label className="mb-1 block text-sm font-medium text-ink">Nombre *</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-card border border-border px-3 py-2 focus:border-accent focus:outline-none"
                   />
                 </div>
 
                 {/* Slug */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Slug *</label>
+                  <label className="mb-1 block text-sm font-medium text-ink">Slug *</label>
                   <input
                     type="text"
                     name="slug"
@@ -241,68 +239,64 @@ export default function AdminCategoriesPage() {
                     onChange={handleInputChange}
                     required
                     pattern="[a-z0-9-]+"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-card border border-border px-3 py-2 focus:border-accent focus:outline-none"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-ink-light">
                     Solo letras minúsculas, números y guiones
                   </p>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Descripción
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-ink">Descripción</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-card border border-border px-3 py-2 focus:border-accent focus:outline-none"
                   />
                 </div>
 
                 {/* Image URL */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    URL de Imagen
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-ink">URL de Imagen</label>
                   <input
                     type="url"
                     name="imageUrl"
                     value={formData.imageUrl}
                     onChange={handleInputChange}
                     placeholder="https://ejemplo.com/imagen.jpg"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-card border border-border px-3 py-2 focus:border-accent focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   {/* Order */}
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Orden</label>
+                    <label className="mb-1 block text-sm font-medium text-ink">Orden</label>
                     <input
                       type="number"
                       name="order"
                       value={formData.order}
                       onChange={handleInputChange}
                       min="0"
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                      className="w-full rounded-card border border-border px-3 py-2 focus:border-accent focus:outline-none"
                     />
                   </div>
 
                   {/* Active Status */}
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Estado</label>
+                    <label className="mb-1 block text-sm font-medium text-ink">Estado</label>
                     <div className="flex h-10 items-center">
                       <input
                         type="checkbox"
                         name="isActive"
                         checked={formData.isActive}
                         onChange={handleInputChange}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
                       />
-                      <span className="ml-2 text-sm text-gray-700">Activa</span>
+                      <span className="ml-2 text-sm text-ink">Activa</span>
                     </div>
                   </div>
                 </div>
@@ -313,13 +307,13 @@ export default function AdminCategoriesPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  className="rounded-card border border-border px-4 py-2 text-ink hover:bg-cream"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  className="rounded-card bg-accent px-4 py-2 text-white hover:bg-accent-dark"
                 >
                   {editingCategory ? 'Guardar Cambios' : 'Crear Categoría'}
                 </button>

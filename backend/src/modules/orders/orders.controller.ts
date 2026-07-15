@@ -9,11 +9,14 @@ import {
   UseGuards,
   ParseIntPipe,
   DefaultValuePipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { LookupOrderDto } from './dto/lookup-order.dto';
 import { OrderStatus } from '@prisma/client';
 import { JwtAuthGuard } from '@modules/admin/guards/jwt-auth.guard';
 
@@ -43,6 +46,15 @@ export class OrdersController {
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
   ) {
     return this.ordersService.findAll(page, limit);
+  }
+
+  @Post('lookup')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Buscar una orden por número + teléfono (público, sin login)' })
+  @ApiResponse({ status: 200, description: 'Orden encontrada' })
+  @ApiResponse({ status: 404, description: 'Orden no encontrada' })
+  lookup(@Body() dto: LookupOrderDto) {
+    return this.ordersService.findByOrderNumberAndPhone(dto);
   }
 
   @Get('status/:status')

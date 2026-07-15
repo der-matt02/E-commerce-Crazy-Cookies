@@ -3,6 +3,8 @@ import type { Product } from '@/types/product.types';
 import Link from 'next/link';
 import Image from 'next/image';
 import { AddToCartButton } from '@/features/products/components/AddToCartButton';
+import { WishlistButton } from '@/components/ui/WishlistButton';
+import { formatPrice } from '@/lib/format';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -70,7 +72,10 @@ export default async function HomePage() {
 
                 return (
                   <article key={product.id} className="product-card">
-                    <div className="product-card__image-wrap">
+                    <div
+                      className={`product-card__image-wrap ${!firstImage ? 'product-card__image-wrap--placeholder' : ''}`}
+                    >
+                      <WishlistButton productId={product.id} />
                       {firstImage ? (
                         <Image
                           src={`${API_URL}${firstImage.url}`}
@@ -80,7 +85,9 @@ export default async function HomePage() {
                           style={{ width: '100%', height: 'auto' }}
                           className="product-card__image"
                         />
-                      ) : null}
+                      ) : (
+                        <span className="product-card__image-placeholder-label">foto</span>
+                      )}
                       {isOutOfStock && (
                         <div className="product-card__sold-out-overlay">
                           <span className="product-card__sold-out-label">Agotado</span>
@@ -95,9 +102,7 @@ export default async function HomePage() {
                         {product.name}
                       </Link>
                       <div className="product-card__footer">
-                        <span className="product-card__price">
-                          ${product.price.toLocaleString('es-CO')}
-                        </span>
+                        <span className="product-card__price">{formatPrice(product.price)}</span>
                         <AddToCartButton productId={product.id} outOfStock={isOutOfStock} />
                       </div>
                     </div>

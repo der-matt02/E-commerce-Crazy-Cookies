@@ -21,6 +21,8 @@ export interface Order {
   status: OrderStatus;
   subtotal: number;
   tax: number;
+  discount: number;
+  couponCode: string | null;
   total: number;
   createdAt: string;
   updatedAt: string;
@@ -53,6 +55,12 @@ export interface CreateOrderDto {
   customerEmail?: string;
   deliveryAddress: string;
   notes?: string;
+  couponCode?: string;
+}
+
+export interface LookupOrderDto {
+  orderNumber: string;
+  customerPhone: string;
 }
 
 export interface UpdateOrderStatusDto {

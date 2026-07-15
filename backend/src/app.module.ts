@@ -16,13 +16,14 @@ import { ReviewsModule } from '@modules/reviews/reviews.module';
 import { NotificationsModule } from '@modules/notifications/notifications.module';
 import { AuditModule } from '@modules/audit/audit.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { CouponsModule } from '@modules/coupons/coupons.module';
 
 @Module({
   imports: [
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     }),
 
     // Cron jobs
@@ -39,6 +40,7 @@ import { AuthModule } from '@modules/auth/auth.module';
     NotificationsModule,
     AuditModule,
     AuthModule,
+    CouponsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

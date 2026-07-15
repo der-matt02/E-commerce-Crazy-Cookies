@@ -1,40 +1,42 @@
 @use 'tokens' as *;
 
-// ── Grid de productos (truco 1px de borde) ─────────────────────────────────
+// ── Grid de productos ───────────────────────────────────────────────────────
 .product-grid {
   display: grid;
-  gap: 1px;
-  background-color: $border;
-  border: 1px solid $border;
+  gap: 12px;
 
   &--4col {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 
     @media (max-width: $bp-lg) {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     @media (max-width: $bp-sm) {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   &--2col {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
     @media (max-width: $bp-sm) {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 }
 
 // ── Card individual ────────────────────────────────────────────────────────
 .product-card {
-  background-color: $cream;
-  transition: background-color $t-normal;
+  background-color: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+  transition: box-shadow $t-normal;
 
   &:hover {
-    background-color: $white;
+    box-shadow: 0 4px 20px rgba(26, 23, 20, 0.1);
   }
 
   &__image-wrap {
@@ -42,6 +44,26 @@
     overflow: hidden;
     background-color: $cream-dark;
     position: relative;
+  }
+
+  &__image-wrap--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: repeating-linear-gradient(
+      45deg,
+      $cream-dark,
+      $cream-dark 10px,
+      $white 10px,
+      $white 20px
+    );
+  }
+
+  &__image-placeholder-label {
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: $ink-lighter;
   }
 
   &__image {
@@ -52,6 +74,38 @@
 
     .product-card:hover & {
       transform: scale(1.04);
+    }
+  }
+
+  &__wishlist {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: $radius-md;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.85);
+    color: $ink-light;
+    cursor: pointer;
+    transition: background-color $t-fast, color $t-fast;
+    z-index: 1;
+
+    &:hover {
+      background-color: $white;
+      color: $accent;
+    }
+
+    &--active {
+      color: $accent;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
     }
   }
 
@@ -67,22 +121,25 @@
   &__sold-out-label {
     font-family: $font-sans;
     font-size: 11px;
-    font-weight: 400;
-    letter-spacing: 0.10em;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: $white;
+    background-color: rgba(26, 23, 20, 0.6);
+    padding: 4px 10px;
+    border-radius: $radius-full;
   }
 
   &__body {
-    padding: 16px 18px 20px;
+    padding: 12px 14px 14px;
   }
 
   &__category {
     display: block;
     font-family: $font-sans;
-    font-size: 10px;
-    font-weight: 400;
-    letter-spacing: 0.12em;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: $ink-lighter;
     margin-bottom: 4px;
@@ -90,9 +147,9 @@
 
   &__name {
     display: block;
-    font-family: $font-serif;
-    font-size: 17px;
-    font-weight: 400;
+    font-family: $font-sans;
+    font-size: 13.5px;
+    font-weight: 600;
     line-height: 1.3;
     color: $ink;
     margin-bottom: 8px;
@@ -115,15 +172,16 @@
   }
 
   &__price {
-    font-family: $font-serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: $ink;
+    font-family: $font-sans;
+    font-size: 14px;
+    font-weight: 700;
+    color: $accent;
   }
 
   &__low-stock {
     font-family: $font-sans;
     font-size: 11px;
+    font-weight: 500;
     color: $accent;
     margin-bottom: 6px;
   }
@@ -131,7 +189,8 @@
   &__out-label {
     font-family: $font-sans;
     font-size: 11px;
-    letter-spacing: 0.10em;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: $ink-lighter;
   }
@@ -159,7 +218,7 @@
   &__label {
     font-family: $font-sans;
     font-size: 10px;
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: $ink-lighter;
@@ -168,9 +227,9 @@
   }
 
   &__title {
-    font-family: $font-serif;
-    font-size: 28px;
-    font-weight: 300;
+    font-family: $font-sans;
+    font-size: 22px;
+    font-weight: 700;
     color: $ink;
   }
 

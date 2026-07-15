@@ -1,5 +1,10 @@
 import { apiClient } from '@/lib/api-client';
-import type { Order, CreateOrderDto, UpdateOrderStatusDto } from '@/types/order.types';
+import type {
+  Order,
+  CreateOrderDto,
+  UpdateOrderStatusDto,
+  LookupOrderDto,
+} from '@/types/order.types';
 
 export const ordersApi = {
   async create(sessionId: string, dto: CreateOrderDto): Promise<Order> {
@@ -9,9 +14,14 @@ export const ordersApi = {
     return data;
   },
 
-  async getAll(): Promise<Order[]> {
-    const { data } = await apiClient.get<Order[]>('/orders');
+  async lookup(dto: LookupOrderDto): Promise<Order> {
+    const { data } = await apiClient.post<Order>('/orders/lookup', dto);
     return data;
+  },
+
+  async getAll(): Promise<Order[]> {
+    const { data } = await apiClient.get<{ orders: Order[] }>('/orders');
+    return data.orders;
   },
 
   async getOne(id: string): Promise<Order> {

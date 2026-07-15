@@ -47,7 +47,10 @@
 
   // Imagen
   &__image-wrap {
-    background-color: $cream-dark;
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-card;
     overflow: hidden;
   }
 
@@ -61,7 +64,23 @@
   &__image-placeholder {
     aspect-ratio: 1;
     width: 100%;
-    background-color: $cream-dark;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: repeating-linear-gradient(
+      45deg,
+      $cream-dark,
+      $cream-dark 12px,
+      $white 12px,
+      $white 24px
+    );
+  }
+
+  &__image-placeholder-label {
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: $ink-lighter;
   }
 
   // Info
